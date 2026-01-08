@@ -1,6 +1,6 @@
 # Dotfiles
 
-Personal configuration files for zsh, tmux, and neovim.
+Personal configuration files for zsh, tmux, neovim, hammerspoon, and ghostty.
 
 ## Contents
 
@@ -20,6 +20,10 @@ dotfiles/
 ├── bin/           # Custom scripts
 │   ├── tm         # Tmux session launcher
 │   └── dana       # Project launcher
+├── hammerspoon/   # macOS automation
+│   └── init.lua
+├── ghostty/       # Terminal emulator
+│   └── config
 └── README.md
 ```
 
@@ -36,6 +40,9 @@ brew install powerlevel10k zsh-autosuggestions direnv
 
 # Development tools (optional)
 brew install gh lazygit
+
+# macOS apps
+brew install --cask ghostty hammerspoon
 ```
 
 Install a Nerd Font for icons:
@@ -71,6 +78,14 @@ ln -sf ~/dotfiles/nvim ~/.config/nvim
 mkdir -p ~/bin
 ln -sf ~/dotfiles/bin/tm ~/bin/tm
 ln -sf ~/dotfiles/bin/dana ~/bin/dana
+
+# Hammerspoon (remove existing directory first)
+rm -rf ~/.hammerspoon
+ln -sf ~/dotfiles/hammerspoon ~/.hammerspoon
+
+# Ghostty
+mkdir -p ~/.config/ghostty
+ln -sf ~/dotfiles/ghostty/config ~/.config/ghostty/config
 ```
 
 ### 3. Set up secrets
@@ -128,6 +143,15 @@ Then reload your shell: `source ~/.zshrc`
 - Telescope fuzzy finder
 - GitHub Copilot (disabled for sensitive files)
 - Treesitter syntax highlighting
+
+### Hammerspoon
+- Auto-centre windows for specified apps
+- CLI enabled via IPC
+
+### Ghostty
+- Dracula colour scheme
+- Zsh shell integration
+- macOS optimised (glass icon, Option as Alt)
 
 ## Keybinding Quick Reference
 
