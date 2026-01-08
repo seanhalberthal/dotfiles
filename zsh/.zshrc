@@ -188,6 +188,9 @@ alias dap="cd ~/src/dana/.claude/plans/"
 # Kill Vite Server
 alias killvite="pkill -f "vite" 2>/dev/null"
 
+# dotfiles repo
+alias dot="cd ~/dotfiles"
+
 # Tmux session management (see ~/.tmux/README.md)
 alias tls="~/.tmux/scripts/resurrect-restore-session.sh --list"
 

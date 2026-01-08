@@ -216,6 +216,7 @@ direnv allow
 | `mcp-sync` | `~/.config/sync-mcp-servers.sh` | Sync MCP server configs            |
 | `tls`      | `trestore --list`               | List saved tmux session backups    |
 | `gols`     | `ls ~/go/bin`                   | List installed Go binaries         |
+| `dot`      | `cd ~/dotfiles`                 | Navigate to dotfiles directory     |
 
 | Function       | Usage                        | Description                                                                                                                                    |
 | -------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |

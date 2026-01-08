@@ -131,7 +131,7 @@ Press `` ` h `` to display the keybinding reference. Close it by pressing `Esc`.
 | Enter scroll mode | `Opt+v` or `prefix+v` |
 | Navigate          | `h` / `j` / `k` / `l` |
 | Page down/up      | `f` / `b`             |
-| Half-page down/up | `d` / `u` (u moves cursor to top) |
+| Half-page down/up | `d` / `u` (cursor moves to screen edge) |
 | Top of history    | `g`                   |
 | Bottom of history | `G`                   |
 | Exit scroll mode  | `q` or `Esc`          |
