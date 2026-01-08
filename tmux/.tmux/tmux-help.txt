@@ -1,0 +1,46 @@
+╔══════════════════════════════════════════════════════════════════════════╗
+║                          TMUX KEYBOARD SHORTCUTS                         ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+┌─ TABS ────────────────────────────────┬─ PANES ──────────────────────────┐
+│                                       │                                  │
+│  Opt+[ / Opt+]       prev / next      │  Opt+hjkl            navigate    │
+│  Ctrl+Enter / Ctrl+Shift+Enter        │  Ctrl+, / Ctrl+.     left/down   │
+│                                       │                                  │
+│  ` 1-5               go to tab        │  Opt+Shift+hjkl      resize      │
+│  Opt+t               new tab          │                                  │
+│  Opt+Shift+n         rename tab       │  Opt+'               split left  │
+│  Opt+Shift+[ / ]     swap left/right  │  Opt+\               split right │
+│  Opt+x               kill tab         │  Opt+-               split down  │
+│                                       │  Opt+s               close pane  │
+│                                       │  Opt+z               zoom pane   │
+│                                       │                                  │
+└───────────────────────────────────────┴──────────────────────────────────┘
+
+┌─ SCROLL MODE ─────────────────────────┬─ SESSION ────────────────────────┐
+│                                       │                                  │
+│  Opt+v / ` v         enter mode       │  ` s                 switch      │
+│                                       │                      (fzf)       │
+│  hjkl                navigate         │  ` f                 switch win  │
+│  f / b               page down/up     │                      (fzf)       │
+│  d / u               half-page        │  ` w                 save all    │
+│  g / G               top / bottom     │  ` d                 detach      │
+│  q / Esc             exit mode        │  ` h                 this help   │
+│                                       │                                  │
+└───────────────────────────────────────┴──────────────────────────────────┘
+
+┌─ FZF SWITCHERS ──────────────────────────────────────────────────────────┐
+│                                                                          │
+│  j/k  g/G  f/b  d/u     move / jump to ends / page / half-page           │
+│  Space / Enter          select                                           │
+│  /                      start searching                                  │
+│  q / Esc                quit (q works in nav mode only)                  │
+│                                                                          │
+│  Ctrl+k                 delete line                                      │
+│  Ctrl+x                 kill session/window                              │
+│  Ctrl+u                 undo kill (sessions only)                        │
+│  r                      rename session (sessions only)                   │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+
+                          Press Esc to close this help

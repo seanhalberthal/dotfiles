@@ -1,0 +1,35 @@
+#!/bin/bash
+# Start tmux with a dev layout: claude+terminal | nvim
+# If session already exists, attach to it instead
+
+# Session name = last folder in path
+dir="${1:-$(pwd)}"
+session="$(basename "$dir")"
+
+# Check if already in tmux
+if [[ -n "$TMUX" ]]; then
+  echo "Already in tmux session"
+  exit 1
+fi
+
+# If session exists, just attach to it
+if tmux has-session -t "$session" 2>/dev/null; then
+  exec tmux attach -t "$session"
+fi
+
+# Create session with first window (claude + terminal)
+tmux new-session -d -s "$session" -n "dev" -c "$dir"
+tmux split-window -h -t "$session:1" -c "$dir"
+tmux send-keys -t "$session:1.1" 'claude' Enter
+tmux resize-pane -t "$session:1.1" -Z
+
+# Create second window for nvim
+tmux new-window -t "$session" -n "edit" -c "$dir"
+tmux send-keys -t "$session:2" 'nvim' Enter
+
+# Go back to first window, focus on Claude pane (zoomed)
+tmux select-window -t "$session:1"
+tmux select-pane -t "$session:1.1"
+
+# Attach
+tmux attach -t "$session"

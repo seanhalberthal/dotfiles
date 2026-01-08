@@ -1,0 +1,15 @@
+# Secrets - NEVER commit
+zsh/.zsh/.secrets.zsh
+
+# Tmux runtime data (managed by plugins)
+tmux/.tmux/plugins/
+tmux/.tmux/resurrect/
+
+# System files
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Neovim generated/cache
+nvim/.luarc.json
