@@ -13,3 +13,7 @@ tmux/.tmux/resurrect/
 
 # Neovim generated/cache
 nvim/.luarc.json
+.luarc.json
+
+# Claude Code
+.claude/
