@@ -170,7 +170,10 @@ Both `prefix + s` (sessions) and `prefix + f` (windows) use vim-style navigation
 | Delete line         | `Ctrl+k`                 |
 | Kill session/window | `Ctrl+x`                 |
 | Undo kill           | `Ctrl+u` (sessions only) |
+| New session         | `n` (sessions only)      |
 | Rename session      | `r` (sessions only)      |
+
+**New session:** Press `n` to open a dialog to create a new session. Type the name and press `Enter` to create (starts at `~`), or `Esc` to cancel. If a session with that name already exists, it will switch to it instead.
 
 **Rename:** Press `r` to open a rename dialog with the current session name pre-filled. Edit the name and press `Enter` to confirm, or `Esc` to cancel.
 
@@ -290,6 +293,7 @@ Available session backups:
 │   └── last                              # Symlink to latest save
 ├── scripts/
 │   ├── fzf-kill-session.sh               # Kill with undo support
+│   ├── fzf-new-session.sh                # Create new session dialog
 │   ├── fzf-rename-session.sh             # Rename session dialog
 │   ├── fzf-undo-session.sh               # Restore last killed session
 │   ├── resurrect-restore-session.sh      # Individual session restore
