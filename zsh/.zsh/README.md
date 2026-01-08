@@ -217,6 +217,7 @@ direnv allow
 | `tls`      | `trestore --list`               | List saved tmux session backups    |
 | `gols`     | `ls ~/go/bin`                   | List installed Go binaries         |
 | `dot`      | `cd ~/dotfiles`                 | Navigate to dotfiles directory     |
+| `claudeconfig` | `cd ~/claude-config`        | Navigate to claude-config directory |
 
 | Function       | Usage                        | Description                                                                                                                                    |
 | -------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
