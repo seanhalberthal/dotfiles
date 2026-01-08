@@ -139,6 +139,7 @@ Then reload your shell: `source ~/.zshrc`
 | Save session | `` ` w `` |
 | Session switcher | `` ` s `` |
 | Window switcher | `` ` f `` |
+| Rename window | `Opt+r` |
 
 ### Neovim
 | Action | Keybinding |
