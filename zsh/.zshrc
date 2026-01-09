@@ -54,7 +54,7 @@ export INCLUDE=/opt/homebrew/arm-none-eabi/include
 # =============================================================================
 # GOOGLE CLOUD SDK - LAZY LOADED
 # =============================================================================
-# Lazy load gcloud CLI tools and shell completion (~50-100ms savings)
+# Lazy load gcloud CLI tools and shell completion (~260ms savings)
 # Only loads when you actually use gcloud/gsutil/bq
 _load_gcloud() {
   unset -f gcloud gsutil bq
@@ -70,23 +70,12 @@ gsutil() { _load_gcloud && gsutil "$@"; }
 bq() { _load_gcloud && bq "$@"; }
 
 # =============================================================================
-# NODE.JS (NVM) - LAZY LOADED
+# NODE.JS (FNM)
 # =============================================================================
-# NVM (Node Version Manager) for managing multiple Node.js versions
-# Usage: nvm install 20, nvm use 18, nvm alias default 20
-# Lazy loaded to improve shell startup time (~300-500ms savings)
-export NVM_DIR="$HOME/.nvm"
-
-# Lazy load NVM - only loads when you actually use node/npm/nvm/npx
-_load_nvm() {
-  unset -f nvm node npm npx
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-}
-nvm() { _load_nvm && nvm "$@"; }
-node() { _load_nvm && node "$@"; }
-npm() { _load_nvm && npm "$@"; }
-npx() { _load_nvm && npx "$@"; }
+# fnm (Fast Node Manager) - Rust-based, ~5ms init vs NVM's 300-500ms
+# Usage: fnm install 22, fnm use 20, fnm default 22
+# Reads .nvmrc and .node-version files automatically with --use-on-cd
+eval "$(fnm env --use-on-cd)"
 
 # =============================================================================
 # DOCKER & COMPLETIONS
@@ -118,9 +107,7 @@ source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 # fzf: fuzzy finder for files, history, and more
 # Keybindings: Ctrl+R (history), Ctrl+T (files), Opt+C (cd to directory)
-# Using cached config file instead of subshell (~20-50ms savings)
-# Regenerate with: fzf --zsh > ~/.fzf.zsh
-[[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
+eval "$(fzf --zsh)"
 
 # =============================================================================
 # TERMINAL TITLE HOOKS
@@ -250,13 +237,8 @@ ta() {
 # Development tools
 alias gols="ls ~/go/bin"               # List installed Go binaries
 
-# Homebrew update with cache regeneration
-brewup() {
-  brew update && brew upgrade
-  echo "Regenerating fzf cache..."
-  fzf --zsh > ~/.fzf.zsh
-  echo "Done. Restart your shell or run: source ~/.fzf.zsh"
-}
+# Homebrew update
+alias brewup="brew update && brew upgrade"
 
 # =============================================================================
 # ZSH LINE EDITOR (ZLE) KEYBINDINGS

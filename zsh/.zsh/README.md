@@ -145,7 +145,7 @@ The `.zshrc` is organised into these sections:
 1. **Powerlevel10k Prompt** - Theme and instant prompt
 2. **PATH Configuration** - Homebrew, Go, Java, Python, etc.
 3. **Google Cloud SDK** - gcloud CLI and completions (lazy loaded)
-4. **Node.js (NVM)** - Node version management (lazy loaded)
+4. **Node.js (fnm)** - Fast Node Manager (~5ms init)
 5. **Docker & Completions** - CLI completions with cached compinit
 6. **Direnv** - Per-directory environment variables
 7. **ZSH Plugins** - autosuggestions, fzf
@@ -224,7 +224,7 @@ direnv allow
 | `ta <name>`    | `ta myproject`               | Smart attach: connects to running session, or restores from backup if not running. Automatically cleans up stale backups that fail to restore. |
 | `tkill <name>` | `tkill myproject`            | Kills the specified tmux session and removes its backup file from `~/.tmux/resurrect/sessions/`. |
 | `trestore`     | `trestore <name> [options]`  | Restore a tmux session from backup. Options: `--replace` (kill existing first), `--delete` (delete backup). |
-| `brewup`       | `brewup`                     | Runs `brew update && brew upgrade`, then regenerates the fzf cache. |
+| `brewup`       | `brewup`                     | Runs `brew update && brew upgrade`. |
 
 ### Tab Completion
 
@@ -254,7 +254,7 @@ $HOME/.bun/bin                      # Bun runtime
 $ANDROID_HOME/platform-tools        # Android SDK
 JetBrains Toolbox scripts           # (from .zprofile)
 Google Cloud SDK                    # (lazy loaded)
-NVM-managed Node.js                 # (lazy loaded)
+fnm-managed Node.js                 # (~5ms init, auto-switches on cd)
 ```
 
 ---
@@ -461,10 +461,22 @@ Heavy tools are lazy loaded—they only initialise when first used:
 
 | Tool        | Commands                  | Savings   |
 | ----------- | ------------------------- | --------- |
-| **NVM**     | `nvm`, `node`, `npm`, `npx` | ~300-500ms |
-| **gcloud**  | `gcloud`, `gsutil`, `bq`    | ~50-100ms  |
+| **gcloud**  | `gcloud`, `gsutil`, `bq`    | ~260ms    |
 
 The first invocation of these commands will have a brief delay as the tool loads, but subsequent calls are instant.
+
+### Fast Node Manager (fnm)
+
+Node.js version management uses [fnm](https://github.com/Schniz/fnm) instead of NVM. fnm is written in Rust and initialises in ~5ms (vs NVM's 300-500ms), eliminating the need for lazy loading.
+
+```bash
+# Install/switch Node versions
+fnm install 22        # Install Node 22
+fnm use 20            # Switch to Node 20
+fnm default 22        # Set default version
+
+# Auto-switching: fnm reads .nvmrc/.node-version files automatically
+```
 
 ### Cached Completions
 
@@ -477,15 +489,6 @@ if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
 else
   compinit -C  # Use cached dump
 fi
-```
-
-### Cached fzf Config
-
-The fzf shell integration is pre-generated rather than running a subshell on each startup:
-
-```bash
-# Regenerate after fzf updates
-fzf --zsh > ~/.fzf.zsh
 ```
 
 ### Powerlevel10k Instant Prompt
@@ -508,18 +511,10 @@ zprof
 
 ### Maintenance
 
-Use `brewup` to update Homebrew and regenerate caches automatically:
-
 ```bash
-brewup  # Runs: brew update && brew upgrade, then regenerates fzf cache
-```
+# Update Homebrew packages
+brewup
 
-Or manually regenerate cached files:
-
-```bash
-# After fzf update
-fzf --zsh > ~/.fzf.zsh
-
-# Force completion cache rebuild
+# Force completion cache rebuild (if completions seem stale)
 rm -f ~/.zcompdump && compinit
 ```
