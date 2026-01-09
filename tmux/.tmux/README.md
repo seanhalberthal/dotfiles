@@ -142,9 +142,17 @@ Opens a fzf popup with all URLs from the current pane's scrollback. Uses the sam
 | Half-page down/up | `d` / `u` (cursor moves to screen edge) |
 | Top of history    | `g`                   |
 | Bottom of history | `G`                   |
+| Search down/up    | `/` / `?`             |
+| Next/prev match   | `n` / `N`             |
+| Select chars      | `v`                   |
+| Select line       | `V`                   |
+| Yank selection    | `y`                   |
+| Yank line         | `Y`                   |
 | Exit scroll mode  | `q` or `Esc`          |
 
 **Note:** `Ctrl+f`/`Ctrl+b` and `Ctrl+d`/`Ctrl+u` also work for page and half-page navigation.
+
+**Vim-style yank:** To yank from cursor to top/bottom of history, use visual mode: `v` → `g` (or `G`) → `y`.
 
 ### Sessions
 

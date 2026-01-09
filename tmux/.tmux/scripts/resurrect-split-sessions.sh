@@ -86,3 +86,13 @@ for existing_file in "${SESSIONS_DIR}"/*.txt; do
         rm -f "${existing_file}"
     fi
 done
+
+# ─────────────────────────────────────────
+# Cleanup: remove old resurrect save files
+# ─────────────────────────────────────────
+# Keep only the 20 most recent saves to prevent unbounded growth
+KEEP_SAVES=20
+SAVE_FILES=$(ls -t "${RESURRECT_DIR}"/tmux_resurrect_*.txt 2>/dev/null | tail -n +$((KEEP_SAVES + 1)))
+if [[ -n "${SAVE_FILES}" ]]; then
+    echo "${SAVE_FILES}" | xargs rm -f
+fi

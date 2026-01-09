@@ -1,48 +1,37 @@
 ╔══════════════════════════════════════════════════════════════════════════╗
 ║                          TMUX KEYBOARD SHORTCUTS                         ║
-╚══════════════════════════════════════════════════════════════════════════╝
-
-┌─ TABS ────────────────────────────────┬─ PANES ──────────────────────────┐
-│                                       │                                  │
-│  Opt+[ / Opt+]       prev / next      │  Opt+hjkl            navigate    │
-│  Ctrl+Enter / Ctrl+Shift+Enter        │  Ctrl+, / Ctrl+.     left/down   │
-│                                       │                                  │
-│  ` 1-5               go to tab        │  Opt+Shift+hjkl      resize      │
-│  Opt+t               new tab          │                                  │
-│  Opt+Shift+n         rename tab       │  Opt+'               split left  │
-│  Opt+Shift+[ / ]     swap left/right  │  Opt+\               split right │
-│  Opt+x               kill tab         │  Opt+-               split down  │
-│                                       │  Opt+s               close pane  │
-│                                       │  Opt+z               zoom pane   │
-│                                       │                                  │
-└───────────────────────────────────────┴──────────────────────────────────┘
-
-┌─ SCROLL MODE ─────────────────────────┬─ SESSION ────────────────────────┐
-│                                       │                                  │
-│  Opt+v / ` v         enter mode       │  ` s                 switch      │
-│                                       │                      (fzf)       │
-│  hjkl                navigate         │  ` f                 switch win  │
-│  f / b               page down/up     │                      (fzf)       │
-│  d / u               half-page        │  ` w                 save all    │
-│  g / G               top / bottom     │  ` d                 detach      │
-│  q / Esc             exit mode        │  ` h                 this help   │
-│                                       │                                  │
-│  Opt+u               open URL picker  │                                  │
-│                                       │                                  │
-└───────────────────────────────────────┴──────────────────────────────────┘
-
-┌─ FZF SWITCHERS ──────────────────────────────────────────────────────────┐
-│                                                                          │
-│  j/k  g/G  f/b  d/u     move / jump to ends / page / half-page           │
-│  Space / Enter          select                                           │
-│  /                      start searching                                  │
-│  q / Esc                quit (q works in nav mode only)                  │
-│                                                                          │
-│  Ctrl+k                 delete line                                      │
-│  Ctrl+x                 kill session/window                              │
-│  Ctrl+u                 undo kill (sessions only)                        │
-│  r                      rename session (sessions only)                   │
-│                                                                          │
-└──────────────────────────────────────────────────────────────────────────┘
+╠═ TABS ══════════════════════════════╦═ PANES ════════════════════════════╣
+║                                     ║                                    ║
+║  Opt+[ / Opt+]      prev / next     ║  Opt+hjkl           navigate       ║
+║  ` 1-5              go to tab       ║  Ctrl+, / Ctrl+.    left / down    ║
+║                                     ║  Opt+Shift+hjkl     resize         ║
+║  Opt+t              new tab         ║                                    ║
+║  Opt+Shift+n        rename tab      ║  Opt+'              split left     ║
+║                                     ║  Opt+\              split right    ║
+║  Opt+Shift+[ / ]    swap left/right ║  Opt+-              split down     ║
+║  Opt+x              kill tab        ║                                    ║
+║                                     ║  Opt+s              close pane     ║
+║                                     ║  Opt+z              zoom pane      ║
+╠═ SCROLL MODE ═══════════════════════╬═ SESSION ══════════════════════════╣
+║                                     ║                                    ║
+║  Opt+v / ` v        enter mode      ║  ` s                switch (fzf)   ║
+║                                     ║  ` f                switch win     ║
+║  hjkl               navigate        ║  ` w                save all       ║
+║  f / b              page down/up    ║  ` d                detach         ║
+║  d / u              half-page       ║  ` h                this help      ║
+║  g / G              top / bottom    ║  Opt+u              open URL picker║
+║                                     ║                                    ║
+║  / / ?              search ↓ / ↑    ╠═ FZF SWITCHERS ════════════════════╣
+║  n / N              next / prev     ║                                    ║
+║                                     ║  j/k g/G f/b d/u    navigate       ║
+║  v / V              select / line   ║  Space / Enter      select         ║
+║  y / Y              yank / yank ln  ║  /                  start search   ║
+║  q / Esc            exit mode       ║  q / Esc            quit           ║
+║                                     ║                                    ║
+║                                     ║  Ctrl+k             delete line    ║
+║                                     ║  Ctrl+x             kill sess/win  ║
+║                                     ║  Ctrl+u             undo kill      ║
+║                                     ║  r                  rename session ║
+╚═════════════════════════════════════╩════════════════════════════════════╝
 
                           Press Esc to close this help
