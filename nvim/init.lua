@@ -167,7 +167,7 @@ vim.o.scrolloff = 10
 vim.o.confirm = true
 
 -- Set cursor to be a solid block that blinks in all modes
-vim.opt.guicursor = "n-v-c:block,i-ci-ve:block-blinkwait700-blinkon400-blinkoff250"
+vim.opt.guicursor = 'n-v-c:block,i-ci-ve:block-blinkwait700-blinkon400-blinkoff250'
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
@@ -181,6 +181,45 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 
 -- Neo-tree keybind
 vim.keymap.set('n', '<leader>e', ':Neotree toggle<CR>', { desc = 'Toggle file [E]xplorer' })
+
+-- Help screen (similar to tmux help)
+local function show_nvim_help()
+  local help_file = vim.fn.stdpath 'config' .. '/lua/custom/nvim-help.txt'
+  local lines = {}
+
+  local file = io.open(help_file, 'r')
+  if file then
+    for line in file:lines() do
+      table.insert(lines, line)
+    end
+    file:close()
+  else
+    lines = { 'Help file not found: ' .. help_file }
+  end
+
+  local width = 78
+  local height = math.min(#lines, vim.o.lines - 6)
+  local buf = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+  vim.api.nvim_set_option_value('modifiable', false, { buf = buf })
+  vim.api.nvim_set_option_value('bufhidden', 'wipe', { buf = buf })
+
+  local win_opts = {
+    relative = 'editor',
+    width = width,
+    height = height,
+    col = math.floor((vim.o.columns - width) / 2),
+    row = math.floor((vim.o.lines - height) / 2) - 1,
+    style = 'minimal',
+    border = 'rounded',
+  }
+
+  vim.api.nvim_open_win(buf, true, win_opts)
+  vim.keymap.set('n', 'q', '<cmd>close<CR>', { buffer = buf, silent = true })
+  vim.keymap.set('n', '<Esc>', '<cmd>close<CR>', { buffer = buf, silent = true })
+end
+
+vim.keymap.set('n', '<leader>h', show_nvim_help, { desc = 'Show Nvim [H]elp' })
 
 -- LazyGit keybind
 vim.keymap.set('n', '<leader>g', '<cmd>LazyGit<CR>', { desc = 'Open [G]it UI (LazyGit)' })
@@ -366,7 +405,6 @@ require('lazy').setup({
       spec = {
         { '<leader>s', group = '[S]earch' },
         { '<leader>t', group = '[T]oggle' },
-        { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
       },
     },
   },
@@ -606,8 +644,10 @@ require('lazy').setup({
           ---@return boolean
           local function client_supports_method(client, method, bufnr)
             if vim.fn.has 'nvim-0.11' == 1 then
+              ---@diagnostic disable-next-line: undefined-field
               return client:supports_method(method, bufnr)
             else
+              ---@diagnostic disable-next-line: undefined-field
               return client.supports_method(method, { bufnr = bufnr })
             end
           end
@@ -727,7 +767,7 @@ require('lazy').setup({
           },
         },
         omnisharp = {
-          cmd = { vim.fn.stdpath('data') .. '/mason/packages/omnisharp/OmniSharp' },
+          cmd = { vim.fn.stdpath 'data' .. '/mason/packages/omnisharp/OmniSharp' },
           enable_roslyn_analyzers = true,
           analyze_open_documents_only = false,
           root_dir = function(fname)
@@ -751,10 +791,10 @@ require('lazy').setup({
       -- for you, so that they are available from within Neovim.
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
-        'stylua',      -- Used to format Lua code
-        'eslint_d',    -- ESLint for JavaScript/TypeScript
-        'prettier',    -- Code formatter
-        'csharpier',   -- C# formatter
+        'stylua', -- Used to format Lua code
+        'eslint_d', -- ESLint for JavaScript/TypeScript
+        'prettier', -- Code formatter
+        'csharpier', -- C# formatter
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -817,7 +857,7 @@ require('lazy').setup({
       },
       formatters = {
         csharpier = {
-          command = vim.fn.stdpath('data') .. '/mason/packages/csharpier/csharpier',
+          command = vim.fn.stdpath 'data' .. '/mason/packages/csharpier/csharpier',
         },
       },
     },

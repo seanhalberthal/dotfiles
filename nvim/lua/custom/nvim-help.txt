@@ -1,0 +1,38 @@
+╔══════════════════════════════════════════════════════════════════════════╗
+║                          NVIM KEYBOARD SHORTCUTS                         ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+┌─ NAVIGATION ─────────────────────────┬─ SEARCH (Leader = Space) ────────┐
+│                                      │                                  │
+│  hjkl                 move cursor    │  Space sf          find files    │
+│  w / b               word fwd/back   │  Space sg          live grep     │
+│  0 / $               line start/end  │  Space sk          keymaps       │
+│  gg / G              file top/bottom │  Space /           buffer search │
+│  Ctrl+d / Ctrl+u     half-page       │  Space Space       open buffers  │
+│                                      │                                  │
+└──────────────────────────────────────┴──────────────────────────────────┘
+
+┌─ EDITING ────────────────────────────┬─ LSP ────────────────────────────┐
+│                                      │                                  │
+│  i / a               insert at/after │  grd                go to def    │
+│  o / O               new line below  │  grr                references   │
+│  dd / yy             delete/yank     │  grn                rename       │
+│  p / P               paste after/bef │  gra                code action  │
+│  u / Ctrl+r          undo / redo     │  K                  hover docs   │
+│  .                   repeat last     │                                  │
+│                                      │                                  │
+└──────────────────────────────────────┴──────────────────────────────────┘
+
+┌─ TEXT OBJECTS / SURROUND ────────────┬─ TOOLS ──────────────────────────┐
+│                                      │                                  │
+│  iw / aw             inner/around    │  Space e           file tree     │
+│  i" / i( / i{        inside quotes   │  Space g           git (neogit)  │
+│                                      │  Space f           format file   │
+│  saiw"               surround add    │  Space q           diagnostics   │
+│  sd'                 surround del    │                                  │
+│  sr("                surround rep    │  Ctrl+hjkl         move windows  │
+│                                      │  :vs / :sp         split v/h     │
+│                                      │                                  │
+└──────────────────────────────────────┴──────────────────────────────────┘
+
+                          Press q or Esc to close this help

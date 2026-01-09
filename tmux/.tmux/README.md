@@ -124,6 +124,14 @@ Press `` ` h `` to display the keybinding reference. Close it by pressing `Esc`.
 | Resize up         | `Opt+Shift+k`       |
 | Resize right      | `Opt+Shift+l`       |
 
+### URL Picker
+
+| Action    | Keybinding |
+| --------- | ---------- |
+| Open URLs | `Opt+u`    |
+
+Opens a fzf popup with all URLs from the current pane's scrollback. Uses the same vim-style navigation as other switchers (j/k, g/G, f/b, d/u). Press `y` to yank a URL to clipboard instead of opening.
+
 ### Scroll Mode (Copy Mode)
 
 | Action            | Keybinding            |
@@ -298,7 +306,8 @@ Available session backups:
 │   ├── fzf-undo-session.sh               # Restore last killed session
 │   ├── resurrect-restore-session.sh      # Individual session restore
 │   ├── resurrect-split-sessions.sh       # Post-save hook (splits backups)
-│   └── update-window-timestamp.sh        # Window access tracking hook
+│   ├── update-window-timestamp.sh        # Window access tracking hook
+│   └── url-picker.sh                     # URL picker (Opt+u)
 └── README.md                             # This file
 
 ~/bin/
