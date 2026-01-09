@@ -19,7 +19,7 @@ dotfiles/
 │   └── lua/
 ├── bin/           # Custom scripts
 │   ├── tm         # Tmux session launcher
-│   └── dana       # Project launcher
+│   └── dana       # Dana project launcher (see below)
 ├── hammerspoon/   # macOS automation
 │   └── init.lua
 ├── ghostty/       # Terminal emulator
@@ -152,6 +152,18 @@ Then reload your shell: `source ~/.zshrc`
 - Dracula colour scheme
 - Zsh shell integration
 - macOS optimised (glass icon, Option as Alt)
+
+### Dana Project Launcher
+The `dana` script creates a tmux session with pre-configured windows:
+
+| Window | Name | Directory | Purpose |
+|--------|------|-----------|---------|
+| 1 | backend | ~/src/dana/backend | Backend development |
+| 2 | web | ~/src/dana/web | Web frontend |
+| 3 | mobile | ~/src/dana/mobile | Mobile app |
+| 4 | tools | split panes | Left: `bun dev`, Right: `npx expo` |
+| 5 | commit-and-push | ~/src/dana | Git operations |
+| 6 | zsh | ~ | General shell |
 
 ## Keybinding Quick Reference
 

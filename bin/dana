@@ -24,10 +24,13 @@ if [ $? != 0 ]; then
     tmux select-pane -t $SESSION:tools.0
     tmux send-keys -t $SESSION:tools 'npx expo' C-m
     tmux select-pane -t $SESSION:tools.1
-    tmux send-keys -t $SESSION:tools 'npm run dev' C-m
+    tmux send-keys -t $SESSION:tools 'bun dev' C-m
 
-    # Window 5: zsh
-    tmux new-window -t $SESSION -n shell -c ~
+    # Window 5: commit-and-push
+    tmux new-window -t $SESSION -n commit-and-push -c ~/src/dana
+
+    # Window 6: zsh
+    tmux new-window -t $SESSION -n zsh -c ~
 
     # Go to first window
     tmux select-window -t $SESSION:1
