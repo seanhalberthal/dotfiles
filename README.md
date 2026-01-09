@@ -55,7 +55,7 @@ brew install --cask font-jetbrains-mono-nerd-font
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/dotfiles.git ~/dotfiles
+git clone https://github.com/seanhalberthal/dotfiles.git ~/dotfiles
 ```
 
 ### 2. Create symlinks
@@ -103,7 +103,7 @@ Start tmux and press `` ` `` then `I` (capital i) to install TPM plugins.
 
 ### 5. Install neovim plugins
 
-Open neovim - lazy.nvim will auto-install plugins on first launch.
+Open Neovim - lazy.nvim will auto-install plugins on first launch.
 
 Or manually: `:Lazy sync`
 
@@ -164,12 +164,14 @@ Then reload your shell: `source ~/.zshrc`
 | Session switcher | `` ` s `` |
 | Window switcher | `` ` f `` |
 | Rename window | `Opt+r` |
+| URL picker | `Opt+u` |
 
 ### Neovim
 | Action | Keybinding |
 |--------|------------|
 | Leader | `Space` |
+| Help | `Space h` |
 | Find files | `Space sf` |
 | Live grep | `Space sg` |
-| File explorer | `\` |
+| File explorer | `Space e` |
 | Format | `Space f` |
