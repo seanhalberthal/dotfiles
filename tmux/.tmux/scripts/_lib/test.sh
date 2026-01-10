@@ -38,6 +38,7 @@ section() {
 }
 
 # Capture stderr from a command (discard stdout, return stderr)
+# shellcheck disable=SC2069
 capture_stderr() {
     "$@" 2>&1 1>/dev/null
 }
