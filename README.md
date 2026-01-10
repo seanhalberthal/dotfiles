@@ -1,6 +1,6 @@
 # Dotfiles
 
-Personal configuration files for zsh, tmux, neovim, hammerspoon, and ghostty.
+Personal configuration files for zsh, tmux, neovim, hammerspoon, ghostty, and karabiner.
 
 ## Contents
 
@@ -24,6 +24,8 @@ dotfiles/
 │   └── init.lua
 ├── ghostty/       # Terminal emulator
 │   └── config
+├── karabiner/     # Keyboard customisation
+│   └── karabiner.json
 └── README.md
 ```
 
@@ -42,7 +44,7 @@ brew install powerlevel10k zsh-autosuggestions direnv
 brew install gh lazygit
 
 # macOS apps
-brew install --cask ghostty hammerspoon
+brew install --cask ghostty hammerspoon karabiner-elements
 ```
 
 Install a Nerd Font for icons:
@@ -86,6 +88,10 @@ ln -sf ~/dotfiles/hammerspoon ~/.hammerspoon
 # Ghostty
 mkdir -p ~/.config/ghostty
 ln -sf ~/dotfiles/ghostty/config ~/.config/ghostty/config
+
+# Karabiner Elements
+mkdir -p ~/.config/karabiner
+ln -sf ~/dotfiles/karabiner/karabiner.json ~/.config/karabiner/karabiner.json
 ```
 
 ### 3. Set up secrets
@@ -152,6 +158,11 @@ Then reload your shell: `source ~/.zshrc`
 - Dracula colour scheme
 - Zsh shell integration
 - macOS optimised (glass icon, Option as Alt)
+
+### Karabiner Elements
+- Caps Lock to Escape (Ghostty only)
+- Right Option to Left Control
+- UK keyboard layout fixes for Apple keyboards
 
 ### Dana Project Launcher
 The `dana` script creates a tmux session with pre-configured windows:
