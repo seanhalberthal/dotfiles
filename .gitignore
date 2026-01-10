@@ -15,5 +15,8 @@ tmux/.tmux/resurrect/
 nvim/.luarc.json
 .luarc.json
 
+# Neovim backup files
+nvim/init.lua.backup
+
 # Claude Code
 .claude/
