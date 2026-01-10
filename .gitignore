@@ -10,6 +10,7 @@ tmux/.tmux/resurrect/
 *.swp
 *.swo
 *~
+*.backup
 
 # Neovim generated/cache
 nvim/.luarc.json
