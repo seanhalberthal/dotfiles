@@ -1,7 +1,7 @@
 # Dotfiles
 
 [![CI](https://github.com/seanhalberthal/dotfiles/actions/workflows/ci.yml/badge.svg)](https://github.com/seanhalberthal/dotfiles/actions/workflows/ci.yml)
-[![macOS](https://img.shields.io/badge/macOS-Sonoma-blue?logo=apple)](https://www.apple.com/macos/)
+[![macOS](https://img.shields.io/badge/macOS-Tahoe-blue?logo=apple)](https://www.apple.com/macos/)
 [![Neovim](https://img.shields.io/badge/Neovim-0.9+-green?logo=neovim)](https://neovim.io/)
 [![Tmux](https://img.shields.io/badge/Tmux-3.3+-orange?logo=tmux)](https://github.com/tmux/tmux)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
@@ -12,27 +12,33 @@ Personal configuration files for zsh, tmux, neovim, hammerspoon, ghostty, and ka
 
 ```
 dotfiles/
-├── zsh/           # Zsh shell configuration
+├── zsh/              # Zsh shell configuration
 │   ├── .zshrc
 │   ├── .zprofile
-│   ├── .p10k.zsh  # Powerlevel10k theme
-│   └── .zsh/      # Additional zsh configs
-├── tmux/          # Tmux terminal multiplexer
+│   ├── .p10k.zsh     # Powerlevel10k theme
+│   └── .zsh/         # Additional zsh configs
+├── tmux/             # Tmux terminal multiplexer
 │   ├── .tmux.conf
-│   └── .tmux/     # Scripts and help files
-├── nvim/          # Neovim configuration
-│   ├── init.lua
-│   └── lua/
-├── bin/           # Custom scripts
-│   ├── tm         # Tmux session launcher
-│   └── dana       # Dana project launcher (see below)
-├── hammerspoon/   # macOS automation
+│   └── .tmux/        # Scripts and help files
+├── nvim/             # Neovim configuration
+│   ├── init.lua      # Entry point
+│   └── lua/custom/   # Modular config
+│       ├── core/     # Options, keymaps, autocmds
+│       └── plugins/  # Plugin configurations
+├── bin/              # Custom scripts
+│   ├── tm            # Tmux dev session launcher
+│   └── dana          # Dana project launcher
+├── hammerspoon/      # macOS automation
 │   └── init.lua
-├── ghostty/       # Terminal emulator
+├── ghostty/          # Terminal emulator
 │   └── config
-├── karabiner/     # Keyboard customisation
+├── karabiner/        # Keyboard customisation
 │   └── karabiner.json
-└── README.md
+├── scripts/          # Installation and utility scripts
+│   ├── install/      # Installer modules
+│   ├── hooks/        # Tool hooks (e.g. Claude alerts)
+│   └── _lib/         # Shared shell libraries
+└── Brewfile          # Homebrew dependencies
 ```
 
 ## Quick Start
@@ -137,7 +143,7 @@ See [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for common issues and sol
 ## Updating
 
 ```bash
-dot
+cd ~/dotfiles
 git pull
 ```
 
@@ -172,24 +178,12 @@ Then reload your shell: `source ~/.zshrc`
 ### Ghostty
 - Dracula colour scheme
 - Zsh shell integration
-- macOS optimised (glass icon, Option as Alt)
+- macOS optimised (glass icon, left Option as Alt)
 
 ### Karabiner Elements
 - Caps Lock to Escape (Ghostty only)
 - Right Option to Left Control
 - UK keyboard layout fixes for Apple keyboards
-
-### Dana Project Launcher
-The `dana` script creates a tmux session with pre-configured windows:
-
-| Window | Name | Directory | Purpose |
-|--------|------|-----------|---------|
-| 1 | backend | ~/src/dana/backend | Backend development |
-| 2 | web | ~/src/dana/web | Web frontend |
-| 3 | mobile | ~/src/dana/mobile | Mobile app |
-| 4 | tools | split panes | Left: `bun dev`, Right: `npx expo` |
-| 5 | commit-and-push | ~/src/dana | Git operations |
-| 6 | zsh | ~ | General shell |
 
 ## Keybinding Quick Reference
 
@@ -202,14 +196,18 @@ The `dana` script creates a tmux session with pre-configured windows:
 | Session switcher | `` ` s `` |
 | Window switcher | `` ` f `` |
 | Rename window | `Opt+r` |
-| URL picker | `Opt+u` |
+| Close pane | `Opt+s` |
+| Close window | `Opt+x` |
+| URL picker | `Opt+y` |
+| Undo pane/window | `Opt+u` |
 
 ### Neovim
 | Action | Keybinding |
 |--------|------------|
 | Leader | `Space` |
-| Help | `Space h` |
+| Help | `` ` h `` (in tmux) |
 | Find files | `Space sf` |
 | Live grep | `Space sg` |
 | File explorer | `Space e` |
+| Git (Neogit) | `Space g` |
 | Format | `Space f` |
