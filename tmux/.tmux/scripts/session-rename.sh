@@ -1,13 +1,20 @@
-#!/bin/bash
-# Rename a session from the fzf session switcher
-# Usage: session-rename.sh <session-name>
+#!/usr/bin/env bash
+set -euo pipefail
 
-session="$1"
+# Rename current tmux session via fzf prompt
 
-# Use fzf as a styled input field with escape support
+SCRIPT_DIR="${BASH_SOURCE%/*}"
+source "$SCRIPT_DIR/_lib/common.sh"
+source "$SCRIPT_DIR/_lib/session.sh"
+
+require_tmux
+
+current_session="${1:-$(get_current_session)}"
+
+# Prompt for new name with current name as default
 newname=$(printf '' | fzf \
     --print-query \
-    --query="$session" \
+    --query="$current_session" \
     --prompt='Rename session: ' \
     --height=100% \
     --layout=reverse \
@@ -18,8 +25,29 @@ newname=$(printf '' | fzf \
     --pointer=' ' \
     --bind 'enter:print-query' \
     --bind 'esc:abort' \
-    2>/dev/null | head -1)
+    2>/dev/null | head -1) || true
 
-if [[ -n "$newname" && "$newname" != "$session" ]]; then
-    tmux rename-session -t "$session" "$newname"
+# Handle empty input (user cancelled)
+if [[ -z "$newname" ]]; then
+    exit 0
 fi
+
+# No change needed
+if [[ "$newname" == "$current_session" ]]; then
+    exit 0
+fi
+
+# Validate session name
+if ! validate_session_name "$newname"; then
+    error "Invalid session name"
+    exit 1
+fi
+
+# Check if target name already exists
+if session_exists "$newname"; then
+    error "Session '$newname' already exists"
+    exit 1
+fi
+
+# Rename the session
+tmux rename-session -t "$current_session" "$newname"

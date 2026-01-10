@@ -1,41 +1,26 @@
 #!/usr/bin/env bash
-# URL picker - extracts URLs from tmux pane and opens selected one
+set -euo pipefail
 
-PANE_ID="$1"
+# Extract and open URLs from tmux pane scrollback
+
+SCRIPT_DIR="${BASH_SOURCE%/*}"
+source "$SCRIPT_DIR/_lib/common.sh"
+source "$SCRIPT_DIR/_lib/ui.sh"
+
+PANE_ID="${1:-}"
 
 # Capture pane content and extract URLs
-urls=$(tmux capture-pane -t "$PANE_ID" -Jp -S -5000 | grep -oE 'https?://[^][ \"<>]+' | tail -r | awk '!seen[$0]++')
+if [[ -n "$PANE_ID" ]]; then
+    urls=$(tmux capture-pane -t "$PANE_ID" -Jp -S -5000 2>/dev/null | grep -oE 'https?://[^][ \"<>]+' | tail -r | awk '!seen[$0]++') || true
+else
+    urls=$(tmux capture-pane -Jp -S -5000 2>/dev/null | grep -oE 'https?://[^][ \"<>]+' | tail -r | awk '!seen[$0]++') || true
+fi
 
 if [[ -z "$urls" ]]; then
-    # Get terminal dimensions
-    term_height=$(tput lines)
-    term_width=$(tput cols)
-
-    # Box dimensions (5 lines for box + 2 for spacing + 1 for prompt = 8 total)
-    box_height=8
-    box_width=31
-
-    # Calculate vertical padding
-    v_pad=$(( (term_height - box_height) / 2 ))
-    [[ $v_pad -lt 0 ]] && v_pad=0
-
-    # Calculate horizontal padding
-    h_pad=$(( (term_width - box_width) / 2 ))
-    [[ $h_pad -lt 0 ]] && h_pad=0
-    pad=$(printf '%*s' "$h_pad" '')
-
-    # Clear screen and print centered dialog
-    clear
-    for ((i=0; i<v_pad; i++)); do printf '\n'; done
-
-    printf '%s\033[38;5;141m╭─────────────────────────────╮\033[0m\n' "$pad"
-    printf '%s\033[38;5;141m│\033[0m                             \033[38;5;141m│\033[0m\n' "$pad"
-    printf '%s\033[38;5;141m│\033[0m   \033[38;5;245mNo URLs found in pane\033[0m     \033[38;5;141m│\033[0m\n' "$pad"
-    printf '%s\033[38;5;141m│\033[0m                             \033[38;5;141m│\033[0m\n' "$pad"
-    printf '%s\033[38;5;141m╰─────────────────────────────╯\033[0m\n' "$pad"
-    printf '\n'
-    printf '%s\033[38;5;245mPress any key to close...\033[0m' "$pad"
-    read -n1 -s
+    show_centered_message "No URLs found" \
+        "" \
+        "No URLs were found in the current pane scrollback."
+    wait_for_key "Press any key to close..."
     exit 0
 fi
 
@@ -57,7 +42,7 @@ selected=$(echo "$urls" | fzf \
     --bind 'esc:transform:[[ $FZF_PROMPT == "> " ]] && echo "disable-search+clear-query+change-prompt(: )+rebind(j,k,g,G,f,b,d,u,q,space,y)" || echo "abort"' \
     --bind 'ctrl-k:kill-line,ctrl-w:unix-line-discard' \
     --bind "y:execute-silent(echo -n {} | pbcopy)+abort" \
-)
+) || true
 
 if [[ -n "$selected" ]]; then
     open "$selected"

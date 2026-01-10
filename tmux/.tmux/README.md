@@ -235,7 +235,7 @@ tm
 
 This creates a session called `myproject` with:
 
-- **Window 1 (dev):** Claude Code (zoomed) + terminal (split panes)
+- **Window 1 (dev):** Claude Code + terminal (side-by-side split panes)
 - **Window 2 (edit):** neovim
 
 If a session with that name already exists, `tm` attaches to it instead of creating a new one.
@@ -321,6 +321,12 @@ Available session backups:
 │   ├── sessions/                         # Per-session backup files
 │   └── last                              # Symlink to latest save
 ├── scripts/
+│   ├── _lib/                             # Shared utility libraries
+│   │   ├── common.sh                     # Error handling, validation
+│   │   ├── paths.sh                      # Undo file path definitions
+│   │   ├── session.sh                    # Session management utilities
+│   │   ├── test.sh                       # Test suite for libraries
+│   │   └── ui.sh                         # Terminal UI (dialogs, prompts)
 │   ├── kill-pane.sh                      # Kill pane (Opt+s, saves state)
 │   ├── kill-window.sh                    # Kill window (Opt+x, saves state)
 │   ├── resurrect-delete.sh               # Delete session backup

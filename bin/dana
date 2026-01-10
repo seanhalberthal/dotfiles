@@ -1,40 +1,59 @@
-#!/bin/bash
-# Dana project launcher for tmux
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Dana project launcher - creates a multi-window tmux session
 
 SESSION="dana"
+PROJECT_DIR="$HOME/src/dana"
 
-# Check if session exists
-tmux has-session -t $SESSION 2>/dev/null
-
-if [ $? != 0 ]; then
-    # Create new session with backend window
-    tmux new-session -d -s $SESSION -n backend -c ~/src/dana/backend
-
-    # Window 2: web
-    tmux new-window -t $SESSION -n web -c ~/src/dana/web
-
-    # Window 3: mobile
-    tmux new-window -t $SESSION -n mobile -c ~/src/dana/mobile
-
-    # Window 4: tools (split panes)
-    tmux new-window -t $SESSION -n tools -c ~/src/dana/web
-    tmux split-window -h -t $SESSION:tools -c ~/src/dana/mobile
-
-    # Run dev servers in tools panes
-    tmux select-pane -t $SESSION:tools.0
-    tmux send-keys -t $SESSION:tools 'npx expo' C-m
-    tmux select-pane -t $SESSION:tools.1
-    tmux send-keys -t $SESSION:tools 'bun dev' C-m
-
-    # Window 5: commit-and-push
-    tmux new-window -t $SESSION -n commit-and-push -c ~/src/dana
-
-    # Window 6: zsh
-    tmux new-window -t $SESSION -n zsh -c ~
-
-    # Go to first window
-    tmux select-window -t $SESSION:1
+# Validate project directory exists
+if [[ ! -d "$PROJECT_DIR" ]]; then
+    echo "Error: Project directory not found: $PROJECT_DIR" >&2
+    exit 1
 fi
 
+# Check if session already exists
+if tmux has-session -t "$SESSION" 2>/dev/null; then
+    # Attach to existing session
+    if [[ -n "${TMUX:-}" ]]; then
+        tmux switch-client -t "$SESSION"
+    else
+        tmux attach-session -t "$SESSION"
+    fi
+    exit 0
+fi
+
+# Create new session with backend window
+tmux new-session -d -s "$SESSION" -n backend -c "$PROJECT_DIR/backend"
+
+# Window 2: web
+tmux new-window -t "$SESSION" -n web -c "$PROJECT_DIR/web"
+
+# Window 3: mobile
+tmux new-window -t "$SESSION" -n mobile -c "$PROJECT_DIR/mobile"
+
+# Window 4: tools (split panes)
+tmux new-window -t "$SESSION" -n tools -c "$PROJECT_DIR/web"
+tmux split-window -h -t "$SESSION:tools" -c "$PROJECT_DIR/mobile"
+
+# Run dev servers in tools panes
+tmux select-pane -t "$SESSION:tools.0"
+tmux send-keys -t "$SESSION:tools" 'npx expo' C-m
+tmux select-pane -t "$SESSION:tools.1"
+tmux send-keys -t "$SESSION:tools" 'bun dev' C-m
+
+# Window 5: commit-and-push
+tmux new-window -t "$SESSION" -n commit-and-push -c "$PROJECT_DIR"
+
+# Window 6: zsh
+tmux new-window -t "$SESSION" -n zsh -c ~
+
+# Select first window
+tmux select-window -t "$SESSION:1"
+
 # Attach to session
-tmux attach -t $SESSION
+if [[ -n "${TMUX:-}" ]]; then
+    tmux switch-client -t "$SESSION"
+else
+    tmux attach-session -t "$SESSION"
+fi

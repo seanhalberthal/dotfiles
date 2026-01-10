@@ -1,35 +1,51 @@
-#!/bin/bash
-# Start tmux with a dev layout: claude+terminal | nvim
-# If session already exists, attach to it instead
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Session name = last folder in path
+# Dev session launcher - creates a 3-window layout for development
+
+# Default to current directory if no argument provided
 dir="${1:-$(pwd)}"
-session="$(basename "$dir")"
 
-# Check if already in tmux
-if [[ -n "$TMUX" ]]; then
-  echo "Already in tmux session"
-  exit 1
+# Resolve to absolute path
+dir=$(cd "$dir" && pwd)
+
+# Validate directory exists
+if [[ ! -d "$dir" ]]; then
+    echo "Error: Directory not found: $dir" >&2
+    exit 1
 fi
 
-# If session exists, just attach to it
+# Use directory basename as session name (sanitised)
+session=$(basename "$dir" | tr -c '[:alnum:]_.-' '_')
+
+# Check if session already exists
 if tmux has-session -t "$session" 2>/dev/null; then
-  exec tmux attach -t "$session"
+    if [[ -n "${TMUX:-}" ]]; then
+        tmux switch-client -t "$session"
+    else
+        tmux attach-session -t "$session"
+    fi
+    exit 0
 fi
 
-# Create session with first window (claude + terminal)
+# Create new session with development layout
 tmux new-session -d -s "$session" -n "dev" -c "$dir"
-tmux split-window -h -t "$session:1" -c "$dir"
-tmux send-keys -t "$session:1.1" 'claude' Enter
-tmux resize-pane -t "$session:1.1" -Z
 
-# Create second window for nvim
+# Window 1: Split for Claude (left) and terminal (right)
+tmux split-window -t "$session:1" -h -c "$dir"
+tmux send-keys -t "$session:1.1" 'claude' Enter
+
+# Window 2: Neovim
 tmux new-window -t "$session" -n "edit" -c "$dir"
 tmux send-keys -t "$session:2" 'nvim' Enter
 
-# Go back to first window, focus on Claude pane (zoomed)
+# Select first window, first pane
 tmux select-window -t "$session:1"
 tmux select-pane -t "$session:1.1"
 
-# Attach
-tmux attach -t "$session"
+# Attach to session
+if [[ -n "${TMUX:-}" ]]; then
+    tmux switch-client -t "$session"
+else
+    tmux attach-session -t "$session"
+fi

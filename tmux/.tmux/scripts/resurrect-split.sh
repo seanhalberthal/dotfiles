@@ -91,8 +91,17 @@ done
 # Cleanup: remove old resurrect save files
 # ─────────────────────────────────────────
 # Keep only the 20 most recent saves to prevent unbounded growth
-KEEP_SAVES=20
-SAVE_FILES=$(ls -t "${RESURRECT_DIR}"/tmux_resurrect_*.txt 2>/dev/null | tail -n +$((KEEP_SAVES + 1)))
-if [[ -n "${SAVE_FILES}" ]]; then
-    echo "${SAVE_FILES}" | xargs rm -f
-fi
+cleanup_old_backups() {
+    local dir="$1"
+    local keep="$2"
+    local count=0
+
+    while IFS= read -r file; do
+        count=$((count + 1))
+        if [[ $count -gt $keep ]]; then
+            rm -f "$file"
+        fi
+    done < <(ls -1t "$dir"/tmux_resurrect_*.txt 2>/dev/null)
+}
+
+cleanup_old_backups "$RESURRECT_DIR" 20

@@ -1,85 +1,65 @@
 #!/usr/bin/env bash
-# ══════════════════════════════════════════════════════════════
-# session-kill.sh
-# ══════════════════════════════════════════════════════════════
-# Kills a tmux session but preserves its backup for undo.
-# Called from fzf session switcher when user presses Ctrl+x.
-#
-# Features:
-#   - y/n confirmation before deleting
-#   - Auto-switches to another session if killing the current one
-#
-# Usage: session-kill.sh <session-name>
-# ══════════════════════════════════════════════════════════════
-
 set -euo pipefail
+
+# Kill a tmux session with confirmation dialog and undo capability
+
+SCRIPT_DIR="${BASH_SOURCE%/*}"
+source "$SCRIPT_DIR/_lib/common.sh"
+source "$SCRIPT_DIR/_lib/ui.sh"
+source "$SCRIPT_DIR/_lib/paths.sh"
+source "$SCRIPT_DIR/_lib/session.sh"
+
+require_tmux
 
 SESSION_NAME="${1:-}"
 [[ -z "$SESSION_NAME" ]] && exit 1
 
 # Get the current session (the one the client is attached to)
-CURRENT_SESSION=$(tmux display-message -p '#S')
+CURRENT_SESSION=$(get_current_session)
 
-# Get terminal dimensions
-term_height=$(tput lines)
-term_width=$(tput cols)
+# Prevent killing the last session
+if is_last_session; then
+    show_centered_message "Cannot kill session" \
+        "" \
+        "This is the only session." \
+        "Create another session first."
+    sleep 2
+    exit 1
+fi
 
-# Box dimensions (5 lines for box + 2 for spacing + 1 for prompt = 8 total)
-box_height=8
-box_width=39
-
-# Calculate vertical padding
-v_pad=$(( (term_height - box_height) / 2 ))
-[[ $v_pad -lt 0 ]] && v_pad=0
-
-# Calculate horizontal padding
-h_pad=$(( (term_width - box_width) / 2 ))
-[[ $h_pad -lt 0 ]] && h_pad=0
-pad=$(printf '%*s' "$h_pad" '')
-
-# Clear screen and print centered dialog
-clear
-for ((i=0; i<v_pad; i++)); do printf '\n'; done
-
-printf '%s\033[38;5;203m╭─────────────────────────────────────╮\033[0m\n' "$pad"
-printf '%s\033[38;5;203m│\033[0m                                     \033[38;5;203m│\033[0m\n' "$pad"
-printf '%s\033[38;5;203m│\033[0m   \033[38;5;203mDelete session\033[0m \033[1;37m%-18s\033[0m \033[38;5;203m│\033[0m\n' "$pad" "'$SESSION_NAME'"
-printf '%s\033[38;5;203m│\033[0m                                     \033[38;5;203m│\033[0m\n' "$pad"
-printf '%s\033[38;5;203m╰─────────────────────────────────────╯\033[0m\n' "$pad"
-printf '\n'
-printf '%s\033[38;5;245mConfirm?\033[0m [\033[38;5;84my\033[0m/\033[38;5;203mN\033[0m] ' "$pad"
-read -r -n1 CONFIRM
-echo
-
-if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
+# Show confirmation dialog
+if ! show_centered_confirm "Kill session: $SESSION_NAME" \
+    "This will close all windows and panes in this session."; then
     exit 0
 fi
 
-UNDO_FILE="/tmp/tmux-undo-session"
+# Get undo paths
+UNDO_FILE=$(get_session_undo_file)
 BACKUP_SRC="${HOME}/.tmux/resurrect/sessions/${SESSION_NAME}.txt"
-BACKUP_UNDO="/tmp/tmux-undo-${SESSION_NAME}.txt"
+UNDO_BACKUP=$(get_session_undo_backup)
 
 # Clear previous undo data
-rm -f /tmp/tmux-undo-*.txt 2>/dev/null || true
+cleanup_undo_files "session"
 
 # Save session name for undo
 echo "$SESSION_NAME" > "$UNDO_FILE"
+chmod 600 "$UNDO_FILE"
 
 # Force a save to ensure we have current state
 ~/.tmux/plugins/tmux-resurrect/scripts/save.sh >/dev/null 2>&1 || true
 ~/.tmux/scripts/resurrect-split.sh >/dev/null 2>&1 || true
 
 # Preserve backup before kill triggers cleanup
-[[ -f "$BACKUP_SRC" ]] && cp "$BACKUP_SRC" "$BACKUP_UNDO"
+if [[ -f "$BACKUP_SRC" ]]; then
+    cp "$BACKUP_SRC" "$UNDO_BACKUP"
+    chmod 600 "$UNDO_BACKUP"
+fi
 
 # If killing the current session, switch to another first
 if [[ "$SESSION_NAME" == "$CURRENT_SESSION" ]]; then
-    # Find another session to switch to (most recently used, excluding the one we're killing)
-    OTHER_SESSION=$(tmux list-sessions -F '#{session_activity} #{session_name}' | \
-        sort -rn | cut -d' ' -f2- | grep -v "^${SESSION_NAME}$" | head -n1)
-
-    if [[ -n "$OTHER_SESSION" ]]; then
-        tmux switch-client -t "$OTHER_SESSION"
+    if ! switch_to_other_session "$SESSION_NAME"; then
+        error "Failed to find another session to switch to"
+        exit 1
     fi
 fi
 
