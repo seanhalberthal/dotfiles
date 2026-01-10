@@ -3,10 +3,10 @@ set -euo pipefail
 
 # Install Homebrew if not present, update if already installed
 
-# Colours
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-NC='\033[0m'
+# Colours (using $'...' for proper escape interpretation)
+GREEN=$'\033[0;32m'
+YELLOW=$'\033[0;33m'
+NC=$'\033[0m'
 
 echo "============================================"
 echo "Homebrew Setup"

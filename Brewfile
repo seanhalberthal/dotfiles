@@ -104,7 +104,7 @@ cask "hammerspoon"
 cask "karabiner-elements"     # Keyboard customisation
 
 # Cloud
-cask "google-cloud-sdk"
+cask "gcloud-cli"
 
 # Music
 cask "music-presence"         # Discord Rich Presence for Apple Music

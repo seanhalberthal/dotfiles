@@ -5,12 +5,12 @@ set -euo pipefail
 
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 
-# Colours
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-CYAN='\033[0;36m'
-NC='\033[0m'
+# Colours (using $'...' for proper escape interpretation)
+RED=$'\033[0;31m'
+GREEN=$'\033[0;32m'
+YELLOW=$'\033[0;33m'
+CYAN=$'\033[0;36m'
+NC=$'\033[0m'
 
 echo "============================================"
 echo "Installing Homebrew Packages"
@@ -34,7 +34,7 @@ echo "Installing packages from Brewfile..."
 echo "This may take a while on first run."
 echo ""
 
-if brew bundle install --file="$DOTFILES_DIR/Brewfile" --no-lock; then
+if brew bundle install --file="$DOTFILES_DIR/Brewfile"; then
     echo ""
     echo "${GREEN}All packages installed successfully${NC}"
 else

@@ -4,11 +4,11 @@ set -euo pipefail
 # Check all prerequisites for dotfiles installation
 # Returns 0 if all checks pass, 1 otherwise
 
-# Colours
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-NC='\033[0m'
+# Colours (using $'...' for proper escape interpretation)
+RED=$'\033[0;31m'
+GREEN=$'\033[0;32m'
+YELLOW=$'\033[0;33m'
+NC=$'\033[0m'
 
 FAILED=0
 
@@ -116,7 +116,7 @@ echo "Optional tools:"
 echo "---------------"
 check_optional "fnm" "fnm" "brew install fnm"
 check_optional "python" "python3" "brew install python"
-check_optional "gcloud" "gcloud" "brew install --cask google-cloud-sdk"
+check_optional "gcloud" "gcloud" "brew install --cask gcloud-cli"
 check_optional "hammerspoon" "hs" "brew install --cask hammerspoon"
 check_optional "fd" "fd" "brew install fd"
 check_optional "bat" "bat" "brew install bat"

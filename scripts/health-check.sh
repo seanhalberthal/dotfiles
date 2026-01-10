@@ -6,11 +6,11 @@ set -euo pipefail
 
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 
-# Colours
-GREEN='\033[0;32m'
-RED='\033[0;31m'
-YELLOW='\033[0;33m'
-NC='\033[0m'
+# Colours (using $'...' for proper escape interpretation)
+GREEN=$'\033[0;32m'
+RED=$'\033[0;31m'
+YELLOW=$'\033[0;33m'
+NC=$'\033[0m'
 
 ISSUES=0
 

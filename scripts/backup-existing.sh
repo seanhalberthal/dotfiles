@@ -6,10 +6,10 @@ set -euo pipefail
 
 BACKUP_DIR="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
 
-# Colours
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-NC='\033[0m'
+# Colours (using $'...' for proper escape interpretation)
+GREEN=$'\033[0;32m'
+YELLOW=$'\033[0;33m'
+NC=$'\033[0m'
 
 backup_if_exists() {
     local source="$1"
