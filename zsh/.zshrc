@@ -177,6 +177,7 @@ alias killvite="pkill -f "vite" 2>/dev/null"
 
 # dotfiles 
 alias dot="cd ~/dotfiles"
+alias dotp="cd ~/dotfiles/.claude/plans"
 
 # claude-config 
 alias claudeconfig="cd ~/claude-config"
