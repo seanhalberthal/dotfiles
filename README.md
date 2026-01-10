@@ -44,8 +44,7 @@ dotfiles/
 
 ### Prerequisites
 
-- macOS (some features are macOS-specific)
-- [Homebrew](https://brew.sh/) installed
+- macOS (some features are macOS-specific, keybind remapping is Macbook Pro specific)
 
 ### Automatic Installation
 
