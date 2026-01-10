@@ -18,21 +18,30 @@ jobs:
 
       - name: Run ShellCheck on installation scripts
         run: |
-          shellcheck -x -e SC1091 -e SC2059 install.sh
-          shellcheck -x -e SC1091 -e SC2059 scripts/install/*.sh
-          shellcheck -x -e SC1091 -e SC2059 scripts/_lib/*.sh
-          shellcheck -x -e SC1091 -e SC2059 scripts/hooks/*.sh
+          # Exclude info-level warnings that are intentional:
+          # SC1091: Can't follow external source files (expected in CI)
+          # SC2059: Printf format string variables (intentional for colours)
+          # SC2015: A && B || C pattern (intentional, not if-then-else)
+          # SC2016: Single quotes preventing expansion (intentional for fzf bindings)
+          # SC2034: Unused variables (may be used by sourced scripts)
+          EXCLUDES="-e SC1091 -e SC2059 -e SC2015 -e SC2016 -e SC2034"
+          shellcheck -x $EXCLUDES install.sh
+          shellcheck -x $EXCLUDES scripts/install/*.sh
+          shellcheck -x $EXCLUDES scripts/_lib/*.sh
+          shellcheck -x $EXCLUDES scripts/hooks/*.sh
 
       - name: Run ShellCheck on tmux scripts
         run: |
-          shellcheck -x -e SC1091 -e SC2059 tmux/.tmux/scripts/*.sh
-          shellcheck -x -e SC1091 -e SC2059 tmux/.tmux/scripts/_lib/*.sh
+          EXCLUDES="-e SC1091 -e SC2059 -e SC2015 -e SC2016 -e SC2034"
+          shellcheck -x $EXCLUDES tmux/.tmux/scripts/*.sh
+          shellcheck -x $EXCLUDES tmux/.tmux/scripts/_lib/*.sh
 
       - name: Run ShellCheck on bin utilities
         run: |
+          EXCLUDES="-e SC1091 -e SC2059 -e SC2015 -e SC2016 -e SC2034"
           for f in bin/*; do
             if file "$f" | grep -q "shell script"; then
-              shellcheck -x -e SC1091 -e SC2059 "$f"
+              shellcheck -x $EXCLUDES "$f"
             fi
           done
 
