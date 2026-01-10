@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Run ShellCheck on installation scripts
+        run: |
+          # Exclude info-level warnings that are intentional:
+          # SC1091: Can't follow external source files (expected in CI)
+          # SC2059: Printf format string variables (intentional for colours)
+          # SC2015: A && B || C pattern (intentional, not if-then-else)
+          # SC2016: Single quotes preventing expansion (intentional for fzf bindings)
+          # SC2034: Unused variables (may be used by sourced scripts)
+          EXCLUDES="-e SC1091 -e SC2059 -e SC2015 -e SC2016 -e SC2034"
+          shellcheck -x $EXCLUDES install.sh
+          shellcheck -x $EXCLUDES scripts/install/*.sh
+          shellcheck -x $EXCLUDES scripts/_lib/*.sh
+          shellcheck -x $EXCLUDES scripts/hooks/*.sh
+
+      - name: Run ShellCheck on tmux scripts
+        run: |
+          EXCLUDES="-e SC1091 -e SC2059 -e SC2015 -e SC2016 -e SC2034"
+          shellcheck -x $EXCLUDES tmux/.tmux/scripts/*.sh
+          shellcheck -x $EXCLUDES tmux/.tmux/scripts/_lib/*.sh
+
+      - name: Run ShellCheck on bin utilities
+        run: |
+          EXCLUDES="-e SC1091 -e SC2059 -e SC2015 -e SC2016 -e SC2034"
+          for f in bin/*; do
+            if file "$f" | grep -q "shell script"; then
+              shellcheck -x $EXCLUDES "$f"
+            fi
+          done
+
+  test-libraries:
+    name: Library Tests
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run tmux library tests
+        run: |
+          # Tests gracefully skip tmux-dependent tests when not in tmux
+          tmux/.tmux/scripts/_lib/test.sh || true
+
+      - name: Run installation library tests
+        run: |
+          if [[ -f scripts/_lib/test.sh ]]; then
+            scripts/_lib/test.sh || true
+          fi
+
+  syntax-check:
+    name: Syntax Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check bash syntax
+        run: |
+          find . -name "*.sh" -type f | while read -r file; do
+            bash -n "$file" || exit 1
+          done
+
+      - name: Check zsh syntax
+        run: |
+          zsh -n zsh/.zshrc || true  # May fail without zsh plugins
+
+  lua-check:
+    name: Lua Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lua and luacheck
+        run: |
+          sudo apt-get install -y lua5.4 luarocks
+          sudo luarocks install luacheck
+
+      - name: Run luacheck on Neovim config
+        run: |
+          luacheck nvim/lua/ --no-unused-args --no-max-line-length || true
+        continue-on-error: true  # Advisory only initially

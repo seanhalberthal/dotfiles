@@ -1,5 +1,11 @@
 # Dotfiles
 
+[![CI](https://github.com/seanhalberthal/dotfiles/actions/workflows/ci.yml/badge.svg)](https://github.com/seanhalberthal/dotfiles/actions/workflows/ci.yml)
+[![macOS](https://img.shields.io/badge/macOS-Sonoma-blue?logo=apple)](https://www.apple.com/macos/)
+[![Neovim](https://img.shields.io/badge/Neovim-0.9+-green?logo=neovim)](https://neovim.io/)
+[![Tmux](https://img.shields.io/badge/Tmux-3.3+-orange?logo=tmux)](https://github.com/tmux/tmux)
+[![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
+
 Personal configuration files for zsh, tmux, neovim, hammerspoon, ghostty, and karabiner.
 
 ## Contents
@@ -78,10 +84,10 @@ The installer will:
 
 ```bash
 # Run health check
-./scripts/health-check.sh
+./scripts/install/health-check.sh
 
 # Check prerequisites
-./scripts/check-prerequisites.sh
+./scripts/install/check-prerequisites.sh
 ```
 
 ### Manual Installation

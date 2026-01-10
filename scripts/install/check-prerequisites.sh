@@ -4,55 +4,22 @@ set -euo pipefail
 # Check all prerequisites for dotfiles installation
 # Returns 0 if all checks pass, 1 otherwise
 
-# Colours (using $'...' for proper escape interpretation)
-RED=$'\033[0;31m'
-GREEN=$'\033[0;32m'
-YELLOW=$'\033[0;33m'
-NC=$'\033[0m'
+SCRIPT_DIR="${BASH_SOURCE%/*}"
+source "$SCRIPT_DIR/../_lib/common.sh"
 
 FAILED=0
 
 check() {
-    local name="$1"
-    local cmd="$2"
-    local install_hint="${3:-}"
-
-    printf "Checking %-20s" "$name..."
-
-    if command -v "$cmd" &>/dev/null; then
-        printf "${GREEN}OK${NC}\n"
-        return 0
-    else
-        printf "${RED}MISSING${NC}\n"
-        if [[ -n "$install_hint" ]]; then
-            printf "  ${YELLOW}Install with:${NC} %s\n" "$install_hint"
-        fi
+    if ! check_command "$1" "$2" "$3"; then
         FAILED=1
-        return 1
     fi
 }
 
 check_optional() {
-    local name="$1"
-    local cmd="$2"
-    local install_hint="${3:-}"
-
-    printf "Checking %-20s" "$name (optional)..."
-
-    if command -v "$cmd" &>/dev/null; then
-        printf "${GREEN}OK${NC}\n"
-    else
-        printf "${YELLOW}MISSING${NC}\n"
-        if [[ -n "$install_hint" ]]; then
-            printf "  ${YELLOW}Install with:${NC} %s\n" "$install_hint"
-        fi
-    fi
+    check_command "$1" "$2" "$3" "true"
 }
 
-echo "============================================"
-echo "Dotfiles Prerequisites Check"
-echo "============================================"
-echo ""
+print_section "Dotfiles Prerequisites Check"
 
 echo "Required - Core Tools:"
 echo "----------------------"
@@ -124,9 +91,9 @@ check_optional "bat" "bat" "brew install bat"
 echo ""
 
 if [[ $FAILED -eq 0 ]]; then
-    printf "${GREEN}All required prerequisites are installed!${NC}\n"
+    success "All required prerequisites are installed!"
     exit 0
 else
-    printf "${RED}Some required tools are missing. Please install them before continuing.${NC}\n"
+    error "Some required tools are missing. Please install them before continuing."
     exit 1
 fi

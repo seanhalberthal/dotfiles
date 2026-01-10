@@ -1,5 +1,12 @@
--- You can add your own plugins here or in other files in this directory!
---  I promise not to create any merge conflicts in this directory :)
---
--- See the kickstart.nvim README for more information
-return {}
+-- Plugin specifications loader
+-- Each file returns a table of plugin specs
+
+return {
+  { import = 'custom.plugins.ui' },
+  { import = 'custom.plugins.editor' },
+  { import = 'custom.plugins.telescope' },
+  { import = 'custom.plugins.lsp' },
+  { import = 'custom.plugins.completion' },
+  { import = 'custom.plugins.git' },
+  { import = 'custom.plugins.copilot' },
+}

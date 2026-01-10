@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1091
 set -euo pipefail
 
 # Backup existing configuration files before creating symlinks
 # Creates timestamped backup directory
 
-BACKUP_DIR="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
+SCRIPT_DIR="${BASH_SOURCE%/*}"
+source "$SCRIPT_DIR/../_lib/common.sh"
+source "$SCRIPT_DIR/../_lib/rollback.sh"
 
-# Colours (using $'...' for proper escape interpretation)
-GREEN=$'\033[0;32m'
-YELLOW=$'\033[0;33m'
-NC=$'\033[0m'
+BACKUP_DIR="$HOME/.dotfiles-backup/$(date +%Y%m%d-%H%M%S)"
 
 backup_if_exists() {
     local source="$1"
@@ -24,10 +24,7 @@ backup_if_exists() {
     return 1
 }
 
-echo "============================================"
-echo "Backing up existing configuration files"
-echo "============================================"
-echo ""
+print_section "Backing up existing configuration files"
 
 BACKED_UP=0
 
@@ -56,13 +53,17 @@ backup_if_exists "$HOME/.config/karabiner" "$BACKUP_DIR/.config/karabiner" && BA
 echo ""
 
 if [[ $BACKED_UP -eq 1 ]]; then
-    echo "${GREEN}Backup complete!${NC}"
+    success "Backup complete!"
     echo "Backup location: $BACKUP_DIR"
     echo ""
     echo "To restore, run:"
     echo "  cp -r $BACKUP_DIR/* \$HOME/"
+
+    # Record backup location for rollback
+    record_backup_location "$BACKUP_DIR"
 else
     echo "No existing configuration files found to backup."
+    rmdir "$BACKUP_DIR" 2>/dev/null || true
 fi
 
 echo "$BACKUP_DIR"
