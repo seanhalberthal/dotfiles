@@ -11,14 +11,14 @@ tap "homebrew/cask-fonts"
 
 # Shell & Terminal
 brew "zsh"
-brew "tmux"
+brew "tmux"                   # >= 3.3 required for popup support
 brew "powerlevel10k"
 brew "zsh-autosuggestions"
-brew "fzf"
+brew "fzf"                    # >= 0.40 for --tmux flag
 brew "direnv"
 
 # Editors
-brew "neovim"
+brew "neovim"                 # >= 0.9 required for lazy.nvim
 
 # AI Coding Assistants
 brew "opencode"
@@ -29,9 +29,8 @@ brew "gh"
 brew "lazygit"
 
 # Search & Navigation
-brew "ripgrep"
+brew "ripgrep"                # >= 13.0
 brew "fd"                     # Fast find alternative
-brew "fzf"
 brew "tree"
 brew "jq"
 brew "wget"
@@ -43,7 +42,7 @@ brew "bat"                    # Cat with syntax highlighting
 
 # Node.js (via fnm - Fast Node Manager)
 brew "fnm"
-brew "bun"
+brew "bun"                    # >= 1.0
 
 # Go
 brew "go"

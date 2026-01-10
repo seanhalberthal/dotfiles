@@ -3,29 +3,22 @@ set -euo pipefail
 
 # Install packages from Brewfile
 
+SCRIPT_DIR="${BASH_SOURCE%/*}"
+source "$SCRIPT_DIR/../_lib/common.sh"
+
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 
-# Colours (using $'...' for proper escape interpretation)
-RED=$'\033[0;31m'
-GREEN=$'\033[0;32m'
-YELLOW=$'\033[0;33m'
-CYAN=$'\033[0;36m'
-NC=$'\033[0m'
-
-echo "============================================"
-echo "Installing Homebrew Packages"
-echo "============================================"
-echo ""
+print_section "Installing Homebrew Packages"
 
 # Check if Brewfile exists
 if [[ ! -f "$DOTFILES_DIR/Brewfile" ]]; then
-    echo "${RED}Error: Brewfile not found at $DOTFILES_DIR/Brewfile${NC}"
+    error "Brewfile not found at $DOTFILES_DIR/Brewfile"
     exit 1
 fi
 
 # Check if brew is available
-if ! command -v brew &>/dev/null; then
-    echo "${RED}Error: Homebrew not found. Run install-homebrew.sh first.${NC}"
+if ! command_exists brew; then
+    error "Homebrew not found. Run install-homebrew.sh first."
     exit 1
 fi
 
@@ -36,10 +29,10 @@ echo ""
 
 if brew bundle install --file="$DOTFILES_DIR/Brewfile"; then
     echo ""
-    echo "${GREEN}All packages installed successfully${NC}"
+    success "All packages installed successfully"
 else
     echo ""
-    echo "${YELLOW}Some packages may have failed to install.${NC}"
+    warn "Some packages may have failed to install."
     echo "Check the output above for details."
     echo ""
     echo "You can retry failed packages with:"
@@ -48,11 +41,11 @@ fi
 
 # Post-installation setup for specific tools
 echo ""
-echo "${CYAN}Running post-installation setup...${NC}"
+info "Running post-installation setup..."
 echo ""
 
 # fzf keybindings and completion
-if command -v fzf &>/dev/null; then
+if command_exists fzf; then
     FZF_INSTALL="$(brew --prefix)/opt/fzf/install"
     if [[ -f "$FZF_INSTALL" ]]; then
         echo "Setting up fzf keybindings..."
@@ -61,17 +54,17 @@ if command -v fzf &>/dev/null; then
 fi
 
 # fnm shell setup reminder
-if command -v fnm &>/dev/null; then
+if command_exists fnm; then
     echo ""
-    echo "${CYAN}fnm installed.${NC} To install Node.js:"
+    info "fnm installed. To install Node.js:"
     echo "  fnm install --lts"
     echo "  fnm default lts-latest"
 fi
 
 # pipx path setup
-if command -v pipx &>/dev/null; then
+if command_exists pipx; then
     pipx ensurepath 2>/dev/null || true
 fi
 
 echo ""
-echo "${GREEN}Package installation complete${NC}"
+success "Package installation complete"

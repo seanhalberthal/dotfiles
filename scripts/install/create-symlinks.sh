@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1091
 set -euo pipefail
 
 # Create symlinks for all dotfiles
 # Requires DOTFILES_DIR to be set
 
-DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
+SCRIPT_DIR="${BASH_SOURCE%/*}"
+DOTFILES_DIR="${DOTFILES_DIR:-$(dirname "$(dirname "$SCRIPT_DIR")")}"
+export DOTFILES_DIR
 
-# Colours (using $'...' for proper escape interpretation)
-GREEN=$'\033[0;32m'
-RED=$'\033[0;31m'
-NC=$'\033[0m'
+source "$SCRIPT_DIR/../_lib/common.sh"
+source "$SCRIPT_DIR/../_lib/rollback.sh"
 
 FAILED=0
 
@@ -35,6 +36,8 @@ create_link() {
     # Create symlink
     if ln -sf "$source" "$dest"; then
         printf "${GREEN}Created:${NC} %s -> %s\n" "$dest" "$source"
+        # Record for rollback
+        record_symlink "$dest" "$source"
         return 0
     else
         printf "${RED}FAILED:${NC} Could not create symlink %s\n" "$dest"
@@ -43,10 +46,7 @@ create_link() {
     fi
 }
 
-echo "============================================"
-echo "Creating symlinks"
-echo "============================================"
-echo ""
+print_section "Creating symlinks"
 echo "Source: $DOTFILES_DIR"
 echo ""
 
@@ -88,10 +88,13 @@ create_link "$DOTFILES_DIR/bin/dana" "$HOME/.local/bin/dana"
 
 echo ""
 
+# Record step completion
+record_step "symlinks"
+
 if [[ $FAILED -eq 0 ]]; then
-    echo "${GREEN}All symlinks created successfully!${NC}"
+    success "All symlinks created successfully!"
     exit 0
 else
-    echo "${RED}Some symlinks failed to create. Check the output above.${NC}"
+    error "Some symlinks failed to create. Check the output above."
     exit 1
 fi

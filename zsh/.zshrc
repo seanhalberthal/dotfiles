@@ -19,8 +19,32 @@ if [[ -z "$SSH_CONNECTION" && -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-p
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
+# =============================================================================
+# PLATFORM DETECTION
+# =============================================================================
+# Detect platform for conditional configuration (must be before Homebrew-installed tools)
+case "$(uname)" in
+  Darwin)
+    export IS_MACOS=1
+    if [[ "$(uname -m)" == "arm64" ]]; then
+      export IS_APPLE_SILICON=1
+      export HOMEBREW_PREFIX="/opt/homebrew"
+    else
+      export IS_APPLE_SILICON=0
+      export HOMEBREW_PREFIX="/usr/local"
+    fi
+    ;;
+  Linux)
+    export IS_MACOS=0
+    export IS_APPLE_SILICON=0
+    export HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
+    ;;
+esac
+
 # Load theme and config (installed via: brew install powerlevel10k)
-source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
+if [[ -f "$HOMEBREW_PREFIX/share/powerlevel10k/powerlevel10k.zsh-theme" ]]; then
+  source "$HOMEBREW_PREFIX/share/powerlevel10k/powerlevel10k.zsh-theme"
+fi
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 # =============================================================================
@@ -28,18 +52,18 @@ source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
 # =============================================================================
 # Note: Additional PATH entries may exist in ~/.zprofile (added by installers)
 
-# Homebrew (Apple Silicon location)
-export PATH=/opt/homebrew/bin:/opt/homebrew/sbin:$PATH
+# Homebrew (detected location)
+export PATH="$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin:$PATH"
 
 # Go workspace (GOPATH is where go install puts binaries)
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
 
 # Java (OpenJDK via Homebrew)
-export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
+export PATH="$HOMEBREW_PREFIX/opt/openjdk/bin:$PATH"
 
 # Python pipx (isolated CLI tool installation)
-export PATH="$PATH:/Users/bssmnt/.local/bin"
+export PATH="$PATH:$HOME/.local/bin"
 
 # User scripts directory (custom shell scripts)
 export PATH="$HOME/bin:$PATH"
@@ -48,8 +72,8 @@ export PATH="$HOME/bin:$PATH"
 export PATH="$HOME/.local/share/nvim/mason/bin:$PATH"
 
 # ARM embedded development (for microcontroller/firmware work)
-export INCLUDE=/opt/homebrew/arm-none-eabi/include
-# export LIB=/opt/homebrew/arm-none-eabi/lib
+export INCLUDE="$HOMEBREW_PREFIX/arm-none-eabi/include"
+# export LIB="$HOMEBREW_PREFIX/arm-none-eabi/lib"
 
 # =============================================================================
 # GOOGLE CLOUD SDK - LAZY LOADED
@@ -58,11 +82,12 @@ export INCLUDE=/opt/homebrew/arm-none-eabi/include
 # Only loads when you actually use gcloud/gsutil/bq
 _load_gcloud() {
   unset -f gcloud gsutil bq
-  if [ -f '/Users/bssmnt/google-cloud-sdk/path.zsh.inc' ]; then
-    . '/Users/bssmnt/google-cloud-sdk/path.zsh.inc'
+  local gcloud_dir="$HOME/google-cloud-sdk"
+  if [[ -f "$gcloud_dir/path.zsh.inc" ]]; then
+    source "$gcloud_dir/path.zsh.inc"
   fi
-  if [ -f '/Users/bssmnt/google-cloud-sdk/completion.zsh.inc' ]; then
-    . '/Users/bssmnt/google-cloud-sdk/completion.zsh.inc'
+  if [[ -f "$gcloud_dir/completion.zsh.inc" ]]; then
+    source "$gcloud_dir/completion.zsh.inc"
   fi
 }
 gcloud() { _load_gcloud && gcloud "$@"; }
@@ -81,7 +106,7 @@ eval "$(fnm env --use-on-cd)"
 # DOCKER & COMPLETIONS
 # =============================================================================
 # Docker CLI completions (docker, docker-compose commands)
-fpath=(/Users/bssmnt/.docker/completions $fpath)
+fpath=("$HOME/.docker/completions" $fpath)
 
 # Cached compinit - only regenerate completion dump once per day (~50-100ms savings)
 autoload -Uz compinit
@@ -103,7 +128,9 @@ eval "$(direnv hook zsh)"
 # =============================================================================
 # zsh-autosuggestions: suggests commands as you type based on history
 # Accept suggestion: Right arrow or End key
-source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+if [[ -f "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
+  source "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+fi
 
 # fzf: fuzzy finder for files, history, and more
 # Keybindings: Ctrl+R (history), Ctrl+T (files), Opt+C (cd to directory)

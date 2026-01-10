@@ -55,3 +55,13 @@ get_pane_directory() {
 get_window_layout() {
     tmux display-message -p '#{window_layout}'
 }
+
+# Get current window name
+get_window_name() {
+    tmux display-message -p '#{window_name}'
+}
+
+# Get pane count in current window
+get_pane_count() {
+    tmux display-message -p '#{window_panes}'
+}

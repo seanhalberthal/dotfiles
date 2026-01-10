@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1091
 set -euo pipefail
 
 # Dotfiles installation script
@@ -7,12 +8,35 @@ set -euo pipefail
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export DOTFILES_DIR
 
-# Colours (using $'...' for proper escape interpretation)
-RED=$'\033[0;31m'
-GREEN=$'\033[0;32m'
-YELLOW=$'\033[0;33m'
-CYAN=$'\033[0;36m'
-NC=$'\033[0m'
+# Source shared utilities
+source "$DOTFILES_DIR/scripts/_lib/common.sh"
+source "$DOTFILES_DIR/scripts/_lib/rollback.sh"
+
+# Error handler for automatic rollback
+on_error() {
+    local exit_code=$?
+    local line_no=$1
+
+    echo ""
+    error "Installation failed at line $line_no (exit code: $exit_code)"
+    echo ""
+
+    if has_rollback_state; then
+        warn "Installation state detected. You can rollback with:"
+        echo "  ./scripts/install/rollback.sh"
+        echo ""
+        echo "Or to manually restore your backup:"
+        backup_dir=$(get_backup_location)
+        if [[ -n "$backup_dir" ]] && [[ -d "$backup_dir" ]]; then
+            echo "  cp -r $backup_dir/* \$HOME/"
+        fi
+    fi
+
+    exit $exit_code
+}
+
+# Set up error trap
+trap 'on_error $LINENO' ERR
 
 # Parse arguments
 SKIP_BACKUP=0
@@ -41,136 +65,136 @@ while [[ $# -gt 0 ]]; do
             echo "  --skip-brew      Skip Homebrew installation and packages"
             echo "  --check-only     Only run prerequisite and health checks"
             echo "  -h, --help       Show this help message"
+            echo ""
+            echo "To rollback a failed installation:"
+            echo "  ./scripts/install/rollback.sh"
             exit 0
             ;;
         *)
-            echo "Unknown option: $1"
+            error "Unknown option: $1"
             exit 1
             ;;
     esac
 done
 
-echo ""
-echo "${CYAN}╔════════════════════════════════════════════╗${NC}"
-echo "${CYAN}║           Dotfiles Installation            ║${NC}"
-echo "${CYAN}╚════════════════════════════════════════════╝${NC}"
-echo ""
+# Initialise rollback state
+init_rollback_state
+
+print_header "Dotfiles Installation"
 echo "Dotfiles directory: $DOTFILES_DIR"
 echo ""
 
 # Step 1: Install/Update Homebrew
 if [[ $SKIP_BREW -eq 0 ]]; then
-    echo "${CYAN}Step 1: Setting up Homebrew...${NC}"
-    echo ""
-    "$DOTFILES_DIR/scripts/install-homebrew.sh"
+    print_step 1 "Setting up Homebrew..."
+    "$DOTFILES_DIR/scripts/install/install-homebrew.sh"
+    record_step "homebrew"
     echo ""
 else
-    echo "${YELLOW}Step 1: Skipping Homebrew setup (--skip-brew flag)${NC}"
-    echo ""
+    print_skip 1 "Homebrew setup" "--skip-brew flag"
 fi
 
 # Step 2: Install packages from Brewfile
 if [[ $SKIP_BREW -eq 0 ]]; then
-    echo "${CYAN}Step 2: Installing packages from Brewfile...${NC}"
-    echo ""
-    "$DOTFILES_DIR/scripts/install-packages.sh"
+    print_step 2 "Installing packages from Brewfile..."
+    "$DOTFILES_DIR/scripts/install/install-packages.sh"
+    record_step "packages"
     echo ""
 else
-    echo "${YELLOW}Step 2: Skipping package installation (--skip-brew flag)${NC}"
-    echo ""
+    print_skip 2 "package installation" "--skip-brew flag"
 fi
 
 # Step 3: Check prerequisites
-echo "${CYAN}Step 3: Checking prerequisites...${NC}"
-echo ""
-if ! "$DOTFILES_DIR/scripts/check-prerequisites.sh"; then
+print_step 3 "Checking prerequisites..."
+if ! "$DOTFILES_DIR/scripts/install/check-prerequisites.sh"; then
     echo ""
-    echo "${RED}Some required tools are missing.${NC}"
+    error "Some required tools are missing."
     if [[ $SKIP_BREW -eq 1 ]]; then
         echo "Try running without --skip-brew to install missing packages."
     fi
     exit 1
 fi
+record_step "prerequisites"
 
 if [[ $CHECK_ONLY -eq 1 ]]; then
     echo ""
-    echo "${CYAN}Running health check...${NC}"
+    info "Running health check..."
     echo ""
-    "$DOTFILES_DIR/scripts/health-check.sh" || true
+    "$DOTFILES_DIR/scripts/install/health-check.sh" || true
+    cleanup_rollback_state
     exit 0
 fi
 
 # Step 4: Backup existing files
 echo ""
-echo "${CYAN}Step 4: Backing up existing configuration...${NC}"
-echo ""
 if [[ $SKIP_BACKUP -eq 0 ]]; then
-    BACKUP_DIR=$("$DOTFILES_DIR/scripts/backup-existing.sh" | tail -n1)
+    print_step 4 "Backing up existing configuration..."
+    BACKUP_DIR=$("$DOTFILES_DIR/scripts/install/backup-existing.sh" | tail -n1)
+    record_step "backup"
 else
-    echo "${YELLOW}Skipping backup (--skip-backup flag)${NC}"
+    print_skip 4 "backup" "--skip-backup flag"
 fi
 
 # Step 5: Create symlinks
 echo ""
-echo "${CYAN}Step 5: Creating symlinks...${NC}"
-echo ""
-if ! "$DOTFILES_DIR/scripts/create-symlinks.sh"; then
+print_step 5 "Creating symlinks..."
+if ! "$DOTFILES_DIR/scripts/install/create-symlinks.sh"; then
     echo ""
-    echo "${RED}Some symlinks failed. Check the output above.${NC}"
-    if [[ $SKIP_BACKUP -eq 0 ]] && [[ -d "${BACKUP_DIR:-}" ]]; then
-        echo ""
-        echo "To restore your backup, run:"
-        echo "  cp -r $BACKUP_DIR/* \$HOME/"
-    fi
+    error "Some symlinks failed. Check the output above."
+    echo ""
+    echo "To rollback, run: ./scripts/install/rollback.sh"
     exit 1
 fi
+record_step "symlinks"
 
 # Step 6: Install plugin managers
 echo ""
-echo "${CYAN}Step 6: Installing plugin managers...${NC}"
-echo ""
+print_step 6 "Installing plugin managers..."
 
 # TPM (Tmux Plugin Manager)
 if [[ ! -d "$HOME/.tmux/plugins/tpm" ]]; then
     echo "Installing TPM..."
     git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
-    echo "${GREEN}TPM installed. Press prefix + I inside tmux to install plugins.${NC}"
+    success "TPM installed. Press prefix + I inside tmux to install plugins."
 else
     echo "TPM already installed."
 fi
+record_step "plugin-managers"
 
 # lazy.nvim is auto-installed by Neovim config
 echo "lazy.nvim will be auto-installed when you first open Neovim."
 
 # Step 7: Create secrets file if needed
 echo ""
-echo "${CYAN}Step 7: Setting up secrets...${NC}"
-echo ""
+print_step 7 "Setting up secrets..."
 if [[ ! -f "$HOME/.zsh/.secrets.zsh" ]]; then
     if [[ -f "$DOTFILES_DIR/zsh/.zsh/.secrets.zsh.template" ]]; then
         cp "$DOTFILES_DIR/zsh/.zsh/.secrets.zsh.template" "$HOME/.zsh/.secrets.zsh"
-        echo "${YELLOW}Created secrets file from template.${NC}"
+        chmod 600 "$HOME/.zsh/.secrets.zsh"
+        warn "Created secrets file from template."
         echo "Edit ~/.zsh/.secrets.zsh to add your API keys and tokens."
     else
         touch "$HOME/.zsh/.secrets.zsh"
-        echo "${YELLOW}Created empty secrets file.${NC}"
+        chmod 600 "$HOME/.zsh/.secrets.zsh"
+        warn "Created empty secrets file."
     fi
 else
     echo "Secrets file already exists."
 fi
+record_step "secrets"
 
 # Step 8: Run health check
 echo ""
-echo "${CYAN}Step 8: Running health check...${NC}"
-echo ""
-"$DOTFILES_DIR/scripts/health-check.sh" || true
+print_step 8 "Running health check..."
+"$DOTFILES_DIR/scripts/install/health-check.sh" || true
+record_step "health-check"
+
+# Clean up rollback state on success
+cleanup_rollback_state
 
 # Done
-echo ""
-echo "${GREEN}╔════════════════════════════════════════════╗${NC}"
-echo "${GREEN}║         Installation Complete!             ║${NC}"
-echo "${GREEN}╚════════════════════════════════════════════╝${NC}"
-echo ""
+print_header "Installation Complete!"
+
 echo "Next steps:"
 echo "  1. Restart your terminal or run: source ~/.zshrc"
 echo "  2. Open tmux and press \` + I to install plugins"

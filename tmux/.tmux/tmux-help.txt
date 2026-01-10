@@ -7,11 +7,11 @@
 ║  ` 1-5              go to tab       ║  Ctrl+, / Ctrl+.    left / down    ║
 ║                                     ║  Opt+Shift+hjkl     resize         ║
 ║  Opt+t              new tab         ║                                    ║
-║  Opt+Shift+n        rename tab      ║  Opt+'              split left     ║
+║  Opt+r                              ║  Opt+'              split left     ║
 ║                                     ║  Opt+\              split right    ║
 ║  Opt+Shift+[ / ]    swap left/right ║  Opt+-              split down     ║
-║  Opt+x              kill tab        ║                                    ║
-║                                     ║  Opt+s              close pane     ║
+║  Opt+Shift+d        duplicate tab   ║                                    ║
+║  Opt+x              kill tab        ║  Opt+s              close pane     ║
 ║                                     ║  Opt+z              zoom pane      ║
 ║                                     ║                                    ║
 ╠═ SCROLL MODE ═══════════════════════╬═ SESSION ══════════════════════════╣

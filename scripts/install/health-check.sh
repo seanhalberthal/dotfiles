@@ -4,13 +4,10 @@ set -euo pipefail
 # Verify dotfiles installation is correct
 # Checks symlinks, plugin managers, and basic functionality
 
-DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
+SCRIPT_DIR="${BASH_SOURCE%/*}"
+source "$SCRIPT_DIR/../_lib/common.sh"
 
-# Colours (using $'...' for proper escape interpretation)
-GREEN=$'\033[0;32m'
-RED=$'\033[0;31m'
-YELLOW=$'\033[0;33m'
-NC=$'\033[0m'
+DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 
 ISSUES=0
 
@@ -74,10 +71,7 @@ check_file() {
     fi
 }
 
-echo "============================================"
-echo "Dotfiles Health Check"
-echo "============================================"
-echo ""
+print_section "Dotfiles Health Check"
 
 echo "Symlinks:"
 echo "---------"
@@ -106,14 +100,14 @@ check_file "$HOME/.zsh/.secrets.zsh" "Secrets file"
 echo ""
 echo "Custom Scripts:"
 echo "---------------"
-if command -v tm &>/dev/null; then
+if command_exists tm; then
     printf "Checking %-30s${GREEN}OK${NC}\n" "tm command"
 else
     printf "Checking %-30s${YELLOW}NOT IN PATH${NC}\n" "tm command"
     echo "  Add ~/.local/bin to your PATH"
 fi
 
-if command -v dana &>/dev/null; then
+if command_exists dana; then
     printf "Checking %-30s${GREEN}OK${NC}\n" "dana command"
 else
     printf "Checking %-30s${YELLOW}NOT IN PATH${NC}\n" "dana command"
@@ -123,9 +117,9 @@ fi
 echo ""
 
 if [[ $ISSUES -eq 0 ]]; then
-    printf "${GREEN}All checks passed! Your dotfiles are correctly installed.${NC}\n"
+    success "All checks passed! Your dotfiles are correctly installed."
     exit 0
 else
-    printf "${YELLOW}Some issues were found. See above for details.${NC}\n"
+    warn "Some issues were found. See above for details."
     exit 1
 fi
