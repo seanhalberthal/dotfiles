@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ══════════════════════════════════════════════════════════════
-# resurrect-restore-session.sh
+# resurrect-restore.sh
 # ══════════════════════════════════════════════════════════════
 # Restores a single tmux session from its individual backup file.
 #
@@ -10,10 +10,10 @@
 # this allows restoring individual sessions independently.
 #
 # Usage:
-#   resurrect-restore-session.sh <session-name>           # Restore session
-#   resurrect-restore-session.sh <session-name> --replace # Kill existing first
-#   resurrect-restore-session.sh <session-name> --delete  # Delete backup
-#   resurrect-restore-session.sh --list                   # List backups
+#   resurrect-restore.sh <session-name>           # Restore session
+#   resurrect-restore.sh <session-name> --replace # Kill existing first
+#   resurrect-restore.sh <session-name> --delete  # Delete backup
+#   resurrect-restore.sh --list                   # List backups
 #
 # Session files are stored in: ~/.tmux/resurrect/sessions/
 # ══════════════════════════════════════════════════════════════

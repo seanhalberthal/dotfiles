@@ -29,8 +29,8 @@ Copy the following to your home directory:
 ~/.tmux.conf                    # Main configuration
 ~/.tmux/
 ├── scripts/
-│   ├── resurrect-restore-session.sh
-│   └── resurrect-split-sessions.sh
+│   ├── resurrect-restore.sh
+│   └── resurrect-split.sh
 ~/bin/
 ├── tm                          # Dev session launcher
 └── dana                        # Project-specific launcher (optional)
@@ -52,8 +52,8 @@ Add to your `~/.zshrc`:
 
 ```bash
 # tmux session management
-alias tls="~/.tmux/scripts/resurrect-restore-session.sh --list"
-alias trestore="~/.tmux/scripts/resurrect-restore-session.sh"
+alias tls="~/.tmux/scripts/resurrect-restore.sh --list"
+alias trestore="~/.tmux/scripts/resurrect-restore.sh"
 alias tkill="tmux kill-server; rm -rf ~/.tmux/resurrect/*"
 
 # Smart attach: connects to running session, or restores from backup
@@ -62,7 +62,7 @@ ta() {
   local backup="${HOME}/.tmux/resurrect/sessions/$1.txt"
   if [[ -f "$backup" ]]; then
     echo "Restoring '$1' from backup..."
-    if ~/.tmux/scripts/resurrect-restore-session.sh "$1" && tmux a -t "$1"; then
+    if ~/.tmux/scripts/resurrect-restore.sh "$1" && tmux a -t "$1"; then
       return 0
     fi
     echo "Backup stale, removing: $1"
@@ -104,6 +104,7 @@ Press `` ` h `` to display the keybinding reference. Close it by pressing `Esc`.
 | Swap window left | `Opt+Shift+[`                 |
 | Swap window right| `Opt+Shift+]`                 |
 | Kill window      | `Opt+x`                       |
+| Undo kill        | `Opt+u`                       |
 
 ### Panes
 
@@ -117,6 +118,7 @@ Press `` ` h `` to display the keybinding reference. Close it by pressing `Esc`.
 | Split right       | `Opt+\`             |
 | Split down        | `Opt+-`             |
 | Close pane        | `Opt+s`             |
+| Undo close        | `Opt+u`             |
 | Zoom (fullscreen) | `Opt+z`             |
 | Swap up/down      | `prefix + H/J/K/L`  |
 | Resize left       | `Opt+Shift+h`       |
@@ -128,9 +130,17 @@ Press `` ` h `` to display the keybinding reference. Close it by pressing `Esc`.
 
 | Action    | Keybinding |
 | --------- | ---------- |
-| Open URLs | `Opt+u`    |
+| Open URLs | `Opt+y`    |
 
 Opens a fzf popup with all URLs from the current pane's scrollback. Uses the same vim-style navigation as other switchers (j/k, g/G, f/b, d/u). Press `y` to yank a URL to clipboard instead of opening.
+
+### Undo
+
+| Action              | Keybinding |
+| ------------------- | ---------- |
+| Undo last kill      | `Opt+u`    |
+
+Restores the last closed pane or window (whichever was killed most recently). Restores directory, layout, and scrollback contents. Works with both `Opt+s` (close pane) and `Opt+x` (kill window).
 
 ### Scroll Mode (Copy Mode)
 
@@ -184,8 +194,8 @@ Both `prefix + s` (sessions) and `prefix + f` (windows) use vim-style navigation
 | Quit                | `q` (nav mode) or `Esc`  |
 | Clear line          | `Ctrl+w` (in search mode)|
 | Delete line         | `Ctrl+k`                 |
-| Kill session/window | `Ctrl+x`                 |
-| Undo kill           | `Ctrl+u` (sessions only) |
+| Kill session/window | `Opt+x`                  |
+| Undo kill           | `Opt+u`                  |
 | New session         | `n` (sessions only)      |
 | Rename session      | `r` (sessions only)      |
 
@@ -197,7 +207,7 @@ Both `prefix + s` (sessions) and `prefix + f` (windows) use vim-style navigation
 
 Navigation keys (`j`, `k`, `g`, `G`, `f`, `b`, `d`, `u`) are automatically unbound in search mode so you can type them normally, then rebound when you exit search mode.
 
-**Undo:** When you kill a session with `Ctrl+x`, press `Ctrl+u` to restore it (works until you close the switcher).
+**Undo:** When you kill a session or window with `Opt+x`, press `Opt+u` to restore it. Sessions are restored with all windows and panes; windows are restored with layout and scrollback contents.
 
 ### Plugins (TPM)
 
@@ -249,10 +259,10 @@ This setup extends tmux-resurrect with custom per-session backup and restore.
 
 1. Press `` ` w `` to save all sessions
 2. tmux-resurrect saves everything to a single timestamped file
-3. The post-save hook (`resurrect-split-sessions.sh`) automatically splits this into individual per-session files
+3. The post-save hook (`resurrect-split.sh`) automatically splits this into individual per-session files
 4. Each session gets its own backup file in `sessions/` directory
 
-**Auto-cleanup:** When you kill a session (e.g., with `X` in the session switcher), a save is automatically triggered to update the backup files. The killed session is removed from `tls` listings.
+**Auto-cleanup:** When you kill a session (e.g., with `Opt+x` in the session switcher), a save is automatically triggered to update the backup files. The killed session is removed from `tls` listings.
 
 ### How Restoring Works
 
@@ -308,14 +318,22 @@ Available session backups:
 │   ├── sessions/                         # Per-session backup files
 │   └── last                              # Symlink to latest save
 ├── scripts/
-│   ├── fzf-kill-session.sh               # Kill with undo support
-│   ├── fzf-new-session.sh                # Create new session dialog
-│   ├── fzf-rename-session.sh             # Rename session dialog
-│   ├── fzf-undo-session.sh               # Restore last killed session
-│   ├── resurrect-restore-session.sh      # Individual session restore
-│   ├── resurrect-split-sessions.sh       # Post-save hook (splits backups)
-│   ├── update-window-timestamp.sh        # Window access tracking hook
-│   └── url-picker.sh                     # URL picker (Opt+u)
+│   ├── kill-pane.sh                      # Kill pane (Opt+s, saves state)
+│   ├── kill-window.sh                    # Kill window (Opt+x, saves state)
+│   ├── resurrect-delete.sh               # Delete session backup
+│   ├── resurrect-restore.sh              # Individual session restore
+│   ├── resurrect-split.sh                # Post-save hook (splits backups)
+│   ├── session-kill.sh                   # Kill session (picker, with confirm)
+│   ├── session-new.sh                    # Create new session dialog
+│   ├── session-rename.sh                 # Rename session dialog
+│   ├── session-undo.sh                   # Restore killed session (picker)
+│   ├── timestamp.sh                      # Window access tracking hook
+│   ├── undo-dispatch.sh                  # Undo dispatcher (Opt+u)
+│   ├── undo-pane.sh                      # Restore killed pane
+│   ├── undo-session.sh                   # Restore killed session (silent)
+│   ├── undo-window.sh                    # Restore killed window
+│   ├── url-picker.sh                     # URL picker (Opt+y)
+│   └── window-kill.sh                    # Kill window (picker, saves state)
 └── README.md                             # This file
 
 ~/bin/

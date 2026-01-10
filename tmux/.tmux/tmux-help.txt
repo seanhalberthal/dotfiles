@@ -1,5 +1,6 @@
 ╔══════════════════════════════════════════════════════════════════════════╗
 ║                          TMUX KEYBOARD SHORTCUTS                         ║
+║		                                                           ║
 ╠═ TABS ══════════════════════════════╦═ PANES ════════════════════════════╣
 ║                                     ║                                    ║
 ║  Opt+[ / Opt+]      prev / next     ║  Opt+hjkl           navigate       ║
@@ -12,6 +13,7 @@
 ║  Opt+x              kill tab        ║                                    ║
 ║                                     ║  Opt+s              close pane     ║
 ║                                     ║  Opt+z              zoom pane      ║
+║                                     ║                                    ║
 ╠═ SCROLL MODE ═══════════════════════╬═ SESSION ══════════════════════════╣
 ║                                     ║                                    ║
 ║  Opt+v / ` v        enter mode      ║  ` s                switch (fzf)   ║
@@ -19,7 +21,8 @@
 ║  hjkl               navigate        ║  ` w                save all       ║
 ║  f / b              page down/up    ║  ` d                detach         ║
 ║  d / u              half-page       ║  ` h                this help      ║
-║  g / G              top / bottom    ║  Opt+u              open URL picker║
+║  g / G              top / bottom    ║  Opt+y              open URL picker║
+║                                     ║  Opt+u              undo pane/win  ║
 ║                                     ║                                    ║
 ║  / / ?              search ↓ / ↑    ╠═ FZF SWITCHERS ════════════════════╣
 ║  n / N              next / prev     ║                                    ║
@@ -29,9 +32,10 @@
 ║  q / Esc            exit mode       ║  q / Esc            quit           ║
 ║                                     ║                                    ║
 ║                                     ║  Ctrl+k             delete line    ║
-║                                     ║  Ctrl+x             kill sess/win  ║
-║                                     ║  Ctrl+u             undo kill      ║
+║                                     ║  Opt+x              kill sess/win  ║
+║                                     ║  Opt+u              undo kill      ║
 ║                                     ║  r                  rename session ║
+║				      ║                                    ║
 ╚═════════════════════════════════════╩════════════════════════════════════╝
 
                           Press Esc to close this help

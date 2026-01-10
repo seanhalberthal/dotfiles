@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # ══════════════════════════════════════════════════════════════
-# fzf-undo-session.sh
+# undo-session.sh
 # ══════════════════════════════════════════════════════════════
 # Restores the last killed session from its preserved backup.
-# Called from fzf session switcher when user presses Ctrl+u.
+# Silent version for use with global ⌥u binding.
 #
-# Usage: fzf-undo-session.sh
+# Usage: undo-session.sh
 # ══════════════════════════════════════════════════════════════
 
 set -euo pipefail
@@ -29,7 +29,10 @@ mkdir -p "$SESSIONS_DIR"
 cp "$BACKUP_UNDO" "${SESSIONS_DIR}/${SESSION_NAME}.txt"
 
 # Restore the session using existing script
-"${HOME}/.tmux/scripts/resurrect-restore-session.sh" "$SESSION_NAME" 2>/dev/null || true
+"${HOME}/.tmux/scripts/resurrect-restore.sh" "$SESSION_NAME" >/dev/null 2>&1 || true
 
 # Cleanup undo data
 rm -f "$UNDO_FILE" "$BACKUP_UNDO"
+
+# Show notification
+tmux display-message "Restored session: ${SESSION_NAME}"

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Rename a session from the fzf session switcher
-# Usage: fzf-rename-session.sh <session-name>
+# Usage: session-rename.sh <session-name>
 
 session="$1"
 

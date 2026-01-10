@@ -1,6 +1,6 @@
 #!/bin/bash
 # Create a new session from the fzf session switcher
-# Usage: fzf-new-session.sh
+# Usage: session-new.sh
 
 # Use fzf as a styled input field with escape support
 newname=$(printf '' | fzf \

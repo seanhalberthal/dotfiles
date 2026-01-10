@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ══════════════════════════════════════════════════════════════
-# resurrect-split-sessions.sh
+# resurrect-split.sh
 # ══════════════════════════════════════════════════════════════
 # Post-save hook for tmux-resurrect.
 #
