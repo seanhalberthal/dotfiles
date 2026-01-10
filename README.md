@@ -29,38 +29,67 @@ dotfiles/
 └── README.md
 ```
 
-## Prerequisites
+## Quick Start
 
-Install these via Homebrew:
+### Prerequisites
 
-```bash
-# Core tools
-brew install neovim tmux fzf
+- macOS (some features are macOS-specific)
+- [Homebrew](https://brew.sh/) installed
 
-# Zsh enhancements
-brew install powerlevel10k zsh-autosuggestions direnv
-
-# Development tools (optional)
-brew install gh lazygit
-
-# macOS apps
-brew install --cask ghostty hammerspoon karabiner-elements
-```
-
-Install a Nerd Font for icons:
-```bash
-brew install --cask font-jetbrains-mono-nerd-font
-```
-
-## Installation
-
-### 1. Clone the repository
+### Automatic Installation
 
 ```bash
+# Clone the repository
 git clone https://github.com/seanhalberthal/dotfiles.git ~/dotfiles
+cd ~/dotfiles
+
+# Run the installer
+./install.sh
 ```
 
-### 2. Create symlinks
+The installer will:
+1. Install/update Homebrew
+2. Install all packages from `Brewfile`
+3. Check prerequisites
+4. Backup existing configuration
+5. Create symlinks
+6. Install plugin managers (TPM)
+7. Create secrets file from template
+8. Run a health check
+
+### Installation Options
+
+```bash
+./install.sh              # Full installation
+./install.sh --skip-brew  # Skip Homebrew/package installation
+./install.sh --skip-backup # Skip backing up existing configs
+./install.sh --check-only  # Only run prerequisite and health checks
+```
+
+### Post-Installation
+
+1. **Restart your terminal** or run `source ~/.zshrc`
+2. **Install tmux plugins**: Open tmux and press `` ` + I ``
+3. **Configure Neovim**: Open nvim - plugins install automatically
+4. **Add secrets**: Edit `~/.zsh/.secrets.zsh` with your API keys
+5. **Install Node.js**: `fnm install --lts && fnm default lts-latest`
+
+### Verification
+
+```bash
+# Run health check
+./scripts/health-check.sh
+
+# Check prerequisites
+./scripts/check-prerequisites.sh
+```
+
+### Manual Installation
+
+If you prefer manual setup, see the symlink commands below:
+
+<details>
+<summary>Click to expand manual symlink commands</summary>
 
 ```bash
 # Zsh
@@ -77,12 +106,11 @@ ln -sf ~/dotfiles/tmux/.tmux ~/.tmux
 ln -sf ~/dotfiles/nvim ~/.config/nvim
 
 # Custom scripts
-mkdir -p ~/bin
-ln -sf ~/dotfiles/bin/tm ~/bin/tm
-ln -sf ~/dotfiles/bin/dana ~/bin/dana
+mkdir -p ~/.local/bin
+ln -sf ~/dotfiles/bin/tm ~/.local/bin/tm
+ln -sf ~/dotfiles/bin/dana ~/.local/bin/dana
 
-# Hammerspoon (remove existing directory first)
-rm -rf ~/.hammerspoon
+# Hammerspoon
 ln -sf ~/dotfiles/hammerspoon ~/.hammerspoon
 
 # Ghostty
@@ -94,30 +122,11 @@ mkdir -p ~/.config/karabiner
 ln -sf ~/dotfiles/karabiner/karabiner.json ~/.config/karabiner/karabiner.json
 ```
 
-### 3. Set up secrets
+</details>
 
-```bash
-cd ~/dotfiles/zsh/.zsh
-cp .secrets.zsh.template .secrets.zsh
-chmod 600 .secrets.zsh
-# Edit .secrets.zsh with your actual API keys
-```
+### Troubleshooting
 
-### 4. Install tmux plugins
-
-Start tmux and press `` ` `` then `I` (capital i) to install TPM plugins.
-
-### 5. Install neovim plugins
-
-Open Neovim - lazy.nvim will auto-install plugins on first launch.
-
-Or manually: `:Lazy sync`
-
-### 6. Source zsh config
-
-```bash
-source ~/.zshrc
-```
+See [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for common issues and solutions.
 
 ## Updating
 
