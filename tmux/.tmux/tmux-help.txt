@@ -27,7 +27,7 @@
 ║  / / ?              search ↓ / ↑    ╠═ FZF SWITCHERS ════════════════════╣
 ║  n / N              next / prev     ║                                    ║
 ║                                     ║  j/k g/G f/b d/u    navigate       ║
-║  v / V              select / line   ║  Space / Enter      select         ║
+║  v / V              select / line   ║  o / Space / Enter  select         ║
 ║  y / Y              yank / yank ln  ║  /                  start search   ║
 ║  q / Esc            exit mode       ║  q / Esc            quit           ║
 ║                                     ║                                    ║

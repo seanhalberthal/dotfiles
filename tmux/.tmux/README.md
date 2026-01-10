@@ -132,7 +132,7 @@ Press `` ` h `` to display the keybinding reference. Close it by pressing `Esc`.
 | --------- | ---------- |
 | Open URLs | `Opt+y`    |
 
-Opens a fzf popup with all URLs from the current pane's scrollback. Uses the same vim-style navigation as other switchers (j/k, g/G, f/b, d/u). Press `y` to yank a URL to clipboard instead of opening.
+Opens a fzf popup with all URLs from the current pane's scrollback. Uses the same vim-style navigation as other switchers (j/k, g/G, f/b, d/u). Press `o`, `Space`, or `Enter` to open, `y` to yank to clipboard.
 
 ### Undo
 

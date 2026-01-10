@@ -76,8 +76,19 @@ show_centered_confirm() {
 }
 
 # Wait for any key press
+# Usage: wait_for_key "prompt" [true] - pass true as second arg to centre the prompt
 wait_for_key() {
     local prompt="${1:-Press any key to continue...}"
+    local centred="${2:-false}"
+
+    if [[ "$centred" == "true" ]]; then
+        local term_width
+        term_width=$(tput cols)
+        local h_pad=$(( (term_width - ${#prompt}) / 2 ))
+        [[ $h_pad -lt 0 ]] && h_pad=0
+        prompt=$(printf '%*s%s' "$h_pad" '' "$prompt")
+    fi
+
     read -rsn1 -p "$prompt"
 }
 

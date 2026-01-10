@@ -20,7 +20,7 @@ if [[ -z "$urls" ]]; then
     show_centered_message "No URLs found" \
         "" \
         "No URLs were found in the current pane scrollback."
-    wait_for_key "Press any key to close..."
+    wait_for_key "Press any key to close..." true
     exit 0
 fi
 
@@ -31,15 +31,15 @@ selected=$(echo "$urls" | fzf \
     --cycle \
     --prompt ': ' \
     --border=rounded \
-    --border-label=' j/k · g/G · f/b · d/u · spc/⏎ open · y yank · / srch · q/esc quit ' \
+    --border-label=' j/k · g/G · f/b · d/u · o/spc/⏎ open · y yank · / srch · q/esc quit ' \
     --border-label-pos=bottom \
-    --bind 'j:down,k:up,g:first,G:last,q:abort,space:accept' \
+    --bind 'j:down,k:up,g:first,G:last,q:abort,space:accept,o:accept' \
     --bind 'f:page-down,b:page-up' \
     --bind 'enter:accept' \
     --bind 'd:half-page-down,u:half-page-up' \
     --bind 'change:transform:[[ $FZF_PROMPT == ": " ]] && echo "clear-query"' \
-    --bind '/:enable-search+change-prompt(> )+unbind(j,k,g,G,f,b,d,u,q,space,y)' \
-    --bind 'esc:transform:[[ $FZF_PROMPT == "> " ]] && echo "disable-search+clear-query+change-prompt(: )+rebind(j,k,g,G,f,b,d,u,q,space,y)" || echo "abort"' \
+    --bind '/:enable-search+change-prompt(> )+unbind(j,k,g,G,f,b,d,u,q,space,y,o)' \
+    --bind 'esc:transform:[[ $FZF_PROMPT == "> " ]] && echo "disable-search+clear-query+change-prompt(: )+rebind(j,k,g,G,f,b,d,u,q,space,y,o)" || echo "abort"' \
     --bind 'ctrl-k:kill-line,ctrl-w:unix-line-discard' \
     --bind "y:execute-silent(echo -n {} | pbcopy)+abort" \
 ) || true
