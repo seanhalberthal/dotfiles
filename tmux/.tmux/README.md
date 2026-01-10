@@ -248,7 +248,7 @@ Location: `~/bin/tm`
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | `tls`             | List saved session backups with window/pane counts                                                                                             |
 | `trestore <name>` | Restore a specific saved session                                                                                                               |
-| `tkill`           | Kill tmux server and clear all backups                                                                                                         |
+| `tkill <name>`    | Kill a specific session and remove its backup                                                                                                  |
 | `ta <name>`       | Smart attach: connects to running session, or restores from backup if not running. Automatically cleans up stale backups that fail to restore. |
 | `dana`            | Launch/attach to the dana project session                                                                                                      |
 

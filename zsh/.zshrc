@@ -183,15 +183,15 @@ alias dotp="cd ~/dotfiles/.claude/plans"
 alias claudeconfig="cd ~/claude-config"
 
 # Tmux session management (see ~/.tmux/README.md)
-alias tls="~/.tmux/scripts/resurrect-restore-session.sh --list"
+alias tls="~/.tmux/scripts/resurrect-restore.sh --list"
 
 # Functions (instead of aliases) for tab completion support
 trestore() {
-  ~/.tmux/scripts/resurrect-restore-session.sh "$@"
+  ~/.tmux/scripts/resurrect-restore.sh "$@"
 }
 
 tkill() {
-  ~/.tmux/scripts/resurrect-kill-session.sh "$@"
+  ~/.tmux/scripts/resurrect-delete.sh "$@"
 }
 
 # Tab completion for tmux commands
@@ -223,7 +223,7 @@ ta() {
   local backup="${HOME}/.tmux/resurrect/sessions/$1.txt"
   if [[ -f "$backup" ]]; then
     echo "Restoring '$1' from backup..."
-    if ~/.tmux/scripts/resurrect-restore-session.sh "$1" && tmux a -t "$1"; then
+    if ~/.tmux/scripts/resurrect-restore.sh "$1" && tmux a -t "$1"; then
       return 0
     fi
     # Restore failed - backup is stale
