@@ -28,5 +28,14 @@ NEW_NAME=$(echo "" | fzf --reverse --no-info \
 
 # If user provided a name, rename the window
 if [[ -n "$NEW_NAME" ]]; then
+    # Clear any existing alert for the old window name before renaming
+    ALERTS_FILE="$HOME/.claude/alerts"
+    SESSION=$(tmux display-message -p '#S')
+    if [[ -f "$ALERTS_FILE" ]]; then
+        grep -v "^${SESSION}:${CURRENT_NAME}$" "$ALERTS_FILE" > "${ALERTS_FILE}.tmp" 2>/dev/null && \
+            mv "${ALERTS_FILE}.tmp" "$ALERTS_FILE" || rm -f "${ALERTS_FILE}.tmp"
+    fi
+    tmux set-option -wt "${SESSION}:${CURRENT_NAME}" -u @claude_alert 2>/dev/null || true
+    
     tmux rename-window "$NEW_NAME"
 fi

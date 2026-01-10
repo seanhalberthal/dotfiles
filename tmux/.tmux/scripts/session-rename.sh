@@ -49,5 +49,16 @@ if session_exists "$newname"; then
     exit 1
 fi
 
+# Clear any existing alerts for the old session name before renaming
+ALERTS_FILE="$HOME/.claude/alerts"
+if [[ -f "$ALERTS_FILE" ]]; then
+    grep -v "^${current_session}:" "$ALERTS_FILE" > "${ALERTS_FILE}.tmp" 2>/dev/null && \
+        mv "${ALERTS_FILE}.tmp" "$ALERTS_FILE" || rm -f "${ALERTS_FILE}.tmp"
+fi
+# Clear @claude_alert options for all windows in the session
+for win in $(tmux list-windows -t "$current_session" -F '#W' 2>/dev/null); do
+    tmux set-option -wt "${current_session}:${win}" -u @claude_alert 2>/dev/null || true
+done
+
 # Rename the session
 tmux rename-session -t "$current_session" "$newname"
