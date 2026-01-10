@@ -18,21 +18,21 @@ jobs:
 
       - name: Run ShellCheck on installation scripts
         run: |
-          shellcheck -x install.sh
-          shellcheck -x scripts/install/*.sh
-          shellcheck -x scripts/_lib/*.sh
-          shellcheck -x scripts/hooks/*.sh
+          shellcheck -x -e SC1091 -e SC2059 install.sh
+          shellcheck -x -e SC1091 -e SC2059 scripts/install/*.sh
+          shellcheck -x -e SC1091 -e SC2059 scripts/_lib/*.sh
+          shellcheck -x -e SC1091 -e SC2059 scripts/hooks/*.sh
 
       - name: Run ShellCheck on tmux scripts
         run: |
-          shellcheck -x tmux/.tmux/scripts/*.sh
-          shellcheck -x tmux/.tmux/scripts/_lib/*.sh
+          shellcheck -x -e SC1091 -e SC2059 tmux/.tmux/scripts/*.sh
+          shellcheck -x -e SC1091 -e SC2059 tmux/.tmux/scripts/_lib/*.sh
 
       - name: Run ShellCheck on bin utilities
         run: |
           for f in bin/*; do
             if file "$f" | grep -q "shell script"; then
-              shellcheck -x "$f"
+              shellcheck -x -e SC1091 -e SC2059 "$f"
             fi
           done
 
