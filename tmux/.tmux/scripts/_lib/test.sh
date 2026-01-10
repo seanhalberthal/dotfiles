@@ -37,9 +37,9 @@ section() {
     echo "─────────────────────────────────────────"
 }
 
-# Capture stderr from a command
+# Capture stderr from a command (discard stdout, return stderr)
 capture_stderr() {
-    "$@" 2>&1 >/dev/null || true
+    "$@" 2>&1 1>/dev/null
 }
 
 # Assert that a command succeeds
