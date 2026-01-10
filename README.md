@@ -131,7 +131,7 @@ See [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for common issues and sol
 ## Updating
 
 ```bash
-cd ~/dotfiles
+dot
 git pull
 ```
 
