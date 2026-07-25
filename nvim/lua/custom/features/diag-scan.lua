@@ -133,7 +133,7 @@ end
 -- <leader>xx list's filtering (diags_to_items in lists.lua)
 local function scan_diagnostics(bufnr)
   return vim.tbl_filter(function(d)
-    return not M.scan_ignored(d) and not scan_runner.in_library(d)
+    return not M.scan_ignored(d) and not scan_runner.in_library(d) and not scan_runner.is_generated(d)
   end, vim.diagnostic.get(bufnr))
 end
 
