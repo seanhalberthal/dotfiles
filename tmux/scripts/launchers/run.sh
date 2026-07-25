@@ -171,7 +171,7 @@ handle_fixed_session() {
     local target
     target=$(printf '%s' "$selection" | sed 's/.*● *//' | awk '{print $1}')
     if [[ -n "$target" ]]; then
-        tmux switch-client -t "$target"
+        focus_session "$target"
     fi
 }
 
@@ -228,7 +228,7 @@ handle_session_collision() {
 
     # only reachable via enter/space; 'n' goes through become()
     if [[ "$selection" == *"●"* ]]; then
-        tmux switch-client -t "$session"
+        focus_session "$session"
         exit 0
     fi
 }

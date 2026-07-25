@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- `tl` reaches the tmux launcher system from a plain shell. With no arguments it opens the launcher picker; with a query it resolves a directory through zoxide (a literal path is taken as-is and fed back to zoxide to keep frecency fresh) and hands it to the `dev` launcher, which attaches to that directory's session or creates one. Since the picker is now reachable from outside tmux, the paths it drives fall back accordingly: session focus uses `attach-session` instead of `switch-client`, and the launcher's error and settings confirmations print to the terminal instead of vanishing with `display-message`. `zsh/dotfiles.zsh`, `tmux/scripts/_lib/common.sh`, `tmux/scripts/launchers/run.sh`, `tmux/scripts/launchers/settings.sh`
 - `gd` is a second binding for go-to-definition in nvim, alongside `grd`. It goes through the same dedup wrapper, and shadows the built-in `gd` (go to local declaration), which `grD` already covers via the LSP. `nvim/lua/custom/plugins/lsp.lua`, `nvim/cheatsheet.txt`
 
 ### Changed

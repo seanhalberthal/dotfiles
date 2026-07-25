@@ -105,7 +105,7 @@ Configured as a clean input layer rather than a productivity surface: keybind re
 - **Command exit alerts** flag the result with ✓ or ✗ when a long-running command finishes in a pane you've switched away from
 - **Process list** (`` ` `` <kbd>Shift</kbd>+<kbd>P</kbd>) is one fzf switcher over everything you're watching: running commands (tests, builds, servers) as live ● rows with elapsed time, plus finished commands as ✓/✗ rows; jump to any, press <kbd>x</kbd> to stop a running one or clear a finished one, or rerun a finished command with <kbd>r</kbd> (stage it on its window's prompt to review) or <kbd>R</kbd> (stage and run); finished rows also clear once you view their window
 - **Undo system** (`Opt/Alt+u`) restores the most recently closed pane or window with full directory, scrollback, and layout intact
-- **Session launchers** (`` ` p ``) cover `dev`, `github` (gh-dash), `btop`, `docker` (lazydocker), `dotfiles`, and `config`; an interactive wizard (`n`) scaffolds new ones, and user launchers in `~/.config/dotfiles/launchers/` override repo launchers by name
+- **Session launchers** (`` ` p ``) cover `dev`, `github` (gh-dash), `btop`, `docker` (lazydocker), `dotfiles`, and `config`; an interactive wizard (`n`) scaffolds new ones, and user launchers in `~/.config/dotfiles/launchers/` override repo launchers by name. The same system is reachable from a plain shell: `tl` opens the picker, and `tl <query>` resolves a directory via zoxide, then attaches to its `dev` session or creates one
 - **Navigation history** (`` ` - `` / `` ` = ``) for browser-style back/forward across windows and sessions
 - `~/.config/tmux/local.conf` survives theme changes and updates
 

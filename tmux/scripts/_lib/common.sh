@@ -118,8 +118,13 @@ success() {
 
 # show error via tmux display-message (visible after popup closes)
 # use this for errors in popup/fzf contexts instead of error()
+# falls back to stderr when running outside tmux
 show_error() {
-    tmux display-message "Error: $1"
+    if [[ -n "${TMUX:-}" ]]; then
+        tmux display-message "Error: $1"
+    else
+        error "$1"
+    fi
 }
 
 # check if fzf is available
@@ -246,6 +251,15 @@ validate_window_index() {
 session_exists() {
     local session="$1"
     tmux list-sessions -F '#{session_name}' 2>/dev/null | grep -qxF "$session"
+}
+
+# bring a session into focus: switch-client inside tmux, attach outside
+focus_session() {
+    if [[ -n "${TMUX:-}" ]]; then
+        tmux switch-client -t "$1"
+    else
+        tmux attach-session -t "$1"
+    fi
 }
 
 # get the number of windows in a session
