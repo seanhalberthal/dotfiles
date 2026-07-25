@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Nvim diagnostics render as virtual lines under the cursor line rather than end-of-line virtual text. Long messages wrap instead of running off the right edge, and every diagnostic on a line is shown: the virtual-text handler only ever draws the *last* one, so stacked findings were silently hidden. Signs still mark affected lines everywhere else. The cursor-hold diagnostic float and the virtual-text hide/restore it drove are removed, since the virtual lines already show the message in place; `K` hover loses the `_hover_open` guard that existed only to keep the float off it. gopls labels analyzer findings with the placeholder code `default`, which the built-in formatter would render as a `default: ` prefix, so codes are only prefixed when they carry a real rule id. `nvim/lua/custom/plugins/lsp.lua`, `nvim/lua/custom/core/autocmds.lua`
+
 ## [0.2.136] - 2026-07-24
 
 ### Changed

@@ -134,11 +134,7 @@ return {
           end
 
           -- LSP keymaps
-          map('K', function()
-            pcall(vim.api.nvim_win_close, vim.b[event.buf]._diag_float_win or -1, true)
-            vim.b._hover_open = true
-            vim.lsp.buf.hover()
-          end, 'Hover')
+          map('K', vim.lsp.buf.hover, 'Hover')
           map('grn', vim.lsp.buf.rename, 'Re[n]ame')
           map('gra', lsp_fix_all.code_action_with_refresh, 'Code [A]ction', { 'n', 'x' })
           map('grf', lsp_fix_all.fix_all_in_file, '[F]ix all in file')
@@ -210,9 +206,22 @@ return {
             [vim.diagnostic.severity.HINT] = '󰌶 ',
           },
         } or {},
-        virtual_text = {
-          source = 'if_many',
-          spacing = 2,
+        -- signs mark the affected lines; the message itself renders as virtual
+        -- lines under the cursor line only. end-of-line virtual text ran off
+        -- the right edge on long messages and only ever drew the *last*
+        -- diagnostic on a line, hiding the rest
+        virtual_text = false,
+        virtual_lines = {
+          current_line = true,
+          -- the built-in formatter prefixes `code`, which is worth showing for
+          -- real rule ids (sonar's S1234, eslint rule names) but not for gopls,
+          -- which labels every analyzer finding with the placeholder "default"
+          format = function(d)
+            if d.code and d.code ~= 'default' then
+              return string.format('%s: %s', d.code, d.message)
+            end
+            return d.message
+          end,
         },
       }
 
