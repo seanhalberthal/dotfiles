@@ -63,12 +63,10 @@ return {
     keys = {
       { '-', '<cmd>Oil<CR>', desc = 'Oil: Open parent directory' },
     },
-    -- personal overrides go in local.lua as `vim.g.oil_opts` (gitignored, loaded
-    -- before plugin specs are imported, so the table is visible here). deep-merged
-    -- on top of the shared defaults rather than replacing them, so setting one key
-    -- (say a single keymap) keeps oil_close on `-` and the rest intact. list-like
-    -- values (`columns`) merge by index, so give the whole list when changing it;
-    -- a keymap is disabled with `['gi'] = false`
+    -- opts as a function so vim.g.oil_opts (set in local.lua, which loads before
+    -- plugin specs) deep-merges over these defaults, same local-override pattern
+    -- as differ.lua. keymaps merge per key, so a local override can add or
+    -- replace one binding without restating the rest
     opts = function()
       return vim.tbl_deep_extend('force', {
         default_file_explorer = true,
