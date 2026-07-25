@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Nvim diagnostics render as virtual lines under the cursor line rather than end-of-line virtual text. Long messages wrap instead of running off the right edge, and every diagnostic on a line is shown: the virtual-text handler only ever draws the *last* one, so stacked findings were silently hidden. Signs still mark affected lines everywhere else. The cursor-hold diagnostic float and the virtual-text hide/restore it drove are removed, since the virtual lines already show the message in place; `K` hover loses the `_hover_open` guard that existed only to keep the float off it. gopls labels analyzer findings with the placeholder code `default`, which the built-in formatter would render as a `default: ` prefix, so codes are only prefixed when they carry a real rule id. `nvim/lua/custom/plugins/lsp.lua`, `nvim/lua/custom/core/autocmds.lua`
 
+### Fixed
+
+- golangci-lint no longer double-reports what gopls already covers. lspconfig roots `golangci_lint_ls` at `go.work`/`go.mod`/`.git`, so it started in every Go project with golangci's default linter set (govet, staticcheck, ineffassign, unused); both servers publish to their own namespace and draw their own extmark, so each finding appeared twice. It now activates only where a project opts in with a `.golangci.{yml,yaml,toml,json}`, via a `root_dir` function that skips `on_dir` (overriding `root_markers` would not work: `vim.lsp.config` deep-merges lists by index, so the shorter list leaves lspconfig's `go.mod`/`.git` entries trailing). The server is also passed `-nolintername`, which stops it baking the linter name into the message text on top of the `source` field; that produced "errcheck: errcheck: ..." wherever we prefix by source. `nvim/lua/custom/plugins/lsp.lua`
+
 ## [0.2.136] - 2026-07-24
 
 ### Changed

@@ -300,6 +300,29 @@ return {
         },
       })
 
+      -- golangci-lint's default linter set (govet, staticcheck, ineffassign,
+      -- unused) re-reports what gopls already runs, and both servers draw their
+      -- own extmark, so every finding rendered twice. lspconfig roots it at
+      -- `go.work`/`go.mod`/`.git`, i.e. every Go project; gate it on an explicit
+      -- golangci config instead so gopls owns vet everywhere else. a `root_dir`
+      -- function that skips `on_dir` is the documented way to decide activation
+      -- dynamically (`:h lsp-root_dir()`); overriding `root_markers` would not
+      -- work, since vim.lsp.config deep-merges lists by index and the shorter
+      -- list would leave lspconfig's `go.mod`/`.git` entries trailing.
+      --
+      -- `-nolintername` stops the server baking the linter name into the message
+      -- text as well as the `source` field, which rendered as "errcheck:
+      -- errcheck: ..." wherever we prefix by source (diagnostic float, lists)
+      vim.lsp.config('golangci_lint_ls', {
+        cmd = { 'golangci-lint-langserver', '-nolintername' },
+        root_dir = function(bufnr, on_dir)
+          local root = vim.fs.root(bufnr, { '.golangci.yml', '.golangci.yaml', '.golangci.toml', '.golangci.json' })
+          if root then
+            on_dir(root)
+          end
+        end,
+      })
+
       -- sourcekit-lsp (Swift) ships with the Xcode/Swift toolchain, not Mason,
       -- so it can't ride the mason-lspconfig ensure_installed/automatic_enable
       -- flow below: configure and enable it directly. launch via `xcrun` on
