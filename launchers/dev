@@ -68,7 +68,6 @@ fi
 dir=$(cd "$dir" && pwd)
 
 # Use SESSION_NAME if provided (e.g. from collision handler), otherwise derive from directory basename
-# Suffixed with -dev to avoid collisions with fixed-session launchers (e.g. acme vs acme-dev)
 # Dots are replaced because tmux uses '.' as a separator in target syntax (session:window.pane)
 session="${SESSION_NAME:-$(basename "$dir" | tr -c '[:alnum:]_\-\n' '-' | sed 's/-*$//')}"
 

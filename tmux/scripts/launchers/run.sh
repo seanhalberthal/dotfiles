@@ -305,9 +305,9 @@ handle_parameterised() {
         dir=$(cd "$dir" && pwd)
     fi
 
-    # derive expected session name (parameterised launchers suffix the launcher name)
+    # derive expected session name (parameterised launchers use the directory basename)
     local expected_session
-    expected_session="$(sanitise_session_name "$(basename "$dir")")-${name}"
+    expected_session="$(sanitise_session_name "$(basename "$dir")")"
     if [[ -n "$expected_session" ]] && session_exists "$expected_session"; then
         handle_session_collision "$expected_session" "$dir"
     fi
