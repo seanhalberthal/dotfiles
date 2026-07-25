@@ -97,7 +97,7 @@ Swap parameter right | >p
 Swap parameter left | <p
 
 ## lsp @lsp
-Go to definition | grd
+Go to definition | gd / grd
 Go to declaration | grD
 Go to references | grr
 Go to implementation | gri

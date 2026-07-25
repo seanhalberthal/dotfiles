@@ -141,6 +141,7 @@ return {
           map('grr', lsp_nav.dedup 'references', '[R]eferences')
           map('gri', lsp_nav.dedup 'implementation', '[I]mplementation')
           map('grd', lsp_nav.dedup 'definition', '[D]efinition')
+          map('gd', lsp_nav.dedup 'definition', '[D]efinition')
           map('grD', vim.lsp.buf.declaration, '[D]eclaration')
           map('gO', require('telescope.builtin').lsp_document_symbols, 'Document symbols')
           map('gW', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'Workspace symbols')
