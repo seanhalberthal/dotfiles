@@ -120,6 +120,7 @@ Configured as a clean input layer rather than a productivity surface: keybind re
 - **Directory navigation:** `cdb`/`cdf` for browser-style back/forward, `mkcd` to make and enter, and `cl` for a full terminal reset
 - **Clipboard:** `<cmd> | clip` copies and bare `clip` pastes, on macOS and Linux alike. The backend follows the live display server (`pbcopy`, `wl-copy`, `xclip`, `xsel`), falling back to OSC 52 so it still works headless and over SSH
 - **Editing:** `Ctrl+G` opens the current command in `$EDITOR`, and `Spacebar` expands the alias under the cursor
+- **Man pages** open in nvim, so search, `K` on a cross-reference, and yank all behave as they do in any other buffer; shells started inside nvim keep plain `less` instead of nesting an editor
 - **Tab completion** for the dotfiles CLI and the tmux helper commands; run `dot aliases` for the full list
 
 ### Dotfiles CLI
