@@ -522,6 +522,14 @@ ssh() {
 # editor (used as default $EDITOR for git, etc.)
 export EDITOR="nvim"
 
+# render man pages in nvim instead of less; plain less inside :terminal so
+# `man foo` from an nvim shell doesn't nest another nvim
+if [[ -n "$NVIM" ]]; then
+  export MANPAGER="less"
+else
+  export MANPAGER="nvim +Man!"
+fi
+
 # @section: NAVIGATION
 
 alias c="clear"                                                                # clear

@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - `tl` reaches the tmux launcher system from a plain shell. With no arguments it opens the launcher picker; with a query it resolves a directory through zoxide (a literal path is taken as-is and fed back to zoxide to keep frecency fresh) and hands it to the `dev` launcher, which attaches to that directory's session or creates one. Since the picker is now reachable from outside tmux, the paths it drives fall back accordingly: session focus uses `attach-session` instead of `switch-client`, and the launcher's error and settings confirmations print to the terminal instead of vanishing with `display-message`. `zsh/dotfiles.zsh`, `tmux/scripts/_lib/common.sh`, `tmux/scripts/launchers/run.sh`, `tmux/scripts/launchers/settings.sh`
 - `gd` is a second binding for go-to-definition in nvim, alongside `grd`. It goes through the same dedup wrapper, and shadows the built-in `gd` (go to local declaration), which `grD` already covers via the LSP. `nvim/lua/custom/plugins/lsp.lua`, `nvim/cheatsheet.txt`
+- Man pages render in nvim through `MANPAGER="nvim +Man!"`, so `man foo` gets the built-in man filetype (syntax highlighting, `K` on a cross-reference, search and yank in a normal buffer) instead of `less`. Shells started inside nvim keep plain `less`, since `$NVIM` is set there and paging a man page through a nested nvim inside `:terminal` is worse than the default. `zsh/dotfiles.zsh`
 
 ### Changed
 
