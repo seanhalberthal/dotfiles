@@ -34,7 +34,7 @@
 --   vim.g.oil_opts = { columns = { 'icon', 'size' } }
 --   vim.g.differ_opts = { ... }   -- passed straight to require('differ').setup
 --
--- obsidian vault root (default: ~/Library/Mobile Documents/iCloud~md~obsidian/Documents).
+-- obsidian vault root (default: ~/obsidian).
 -- either point at a single vault (the directory has `.obsidian/` directly
 -- inside) or at a parent directory containing one or more vaults:
 --   vim.g.obsidian_vault_root = '~/notes'        -- ~/notes/.obsidian exists

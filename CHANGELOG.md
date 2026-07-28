@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- The default obsidian vault root is `~/obsidian` rather than the iCloud container path. iCloud's on-demand eviction makes reads on an evicted note block indefinitely when `fileproviderd` is wedged, which hangs anything walking the vault (telescope, grep). Machines that keep their vault elsewhere still point at it with `vim.g.obsidian_vault_root` in `local.lua`, and the plugin is skipped entirely when neither resolves. `nvim/lua/custom/plugins/obsidian.lua`, `nvim/local.lua.template`
 - Nvim diagnostics render as virtual lines under the cursor line rather than end-of-line virtual text. Long messages wrap instead of running off the right edge, and every diagnostic on a line is shown: the virtual-text handler only ever draws the *last* one, so stacked findings were silently hidden. Signs still mark affected lines everywhere else. The cursor-hold diagnostic float and the virtual-text hide/restore it drove are removed, since the virtual lines already show the message in place; `K` hover loses the `_hover_open` guard that existed only to keep the float off it. gopls labels analyzer findings with the placeholder code `default`, which the built-in formatter would render as a `default: ` prefix, so codes are only prefixed when they carry a real rule id. `nvim/lua/custom/plugins/lsp.lua`, `nvim/lua/custom/core/autocmds.lua`
 
 ### Fixed

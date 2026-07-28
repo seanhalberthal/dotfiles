@@ -5,7 +5,7 @@
 --
 -- vault root resolution (in order):
 --   1. `vim.g.obsidian_vault_root`: set in ~/.config/nvim/local.lua to override
---   2. ~/Library/Mobile Documents/iCloud~md~obsidian/Documents: default iCloud path
+--   2. ~/obsidian: default path
 --   3. neither exists: plugin spec is empty, obsidian.nvim is not loaded
 --
 -- the resolved root can either be a vault itself (has `.obsidian/` directly
@@ -23,7 +23,7 @@ local function resolve_vault_root()
     return nil
   end
 
-  local default = vim.fn.expand '~/Library/Mobile Documents/iCloud~md~obsidian/Documents'
+  local default = vim.fn.expand '~/obsidian'
   if vim.fn.isdirectory(default) == 1 then
     return default
   end
