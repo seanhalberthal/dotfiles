@@ -105,5 +105,9 @@ stored_value="\$HOME${new_value#"$HOME"}"
 
 update_zshrc_export "$var_name" "$stored_value"
 
-# show confirmation via tmux message
-tmux display-message "${var_name} set to ${new_value/#$HOME/\~} (source ~/.zshrc to apply)"
+# show confirmation via tmux message, or stdout when outside tmux
+if [[ -n "${TMUX:-}" ]]; then
+    tmux display-message "${var_name} set to ${new_value/#$HOME/\~} (source ~/.zshrc to apply)"
+else
+    info "${var_name} set to ${new_value/#$HOME/\~} (source ~/.zshrc to apply)"
+fi

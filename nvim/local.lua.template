@@ -30,23 +30,11 @@
 --     require('music.config').options.preferred_backend = 'spotify'
 --   end)
 --
--- oil.nvim: deep-merged on top of the shared defaults, so you only name what you
--- want to change. list-like values (`columns`) merge by index, so give the whole
--- list; a keymap is disabled with `false`:
---   vim.g.oil_opts = {
---     columns = { 'icon', 'permissions', 'size' },
---     view_options = { show_hidden = false },
---     delete_to_trash = true,
---     keymaps = {
---       ['gi'] = false,
---       ['<C-h>'] = { 'actions.select', opts = { horizontal = true } },
---     },
---   }
+-- plugin opts overrides, deep-merged over the repo defaults at spec load:
+--   vim.g.oil_opts = { columns = { 'icon', 'size' } }
+--   vim.g.differ_opts = { ... }   -- passed straight to require('differ').setup
 --
--- differ.nvim (passed straight to its setup(), which merges its own defaults):
---   vim.g.differ_opts = { layout = 'unified' }
---
--- obsidian vault root (default: ~/Library/Mobile Documents/iCloud~md~obsidian/Documents).
+-- obsidian vault root (default: ~/obsidian).
 -- either point at a single vault (the directory has `.obsidian/` directly
 -- inside) or at a parent directory containing one or more vaults:
 --   vim.g.obsidian_vault_root = '~/notes'        -- ~/notes/.obsidian exists

@@ -105,7 +105,7 @@ Configured as a clean input layer rather than a productivity surface: keybind re
 - **Command exit alerts** flag the result with ✓ or ✗ when a long-running command finishes in a pane you've switched away from
 - **Process list** (`` ` `` <kbd>Shift</kbd>+<kbd>P</kbd>) is one fzf switcher over everything you're watching: running commands (tests, builds, servers) as live ● rows with elapsed time, plus finished commands as ✓/✗ rows; jump to any, press <kbd>x</kbd> to stop a running one or clear a finished one, or rerun a finished command with <kbd>r</kbd> (stage it on its window's prompt to review) or <kbd>R</kbd> (stage and run); finished rows also clear once you view their window
 - **Undo system** (`Opt/Alt+u`) restores the most recently closed pane or window with full directory, scrollback, and layout intact
-- **Session launchers** (`` ` p ``) cover `dev`, `github` (gh-dash), `btop`, `docker` (lazydocker), `dotfiles`, and `config`; an interactive wizard (`n`) scaffolds new ones, and user launchers in `~/.config/dotfiles/launchers/` override repo launchers by name
+- **Session launchers** (`` ` p ``) cover `dev`, `github` (gh-dash), `btop`, `docker` (lazydocker), `dotfiles`, and `config`; an interactive wizard (`n`) scaffolds new ones, and user launchers in `~/.config/dotfiles/launchers/` override repo launchers by name. The same system is reachable from a plain shell: `tl` opens the picker, and `tl <query>` resolves a directory via zoxide, then attaches to its `dev` session or creates one
 - **Navigation history** (`` ` - `` / `` ` = ``) for browser-style back/forward across windows and sessions
 - `~/.config/tmux/local.conf` survives theme changes and updates
 
@@ -120,6 +120,7 @@ Configured as a clean input layer rather than a productivity surface: keybind re
 - **Directory navigation:** `cdb`/`cdf` for browser-style back/forward, `mkcd` to make and enter, and `cl` for a full terminal reset
 - **Clipboard:** `<cmd> | clip` copies and bare `clip` pastes, on macOS and Linux alike. The backend follows the live display server (`pbcopy`, `wl-copy`, `xclip`, `xsel`), falling back to OSC 52 so it still works headless and over SSH
 - **Editing:** `Ctrl+G` opens the current command in `$EDITOR`, and `Spacebar` expands the alias under the cursor
+- **Man pages** open in nvim, so search, `K` on a cross-reference, and yank all behave as they do in any other buffer; shells started inside nvim keep plain `less` instead of nesting an editor
 - **Tab completion** for the dotfiles CLI and the tmux helper commands; run `dot aliases` for the full list
 
 ### Dotfiles CLI

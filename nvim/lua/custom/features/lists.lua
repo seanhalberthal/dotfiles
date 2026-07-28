@@ -150,6 +150,10 @@ local function diags_to_items(diagnostics)
   local scan_runner = require 'custom.features.scan-runner'
   local scan_ignored = require('custom.features.diag-scan').scan_ignored
   local items = {}
+  -- get(nil) spans every buffer, so the same file open under two bufnrs
+  -- (a git-diff/review split, a second-window reopen) yields byte-identical
+  -- rows. collapse on (file, lnum, col, text) so a diagnostic surfaces once
+  local seen = {}
   for _, d in ipairs(diagnostics) do
     -- drop scan-ignored phantoms from buffers not shown in any window:
     -- hidden buffers only ever got the reduced-pass pull, and with no
@@ -157,10 +161,15 @@ local function diags_to_items(diagnostics)
     -- they'd sit in the live list indefinitely. displayed buffers keep
     -- theirs (the full pass has run; entries are real). the predicate is
     -- shared with diag-scan's batch snapshot
-    if d.bufnr and d.lnum and not scan_runner.in_library(d) then
+    if d.bufnr and d.lnum and not scan_runner.in_library(d) and not scan_runner.is_generated(d) then
       local hidden_phantom = scan_ignored(d) and #vim.fn.win_findbuf(d.bufnr) == 0
       if not hidden_phantom then
-        table.insert(items, scan_runner.diag_to_item(d))
+        local item = scan_runner.diag_to_item(d)
+        local key = table.concat({ vim.api.nvim_buf_get_name(d.bufnr), item.lnum, item.col or 0, item.text or '' }, ':')
+        if not seen[key] then
+          seen[key] = true
+          table.insert(items, item)
+        end
       end
     end
   end

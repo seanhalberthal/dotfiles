@@ -130,6 +130,33 @@ function M.in_library(d)
   return path:sub(1, #root + 1) ~= root .. '/'
 end
 
+-- generated code (sqlc, protoc-gen-go, mockgen, stringer, …) carries the Go
+-- canonical sentinel on an early line: `// Code generated … DO NOT EDIT.`.
+-- it's regenerated wholesale and never hand-edited, so diagnostics on it are
+-- noise; drop it from the live list and the git-scoped scans alike. cache per
+-- bufnr keyed by changedtick so the lines are read once per edit
+local generated_cache = {}
+
+function M.is_generated(d)
+  if not d.bufnr or not vim.api.nvim_buf_is_valid(d.bufnr) then
+    return false
+  end
+  local tick = vim.b[d.bufnr].changedtick
+  local cached = generated_cache[d.bufnr]
+  if cached and cached.tick == tick then
+    return cached.value
+  end
+  local value = false
+  for _, l in ipairs(vim.api.nvim_buf_get_lines(d.bufnr, 0, 10, false)) do
+    if l:match 'Code generated .* DO NOT EDIT%.' then
+      value = true
+      break
+    end
+  end
+  generated_cache[d.bufnr] = { tick = tick, value = value }
+  return value
+end
+
 local state = nil
 
 local function clear_timer(t)

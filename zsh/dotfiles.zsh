@@ -522,6 +522,14 @@ ssh() {
 # editor (used as default $EDITOR for git, etc.)
 export EDITOR="nvim"
 
+# render man pages in nvim instead of less; plain less inside :terminal so
+# `man foo` from an nvim shell doesn't nest another nvim
+if [[ -n "$NVIM" ]]; then
+  export MANPAGER="less"
+else
+  export MANPAGER="nvim +Man!"
+fi
+
 # @section: NAVIGATION
 
 alias c="clear"                                                                # clear
@@ -705,6 +713,29 @@ tattach() {
   fi
   echo "No session or backup found: $1"
   return 1
+}
+
+# terminal entry to the launcher system: no args opens the launcher picker,
+# with a query it resolves a directory via zoxide and opens a dev session
+# there (attaches if the session already exists, creates it otherwise)
+# @cheat: tl | launcher picker (no args) or zoxide query into a dev session
+tl() {
+  if (( $# == 0 )); then
+    ~/.tmux/scripts/launchers/picker.sh
+    return
+  fi
+
+  local dir
+  if [[ -d "$1" ]]; then
+    dir="$1"
+  elif ! dir=$(zoxide query -- "$@" 2>/dev/null); then
+    echo "tl: no directory match for '$*'" >&2
+    return 1
+  fi
+
+  # keep frecency fresh when launched from an explicit path
+  zoxide add "$dir" 2>/dev/null || true
+  dev "$dir"
 }
 
 # tab completion for tmux commands
