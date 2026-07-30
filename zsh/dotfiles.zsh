@@ -946,7 +946,6 @@ alias oc="opencode"
 alias claude="cl && claude"                                                    # cl + claude
 alias ralph="cl && ralph"
 alias ralf="cl && ralf"
-alias gemini="cl && gemini"                                                    # cl + gemini
 alias copilot="cl && copilot"                                                  # cl + copilot
 alias btop="cl && btop"
 alias drs="dash-repo-sync"                                                     # sync repo paths
