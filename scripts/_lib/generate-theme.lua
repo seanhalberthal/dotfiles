@@ -503,7 +503,8 @@ function M.generate_nvim_colourscheme(name, colours)
 
     -- Punctuation gets a subtle tint toward the purple accent (mirroring the
     -- hand-crafted schemes' muted-violet punctuation) instead of plain fg.
-    local punct = colour.ensure_contrast(colour.blend(colours.fg_primary, colours.purple, 0.35), colours.bg_primary, 4.5)
+    local punct =
+        colour.ensure_contrast(colour.blend(colours.fg_primary, colours.purple, 0.35), colours.bg_primary, 4.5)
 
     -- Semantic role mapping mirroring the hand-crafted schemes: strings=green,
     -- functions=purple (the ANSI blue role), types/modules=cyan, literal data

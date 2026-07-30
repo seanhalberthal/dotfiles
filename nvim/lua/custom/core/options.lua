@@ -35,6 +35,12 @@ function M.setup()
   -- disable swap files (undo + autoread + git make them redundant)
   vim.o.swapfile = false
 
+  -- never write backups alongside the file. the default backupdir starts with
+  -- `.`, so a write in a local obsidian vault created a locked file
+  -- which got replicated to CouchDB, the mac and the phone as a real document,
+  -- then tombstoned a moment later. dropping `.` keeps the state dir as the only backup target.
+  vim.o.backupdir = vim.fn.stdpath 'state' .. '/backup//'
+
   -- search
   vim.o.ignorecase = true
   vim.o.smartcase = true

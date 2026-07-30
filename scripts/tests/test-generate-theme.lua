@@ -498,7 +498,10 @@ end
 if dragon_colours.purple == "#8ba4b0" and dragon_colours.yellow == "#c4b28a" and dragon_colours.red == "#c4746e" then
     pass("chromatic accents left verbatim")
 else
-    fail("chromatic accents changed", dragon_colours.purple .. " " .. dragon_colours.yellow .. " " .. dragon_colours.red)
+    fail(
+        "chromatic accents changed",
+        dragon_colours.purple .. " " .. dragon_colours.yellow .. " " .. dragon_colours.red
+    )
 end
 
 if #sat_adjustments == 2 then

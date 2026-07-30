@@ -72,10 +72,76 @@ function M.setup()
     end,
   })
 
-  -- the cursor-hold diagnostic float lived here. `virtual_lines.current_line`
-  -- (plugins/lsp.lua) renders the same messages in place, so the float, the
-  -- virtual-text hide/restore it drove, and the `_hover_open` guard that kept
-  -- it off `K` are all gone
+  -- write vault notes IN PLACE, never rename-and-replace.
+  --
+  -- with the default `backupcopy=auto`, vim is free to implement a write by
+  -- renaming the original out of the way and creating a new file at the same
+  -- path. that is invisible locally, but if ~/obsidian is watched by
+  -- livesync-bridge, it sees the rename as an `unlink` and replicates a
+  -- genuine DELETE of the note to CouchDB, which propagates to every device,
+  -- immediately followed by a re-create
+  --
+  -- `backupcopy=yes` forces copy-then-overwrite, so the original inode survives
+  -- and the watcher reports a plain `change`. buffer-local because it is only
+  -- correct where something is watching; elsewhere `auto` is faster.
+  -- (services/mirror-notes.sh in ~/nextcloud avoids the same trap by copying in
+  -- place rather than temp+rename - same reasoning, different tool.)
+  local vault_group = vim.api.nvim_create_augroup('vault-inplace-write', { clear = true })
+  vim.api.nvim_create_autocmd({ 'BufReadPre', 'BufNewFile' }, {
+    desc = 'Write vault notes in place so the sync watcher sees no delete',
+    group = vault_group,
+    pattern = vim.env.HOME .. '/obsidian/*',
+    callback = function()
+      vim.bo.backupcopy = 'yes'
+    end,
+  })
+
+  -- auto-show diagnostic float on cursor hold; hide virtual_text while float is open
+  local diag_float_group = vim.api.nvim_create_augroup('diagnostic-float', { clear = true })
+  local vtext_hidden = false
+
+  -- close any diagnostic float we previously opened. open_float's own
+  -- close_events are racy (they miss window/buffer switches and can orphan the
+  -- window if a new CursorHold re-opens before the one-shot close fires), so we
+  -- track the handle ourselves and close it deterministically.
+  local function close_diag_float()
+    local win = vim.b._diag_float_win
+    if win and vim.api.nvim_win_is_valid(win) then
+      pcall(vim.api.nvim_win_close, win, true)
+    end
+    vim.b._diag_float_win = nil
+  end
+
+  vim.api.nvim_create_autocmd('CursorHold', {
+    desc = 'Show diagnostic float and suppress virtual text',
+    group = diag_float_group,
+    callback = function()
+      -- skip diagnostic float while LSP hover is open
+      if vim.b._hover_open then
+        return
+      end
+      close_diag_float()
+      local _, win = vim.diagnostic.open_float(nil, { focusable = false, scope = 'cursor' })
+      if win then
+        vim.b._diag_float_win = win
+        vtext_hidden = true
+        vim.diagnostic.config { virtual_text = false }
+      end
+    end,
+  })
+
+  vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI', 'InsertEnter', 'BufLeave', 'WinLeave' }, {
+    desc = 'Close diagnostic float and restore virtual text',
+    group = diag_float_group,
+    callback = function()
+      vim.b._hover_open = nil
+      close_diag_float()
+      if vtext_hidden then
+        vtext_hidden = false
+        vim.diagnostic.config { virtual_text = { source = 'if_many', spacing = 2 } }
+      end
+    end,
+  })
 
   -- link LSP variable tokens to TreeSitter's @variable styling. leaving the
   -- group empty does not let lower-priority TreeSitter captures show through;
