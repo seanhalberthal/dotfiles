@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 
 - `dotfiles health` reports zsh completion directory permissions. Homebrew installs its share directory group-writable, which `compaudit` flags and which makes the daily full `compinit` prompt before loading completions. The check runs `compaudit` in a clean zsh, names the fix script when it finds anything, and skips where zsh is absent so it stays quiet on a minimal Linux box. `scripts/install/health-check.sh`, `docs/TROUBLESHOOTING.md`
+- nvim declares a clipboard provider on headless machines. On a bare ssh box with no display server and no tmux, nvim finds no clipboard tool at all: xsel and xclip are only considered when `$DISPLAY` is set, and nvim's own OSC 52 fallback is deliberately skipped whenever `clipboard` is non-empty. Copy now goes out over OSC 52, which reaches the clipboard of whichever machine the terminal is running on. Paste reads a local cache file rather than OSC 52, because a clipboard read blocks for up to ten seconds waiting on a response most terminals never send, which under `unnamedplus` would stall every `p`; the cache carries the register type on its first line, so blockwise and linewise yanks paste back with the shape they were yanked with. Inside tmux the tmux provider already covers this, so only standalone nvim declares one. `nvim/lua/custom/core/options.lua`
 
 ### Changed
 
@@ -20,6 +21,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Fixed
 
 - Obsidian vault notes are written in place rather than through a rename. Under the default `backupcopy=auto`, a write may be implemented as a rename of the original followed by a fresh file at the same path; a sync watcher reads that as an unlink and replicates a genuine delete of the note to every device, immediately followed by a re-create. `backupcopy=yes` forces copy-then-overwrite, so the original inode survives and the watcher sees a plain change. It is set buffer-local under the vault root, since `auto` is faster everywhere else. The backup directory also moves off the leading `.` entry, which had been writing backup files alongside the note inside the vault. `nvim/lua/custom/core/autocmds.lua`, `nvim/lua/custom/core/options.lua`
+- tmux stops stacking duplicate `terminal-features` and `terminal-overrides` entries on reload. Both were appended with `-a`, which adds an array entry rather than replacing one, so every `source-file` grew the list again; they are now unset with `set -su` first. Both are server options, so the appends move from `-ag` to `-sa`. The `terminal-overrides` entry also separated its capabilities with a comma, which tmux reads as two array entries rather than two capabilities on one terminal, so `kend` replaced `khome` instead of joining it. They are colon-separated now, and Home/End reach pane apps as intended. `tmux/tmux.conf.template`
+- The postgresql@17 cluster init no longer aborts the Linux install when no UTF-8 locale is available. `grep` exits 1 when it matches nothing, and under `set -e` that ended the script before either fallback could run, leaving the `C` locale default unreachable. Both lookups are guarded. `scripts/install/install-packages.sh`
 
 ### Removed
 
@@ -27,6 +30,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `lua/kickstart/health.lua`, reachable only through `:checkhealth kickstart` and covered by `check-prerequisites.sh` and `dotfiles health`, plus the `dev` block passed to `lazy.setup`, which nothing opted into: the local checkouts name their own directories with `dir=`. `nvim/init.lua`
 - `e2backup.sh`, which mirrored a tree off an unmounted ext2/3/4 image and had nothing to do with the dotfiles. `scripts/one-off/` goes with it.
 - Four migrations that only uninstalled a package (cronboard and posting, CSharpier, openapi-tui, postgresql@14). Uninstall migrations go obsolete once the version they target is well behind the current release, since the worst case for skipping one is unused software left installed; migrations that repair state are kept, because that state stays broken until something fixes it. `scripts/migrations/`
+- `lazycron` from the Brewfile, along with its `lc` alias, its entry in the tools table and its place in the command-alert exclusion list. No uninstall migration ships alongside it, unlike previous Brewfile removals, since the tool stays usable wherever it is already installed. `Brewfile`, `zsh/dotfiles.zsh`, `README.md`, `docs/CMD-ALERTS.md`, `scripts/hooks/cmd-alert-hook.zsh`
 
 ## [0.2.137] - 2026-07-29
 
