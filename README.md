@@ -216,7 +216,6 @@ On a fresh machine, clone the private repo to `~/.dotfiles-local` before running
 | [supplyscan](https://github.com/undont/supplyscan) | Go CLI / MCP that scans JS-ecosystem projects for vulnerabilities and supply-chain attacks |
 | [jiru](https://github.com/undont/jiru)             | Bubble Tea TUI for managing Jira issues and Confluence pages                               |
 | [seeql](https://github.com/undont/seeql)           | SQL client TUI                                                                             |
-| [lazycron](https://github.com/undont/lazycron)     | Cron job manager TUI                                                                       |
 | [gh-bench](https://github.com/undont/gh-bench)     | `gh` CLI extension for benchmarking GitHub Actions and tracking failures                   |
 
 ### gh CLI extensions (auto-installed)

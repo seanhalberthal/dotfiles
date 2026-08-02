@@ -161,8 +161,7 @@ brew "figlet"                        # ASCII art text banners
 brew "toilet"                        # Unicode/colour text banners (figlet-compatible)
 brew "chafa"                         # Terminal image renderer (used by music.nvim)
 brew "charmbracelet/tap/freeze"      # Render code/terminal output to an image
-brew "undont/tap/lazycron"   # Cron job manager TUI
-brew "undont/tap/jiru"       # Jira TUI app
+brew "undont/tap/jiru"               # Jira TUI app
 brew "neur0map/tap/gpk"              # Unified package manager TUI
 brew "snitch" unless OS.linux? && Hardware::CPU.arm? # No Linux ARM bottle
 
