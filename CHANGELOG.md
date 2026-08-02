@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.2.138] - 2026-08-02
+
+### Added
+
+- `dotfiles health` reports zsh completion directory permissions. Homebrew installs its share directory group-writable, which `compaudit` flags and which makes the daily full `compinit` prompt before loading completions. The check runs `compaudit` in a clean zsh, names the fix script when it finds anything, and skips where zsh is absent so it stays quiet on a minimal Linux box. `scripts/install/health-check.sh`, `docs/TROUBLESHOOTING.md`
+
+### Changed
+
+- The cursor-hold diagnostic float returns, alongside the virtual lines from 0.2.137. It tracks its own window handle and closes it deterministically on `CursorMoved`, `InsertEnter`, `BufLeave` and `WinLeave`, rather than relying on `open_float`'s close events, which miss window and buffer switches and can orphan the window when a new `CursorHold` fires before the one-shot close lands. Virtual text is hidden while the float is open and restored when it closes, and the `_hover_open` guard keeps the float off `K`. `nvim/lua/custom/core/autocmds.lua`
+- `fix-compinit-insecure-dirs.sh` moves from `scripts/one-off/` to `scripts/`. It addresses a recurring condition rather than a spent one, since Homebrew reinstates the permission whenever it reinstalls, and `one-off/` gave it no discoverability. `scripts/fix-compinit-insecure-dirs.sh`
+
+### Fixed
+
+- Obsidian vault notes are written in place rather than through a rename. Under the default `backupcopy=auto`, a write may be implemented as a rename of the original followed by a fresh file at the same path; a sync watcher reads that as an unlink and replicates a genuine delete of the note to every device, immediately followed by a re-create. `backupcopy=yes` forces copy-then-overwrite, so the original inode survives and the watcher sees a plain change. It is set buffer-local under the vault root, since `auto` is faster everywhere else. The backup directory also moves off the leading `.` entry, which had been writing backup files alongside the note inside the vault. `nvim/lua/custom/core/autocmds.lua`, `nvim/lua/custom/core/options.lua`
+
+### Removed
+
+- The `gemini` alias, whose binary is neither installed nor in the Brewfile; the `cl &&` prefix meant running it cleared the scrollback before failing. Gemini's tmux integration went several releases ago and this was the remaining fragment. `zsh/dotfiles.zsh`, `docs/CMD-ALERTS.md`
+- `lua/kickstart/health.lua`, reachable only through `:checkhealth kickstart` and covered by `check-prerequisites.sh` and `dotfiles health`, plus the `dev` block passed to `lazy.setup`, which nothing opted into: the local checkouts name their own directories with `dir=`. `nvim/init.lua`
+- `e2backup.sh`, which mirrored a tree off an unmounted ext2/3/4 image and had nothing to do with the dotfiles. `scripts/one-off/` goes with it.
+- Four migrations that only uninstalled a package (cronboard and posting, CSharpier, openapi-tui, postgresql@14). Uninstall migrations go obsolete once the version they target is well behind the current release, since the worst case for skipping one is unused software left installed; migrations that repair state are kept, because that state stays broken until something fixes it. `scripts/migrations/`
+
 ## [0.2.137] - 2026-07-29
 
 ### Added
