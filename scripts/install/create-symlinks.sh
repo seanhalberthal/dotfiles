@@ -210,23 +210,6 @@ if should_install "core"; then
     create_link "$DOTFILES_DIR/lazydocker/format-logs.awk" "$lazydocker_dir/format-logs.awk"
 fi
 
-# aerc (core)
-# aerc.conf is shareable (symlinked); accounts.conf is user-owned (from template,
-# holds real addresses) with secrets in the macOS keychain via *-cred-cmd
-if should_install "core"; then
-    echo ""
-    echo "aerc configuration:"
-    aerc_dir="$HOME/.config/aerc"
-    mkdir -p "$aerc_dir"
-
-    create_link "$DOTFILES_DIR/aerc/aerc.conf" "$aerc_dir/aerc.conf"
-    create_link "$DOTFILES_DIR/aerc/binds.conf" "$aerc_dir/binds.conf"
-    install_local "$DOTFILES_DIR/aerc/accounts.conf.template" "$aerc_dir/accounts.conf"
-    # aerc refuses accounts.conf unless it is owner-only (600), else it drops to
-    # the setup wizard on launch
-    chmod 600 "$aerc_dir/accounts.conf"
-fi
-
 # ImageMagick font map (core, macOS only)
 # homebrew's imagemagick ships empty type-*.xml stubs whose glyph paths resolve
 # to nothing, so SVGs with text (image.nvim rendering shields.io badges) fail

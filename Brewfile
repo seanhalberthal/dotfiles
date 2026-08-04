@@ -49,10 +49,6 @@ cask "codexbar" # Menu bar usage monitor for Codex and Claude
 brew "gh"
 brew "lazygit"       # Git TUI
 
-# Email
-brew "aerc"          # Terminal email client (compose in nvim)
-brew "w3m"           # HTML mail rendering for aerc's html filter
-
 # Search & Navigation
 brew "ripgrep"       # >= 13.0
 brew "fd"            # Fast find alternative
