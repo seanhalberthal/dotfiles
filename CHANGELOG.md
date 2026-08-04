@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.2.139] - 2026-08-04
+
+### Fixed
+
+- The snacks dashboard no longer inherits syntax attributes from the active theme. Its `Desc`, `File` and `Special` groups linked to `Special`, which is a syntax role rather than a UI one, so any attribute a theme attached to it rendered on the startup screen: under dracula the menu entries and recent-file names came out italic. The three groups now take `Special`'s resolved foreground and set no attributes of their own, so a theme still controls the dashboard's colour while its attributes cannot reach it, including in generated themes that are never hand-audited. `nvim/lua/custom/plugins/dashboard.lua`
+- The statusline no longer draws over the dashboard. snacks hides it for the dashboard it opens at startup and restores it the first time another window is entered, then forgets, so a dashboard rendered after that point kept a statusline across its last row; closing oil over the dashboard is the usual way to hit it. The hide is now mirrored on the dashboard's own `SnacksDashboardOpened` and `SnacksDashboardClosed` events, and skipped at startup where snacks has already hidden it, so the two never fight. `nvim/lua/custom/plugins/dashboard.lua`
+
+### Changed
+
+- Italic carries one meaning across every colourscheme: text that is not literal code. `Comment`, `SpecialComment` and `@markup.italic` keep it, and every other group loses it, with colours unchanged in all cases. That covers `@variable.parameter` in dracula, monokai, solarized-dark and synthwave, monokai's seven type roles, dracula's `Special`, `SpecialChar` and `@type.builtin`, and nightfox's `@tag.attribute`. Parameter italics were the one rule whose rendering depended on which language server was attached, since gopls sends no semantic tokens by default while Roslyn's reach every reference rather than the declaration alone. `bold` is untouched, since several themes use it as part of their own character. `nvim/colors/*.lua`, `docs/THEME-SYSTEM.md`
+- nord's `SpecialComment` returns to the comment colour it shares with every other theme, having been moved onto cyan by the 0.2.135 syntax-role redistribution. `nvim/colors/nord.lua`
+
 ## [0.2.138] - 2026-08-02
 
 ### Added

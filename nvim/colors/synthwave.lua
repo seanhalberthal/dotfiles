@@ -155,7 +155,7 @@ hl('LspReferenceWrite', { bg = colors.selection })
 -- Treesitter
 hl('@variable', { fg = colors.fg_variable })
 hl('@variable.builtin', { fg = colors.neon_red, bold = true })
-hl('@variable.parameter', { fg = colors.neon_pink, italic = true })
+hl('@variable.parameter', { fg = colors.neon_pink })
 hl('@variable.member', { fg = colors.neon_pink })
 hl('@constant', { fg = colors.salmon })
 hl('@constant.builtin', { fg = colors.salmon })

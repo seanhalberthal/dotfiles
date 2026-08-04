@@ -149,7 +149,7 @@ hl('LspReferenceWrite', { bg = colors.selection })
 -- treesitter
 hl('@variable', { fg = colors.fg_variable })
 hl('@variable.builtin', { fg = colors.cyan })
-hl('@variable.parameter', { fg = colors.blue, italic = true }) -- upstream parameter role
+hl('@variable.parameter', { fg = colors.blue }) -- upstream parameter role
 hl('@variable.member', { fg = colors.blue })
 hl('@constant', { fg = colors.cyan })
 hl('@constant.builtin', { fg = colors.cyan })

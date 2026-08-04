@@ -1,5 +1,31 @@
 -- Dashboard: snacks.nvim startup screen
 
+--- resolved foreground of a highlight group, following links
+---@param group string
+---@return integer?
+local function fg_of(group)
+  return vim.api.nvim_get_hl(0, { name = group, link = false }).fg
+end
+
+-- snacks only hides the statusline for the dashboard it opens at startup, and
+-- restores it the first time another window is entered. a dashboard opened
+-- after that (oil_close re-rendering it, say) gets a statusline drawn over it,
+-- so mirror the hide on the dashboard's own lifecycle events
+local saved_laststatus
+
+local function hide_statusline()
+  if vim.o.laststatus ~= 0 then
+    saved_laststatus = vim.o.laststatus
+    vim.o.laststatus = 0
+  end
+end
+
+local function restore_statusline()
+  if saved_laststatus then
+    vim.o.laststatus, saved_laststatus = saved_laststatus, nil
+  end
+end
+
 --- set dashboard highlight groups by linking to standard vim groups.
 --- called on load and on every ColorScheme change so highlights
 --- stay in sync with dotfiles theme switching
@@ -8,17 +34,21 @@ local function set_dashboard_highlights()
     SnacksDashboardHeader = 'Keyword',
     SnacksDashboardIcon = 'Function',
     SnacksDashboardKey = 'Number',
-    SnacksDashboardDesc = 'Special',
     SnacksDashboardTitle = 'Title',
     SnacksDashboardFooter = 'Comment',
-    SnacksDashboardSpecial = 'Special',
-    SnacksDashboardFile = 'Special',
     SnacksDashboardDir = 'NonText',
     SnacksDashboardNormal = 'Normal',
     SnacksDashboardTerminal = 'Normal',
   }
   for group, target in pairs(links) do
     vim.api.nvim_set_hl(0, group, { link = target })
+  end
+
+  -- colour only, never a link: Special is a syntax role, so a theme is free to
+  -- attach attributes to it (dracula italicises it) and a link would inherit them
+  local special = fg_of 'Special' or fg_of 'Normal'
+  for _, group in ipairs { 'SnacksDashboardDesc', 'SnacksDashboardFile', 'SnacksDashboardSpecial' } do
+    vim.api.nvim_set_hl(0, group, { fg = special })
   end
 end
 
@@ -97,6 +127,18 @@ return {
       vim.api.nvim_create_autocmd('ColorScheme', {
         group = vim.api.nvim_create_augroup('SnacksDashboardTheme', { clear = true }),
         callback = set_dashboard_highlights,
+      })
+
+      local statusline_group = vim.api.nvim_create_augroup('SnacksDashboardStatusline', { clear = true })
+      vim.api.nvim_create_autocmd('User', {
+        pattern = 'SnacksDashboardOpened',
+        group = statusline_group,
+        callback = hide_statusline,
+      })
+      vim.api.nvim_create_autocmd('User', {
+        pattern = 'SnacksDashboardClosed',
+        group = statusline_group,
+        callback = restore_statusline,
       })
     end,
   },
