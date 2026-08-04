@@ -21,7 +21,17 @@ return {
       -- setqflist re-renders a tracked buffer (:Cfilter, live-diagnostics qf).
       -- full sync never runs compute_diff, so the assert is unreachable. see
       -- neovim/neovim#33224 and the incremental-sync assert family
-      server_opts_overrides = { flags = { allow_incremental_sync = false } },
+      -- exit_timeout defaults to false, and on that default nvim's VimLeavePre
+      -- handler neither force-stops the server nor waits for it: it fires an async
+      -- shutdown request, vim.wait(0), then exits. a server too slow to answer in
+      -- that window outlives nvim and reparents to pid 1, still holding its RSS.
+      -- under memory pressure that is every session, and the orphans compound the
+      -- pressure that caused them. a number makes VimLeavePre wait (exiting early
+      -- once the server closes) and force-stop on timeout
+      server_opts_overrides = {
+        flags = { allow_incremental_sync = false },
+        exit_timeout = 1000,
+      },
       suggestion = {
         enabled = true,
         auto_trigger = true,
