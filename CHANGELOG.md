@@ -6,12 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-## [0.2.138] - 2026-08-04
+## [0.2.138] - 2026-08-05
 
 ### Added
 
 - `dotfiles health` reports zsh completion directory permissions. Homebrew installs its share directory group-writable, which `compaudit` flags and which makes the daily full `compinit` prompt before loading completions. The check runs `compaudit` in a clean zsh, names the fix script when it finds anything, and skips where zsh is absent so it stays quiet on a minimal Linux box. `scripts/install/health-check.sh`, `docs/TROUBLESHOOTING.md`
 - nvim declares a clipboard provider on headless machines. On a bare ssh box with no display server and no tmux, nvim finds no clipboard tool at all: xsel and xclip are only considered when `$DISPLAY` is set, and nvim's own OSC 52 fallback is deliberately skipped whenever `clipboard` is non-empty. Copy now goes out over OSC 52, which reaches the clipboard of whichever machine the terminal is running on. Paste reads a local cache file rather than OSC 52, because a clipboard read blocks for up to ten seconds waiting on a response most terminals never send, which under `unnamedplus` would stall every `p`; the cache carries the register type on its first line, so blockwise and linewise yanks paste back with the shape they were yanked with. Inside tmux the tmux provider already covers this, so only standalone nvim declares one. `nvim/lua/custom/core/options.lua`
+- Reopening a file returns the cursor to where it was left, centred in the window. nvim ships no such default. The centring is deferred a tick, so it re-checks that the window it was scheduled for still holds the same buffer: a background `bufload` runs the autocmd in a throwaway window that is gone by the time the schedule fires, and an unguarded `zz` recentres whichever window happens to be current, scrolling the view out from under you when a plugin loads a file visited earlier in the session. Commit and rebase buffers are skipped, since git reuses one path for them and the stored mark points partway into the previous message. `nvim/lua/custom/core/autocmds.lua`
 
 ### Changed
 

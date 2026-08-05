@@ -53,6 +53,32 @@ function M.setup()
     end,
   })
 
+  -- restore the cursor to the `"` mark, centred. the deferred zz has to
+  -- re-check the window: a background bufload runs this in a throwaway autocmd
+  -- window that is gone by the time the schedule fires, and an unguarded zz
+  -- would recentre whichever window happens to be current instead. git reuses
+  -- one path for commit messages, so its mark points into the previous one
+  vim.api.nvim_create_autocmd('BufReadPost', {
+    callback = function(args)
+      if vim.tbl_contains({ 'gitcommit', 'gitrebase' }, vim.bo[args.buf].filetype) then
+        return
+      end
+      local mark = vim.api.nvim_buf_get_mark(args.buf, '"')
+      if mark[1] < 1 or mark[1] > vim.api.nvim_buf_line_count(args.buf) then
+        return
+      end
+      local win = vim.api.nvim_get_current_win()
+      vim.api.nvim_win_set_cursor(win, mark)
+      vim.schedule(function()
+        if vim.api.nvim_win_is_valid(win) and vim.api.nvim_win_get_buf(win) == args.buf then
+          vim.api.nvim_win_call(win, function()
+            vim.cmd 'normal! zz'
+          end)
+        end
+      end)
+    end,
+  })
+
   -- auto-save: write buffer on text change and on focus/buffer leave.
   -- FocusLost/BufLeave guarantee the buffer is clean before an external
   -- agent edits the file, so the FocusGained checktime above can silently
