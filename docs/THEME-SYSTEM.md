@@ -89,6 +89,31 @@ The Neovim theme loader (`nvim/lua/custom/core/theme.lua`) reads `~/.config/dotf
 3. A `vim.uv` file watcher monitors `current-theme` for live reload
 4. Scheme names are validated (`^[a-z0-9%-]+$`) before path construction to prevent traversal
 
+### Highlight Attributes
+
+Italic marks text that is not literal code. Three groups carry it, in every theme:
+
+- `Comment`: prose, not code
+- `SpecialComment`: prose, not code; it also tracks `Comment`'s colour
+- `@markup.italic`: markdown emphasis, where italic is the literal meaning
+
+No other group is italic. Syntax roles are separated by colour alone, so italic
+means the same thing in every theme and every language, and switching theme
+changes the palette rather than the shape of the text. `scripts/_lib/generate-theme.lua`
+emits only these three plus `CopilotSuggestion`, so generated themes conform
+without extra work.
+
+`bold` is a separate axis and is not covered by this: several themes bold a
+syntax group as part of their own character (gruvbox-dark's functions,
+rose-pine's builtins).
+
+Because syntax groups carry no italic, plugin highlights can link to them
+safely. Where a plugin points a UI element at a syntax role and only the colour
+is wanted, copy the resolved foreground rather than linking, since a link
+inherits attributes and cannot cancel them:
+`nvim/lua/custom/plugins/dashboard.lua` does this for the snacks dashboard,
+whose upstream defaults link `Desc` and `File` to `Special`.
+
 ### Statusline Integration
 
 `scripts/_lib/statusline-theme.sh` lets an AI CLI coding agent's statusline

@@ -35,6 +35,12 @@ function M.setup()
   -- disable swap files (undo + autoread + git make them redundant)
   vim.o.swapfile = false
 
+  -- never write backups alongside the file. the default backupdir starts with
+  -- `.`, so a write in a local obsidian vault created a locked file
+  -- which got replicated to CouchDB, the mac and the phone as a real document,
+  -- then tombstoned a moment later. dropping `.` keeps the state dir as the only backup target.
+  vim.o.backupdir = vim.fn.stdpath 'state' .. '/backup//'
+
   -- search
   vim.o.ignorecase = true
   vim.o.smartcase = true
@@ -78,6 +84,48 @@ function M.setup()
   -- use the system clipboard by default so yanks/pastes work across
   -- separate nvim instances, including panes inside tmux.
   vim.o.clipboard = 'unnamedplus'
+
+  -- on a headless box (bare ssh, no display server, no tmux) nvim finds no
+  -- clipboard tool at all: xsel/xclip are only considered when $DISPLAY is set,
+  -- and nvim's own OSC 52 fallback is deliberately skipped whenever 'clipboard'
+  -- is non-empty (see provider/clipboard.vim). inside tmux the tmux provider
+  -- already covers this, so only standalone nvim needs a provider declared.
+  --
+  -- copy goes out over OSC 52, which reaches the real clipboard on whichever
+  -- machine the terminal is running on. paste reads a local cache file instead
+  -- of OSC 52: a clipboard *read* blocks for up to 10s waiting on a response
+  -- most terminals never send, and with `unnamedplus` that would stall every
+  -- `p`. the cache is what keeps yanks shared across instances here.
+  local has_clipboard = vim.env.DISPLAY or vim.env.WAYLAND_DISPLAY or vim.env.TMUX or vim.fn.has 'mac' == 1
+  if not has_clipboard then
+    local osc52 = require 'vim.ui.clipboard.osc52'
+    local cache = vim.fn.stdpath 'cache' .. '/clipboard'
+
+    local function copy(reg)
+      local send = osc52.copy(reg)
+      return function(lines, regtype)
+        send(lines)
+        -- regtype rides along as the first line so blockwise/linewise yanks
+        -- paste back with the shape they were yanked with
+        pcall(vim.fn.writefile, vim.list_extend({ regtype or 'v' }, lines), cache)
+      end
+    end
+
+    local function paste()
+      local ok, lines = pcall(vim.fn.readfile, cache)
+      if not ok or type(lines) ~= 'table' or #lines == 0 then
+        return { {}, 'v' }
+      end
+      local regtype = table.remove(lines, 1)
+      return { lines, regtype }
+    end
+
+    vim.g.clipboard = {
+      name = 'osc52+cache',
+      copy = { ['+'] = copy '+', ['*'] = copy '*' },
+      paste = { ['+'] = paste, ['*'] = paste },
+    }
+  end
 
   -- spellcheck
   vim.o.spell = true

@@ -4,7 +4,7 @@ After completing any code change, check whether relevant documentation needs upd
 
 **Key documentation locations:**
 
-- `README.md` -- feature summaries, keybindings, aliases
+- `README.md` -- feature summaries and a short keybinding highlights table only
 - `zsh/dotfiles.zsh` -- shell aliases/functions; `dotfiles aliases` parses this file
 - `CLAUDE.md` -- architecture, conventions, common commands
 - `docs/` -- detailed guides (theme system, agent hooks, troubleshooting, etc.)
@@ -19,7 +19,10 @@ After completing any code change, check whether relevant documentation needs upd
 - Free-form rows (ZLE bindings, external tools, dotfiles CLI subcommands) ->
   add a `# @cheat: <name> | <description>` directive.
 - New section -> add `# @section: <NAME>` before the relevant block.
-- New tmux/nvim keybindings -> update `README.md` keybindings section
+- New tmux/nvim keybindings -> update the in-product source, not `README.md`:
+  tmux bindings belong in `tmux/tmux-help.template`, nvim bindings in
+  `nvim/cheatsheet.txt`. `README.md` carries a short highlights table only, and
+  regrowing it into full per-tool tables re-creates a copy that goes stale.
 - New install behaviour/presets -> update `CLAUDE.md` and `README.md`
 - New test files -> confirm they're discovered by `scripts/run-tests.sh` (auto-discovery)
 

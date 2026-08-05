@@ -15,6 +15,7 @@ Common issues and solutions for the dotfiles configuration.
   - [Apple Silicon vs Intel Mac](#apple-silicon-vs-intel-mac)
 - [Zsh Issues](#zsh-issues)
   - [Slow Shell Startup](#slow-shell-startup)
+  - [Insecure Completion Directories](#insecure-completion-directories)
   - [fnm / Node.js Not Working](#fnm--nodejs-not-working)
   - [ANDROID_HOME Issues](#android_home-issues)
   - [Powerlevel10k Not Loading](#powerlevel10k-not-loading)
@@ -340,6 +341,28 @@ zprof
 - Use fnm instead of NVM (already configured)
 - Ensure compinit caching is working
 - Check `~/.zcompdump` exists and is recent
+
+### Insecure Completion Directories
+
+**Symptom**: zsh prints `compinit: insecure directories, run compaudit for list` on startup, or prompts before loading completions.
+
+**Cause**: Homebrew installs its share directory group-writable (775). On macOS that directory is group-owned by a shared group, so `compaudit` flags it. The config runs a full `compinit` once every 24 hours and reuses a cached dump otherwise, so the prompt appears on the first shell of the day. Linux gives each user a private single-member group, so the same permission bit is owner-only and the problem does not occur there.
+
+**Diagnosis**:
+
+```bash
+dotfiles health    # reports under "compinit dir permissions"
+zsh -fc 'autoload -Uz compaudit; compaudit'
+```
+
+**Solution**:
+
+```bash
+~/dotfiles/scripts/fix-compinit-insecure-dirs.sh --dry-run   # preview
+~/dotfiles/scripts/fix-compinit-insecure-dirs.sh             # apply
+```
+
+The script only changes paths you own and rebuilds `~/.zcompdump`; anything root-owned is reported for a manual `sudo chmod go-w`. Homebrew can reintroduce the permission on reinstall, so this may need running again.
 
 ### fnm / Node.js Not Working
 

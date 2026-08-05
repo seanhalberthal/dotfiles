@@ -39,7 +39,6 @@ _local_pairs() {
             "config/lazygit/local.yml|$cfg/lazygit/local.yml"
             "config/zed/settings.json|$cfg/zed/settings.json"
             "config/btop/btop.conf|$cfg/btop/btop.conf"
-            "config/aerc/accounts.conf|$cfg/aerc/accounts.conf"
             "ai/claude/CLAUDE.local.md|$HOME/.ai/claude/CLAUDE.local.md"
         )
         if is_macos; then

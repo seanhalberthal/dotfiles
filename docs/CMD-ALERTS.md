@@ -65,7 +65,7 @@ Interactive commands (pagers, editors) never trigger alerts regardless of how lo
 
 ### Launcher convention
 
-Beyond the list, any alias defined as a clear-then-run (`cl && X`, `clear && X`) is treated as an interactive session and excluded automatically. The rule reads the alias definition from zsh's `aliases` map, so launchers you add later (agents, TUIs) are covered with nothing to keep in sync, as long as they follow the convention. This is why `claude`, `ralph`, `gemini`, `lg` (lazygit), and friends never show up as tracked processes.
+Beyond the list, any alias defined as a clear-then-run (`cl && X`, `clear && X`) is treated as an interactive session and excluded automatically. The rule reads the alias definition from zsh's `aliases` map, so launchers you add later (agents, TUIs) are covered with nothing to keep in sync, as long as they follow the convention. This is why `claude`, `ralph`, `opencode`, `lg` (lazygit), and friends never show up as tracked processes.
 
 Defaults:
 
@@ -77,7 +77,7 @@ docker lazydocker lazygit ssh
 less more man
 vim nvim v vi nano bat diffnav
 psql sqlite3 tmux
-jiru lazycron
+jiru
 fg bg
 ```
 

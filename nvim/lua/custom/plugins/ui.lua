@@ -274,7 +274,16 @@ return {
       notify = { enabled = false },
       lsp = {
         hover = { enabled = true, silent = true },
-        signature = { enabled = true },
+        -- signature help borrows the hover view, whose 120x20 default swamps the
+        -- code being typed once a server sends the whole doc body; the call
+        -- signature is the part worth seeing, the rest is a scroll away
+        signature = {
+          enabled = true,
+          opts = {
+            size = { max_width = 80, max_height = 5 },
+            position = { row = 2, col = 0 },
+          },
+        },
         progress = { enabled = false },
         message = { enabled = false },
         override = {

@@ -605,35 +605,7 @@ fi
 
 cleanup_sandbox
 
-# ─── 11. import sets aerc permissions ─────────────────────────────────
-
-section "import: aerc permissions"
-
-setup_cli_sandbox
-seed_preset core
-seed_gitconfig
-seed_local_files
-dotfiles_run local init > /dev/null
-mkdir -p "$TEST_HOME/.dotfiles-local/config/aerc"
-printf '[personal]\nfrom = a@b.c\n' > "$TEST_HOME/.dotfiles-local/config/aerc/accounts.conf"
-git -C "$TEST_HOME/.dotfiles-local" add -A
-git -C "$TEST_HOME/.dotfiles-local" commit -q -m "seed aerc"
-
-dotfiles_run import > /dev/null
-if [[ "$(uname)" == "Darwin" ]]; then
-    perms=$(stat -f '%Lp' "$TEST_HOME/.config/aerc/accounts.conf" 2>/dev/null || echo none)
-else
-    perms=$(stat -c '%a' "$TEST_HOME/.config/aerc/accounts.conf" 2>/dev/null || echo none)
-fi
-if [[ "$perms" == "600" ]]; then
-    pass "imported accounts.conf is chmod 600"
-else
-    fail "accounts.conf should be 600 (got: $perms)"
-fi
-
-cleanup_sandbox
-
-# ─── 12. manifest drift guard ─────────────────────────────────────────
+# ─── 11. manifest drift guard ─────────────────────────────────────────
 
 section "manifest drift guard"
 

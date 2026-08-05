@@ -49,10 +49,6 @@ cask "codexbar" # Menu bar usage monitor for Codex and Claude
 brew "gh"
 brew "lazygit"       # Git TUI
 
-# Email
-brew "aerc"          # Terminal email client (compose in nvim)
-brew "w3m"           # HTML mail rendering for aerc's html filter
-
 # Search & Navigation
 brew "ripgrep"       # >= 13.0
 brew "fd"            # Fast find alternative
@@ -161,8 +157,7 @@ brew "figlet"                        # ASCII art text banners
 brew "toilet"                        # Unicode/colour text banners (figlet-compatible)
 brew "chafa"                         # Terminal image renderer (used by music.nvim)
 brew "charmbracelet/tap/freeze"      # Render code/terminal output to an image
-brew "undont/tap/lazycron"   # Cron job manager TUI
-brew "undont/tap/jiru"       # Jira TUI app
+brew "undont/tap/jiru"               # Jira TUI app
 brew "neur0map/tap/gpk"              # Unified package manager TUI
 brew "snitch" unless OS.linux? && Hardware::CPU.arm? # No Linux ARM bottle
 

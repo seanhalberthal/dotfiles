@@ -24,13 +24,18 @@ set -g prefix2 C-b
 bind ` send-prefix
 bind C-b send-prefix -2
 
+# reset before appending: -a adds an array entry, so reloads stack duplicates
+set -su terminal-features
+set -su terminal-overrides
+
 # terminal colours: enable 256-colour and true colour (RGB) support
 # use terminal-features wildcard so RGB works regardless of outer TERM
 # (xterm-ghostty under Ghostty, xterm-256color under other emulators, etc.)
 set -g default-terminal "tmux-256color"
-set -ag terminal-features "*:RGB"
+set -sa terminal-features "*:RGB"
 # remap Home/End to CSI sequences so cmd+left/right work in all pane apps
-set -ag terminal-overrides ",xterm-256color:khome=\E[H,kend=\E[F"
+# (caps in one entry are colon-separated; a comma splits them into separate entries)
+set -sa terminal-overrides "xterm-256color:khome=\E[H:kend=\E[F"
 # Claude Code (>=2.1.77) clamps chalk to 256-colour whenever $TMUX is set,
 # regardless of true terminal capability. opt out via this env var so the
 # TUI emits real 24-bit RGB. see anthropics/claude-code#36785, #46146.
@@ -43,7 +48,7 @@ set -g cursor-style block
 set -g mouse on
 
 # extended key and mouse support for apps like glow
-set -ga terminal-features 'xterm*:extkeys:mouse'
+set -sa terminal-features 'xterm*:extkeys:mouse'
 set -g extended-keys always
 set -s extended-keys-format csi-u    # emit kitty u-form (matches Ghostty + zsh bindkey)
 

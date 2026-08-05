@@ -422,6 +422,19 @@ if should_install "core"; then
     fi
 fi
 
+# zsh completion dirs; a dirty compaudit makes the daily full compinit prompt
+printf "Checking %-30s" "compinit dir permissions..."
+if ! command_exists zsh; then
+    printf '%sSKIPPED%s (zsh not found)\n' "${YELLOW}" "${NC}"
+elif [[ -z "$(zsh -fc 'autoload -Uz compaudit; compaudit' 2>/dev/null)" ]]; then
+    printf '%sOK%s\n' "${GREEN}" "${NC}"
+else
+    printf '%sINSECURE DIRS%s\n' "${YELLOW}" "${NC}"
+    printf '  compinit prompts on its next full run (zsh/dotfiles.zsh runs one daily)\n'
+    printf '  Fix with: %s/scripts/fix-compinit-insecure-dirs.sh\n' "$DOTFILES_DIR"
+    ISSUES=1
+fi
+
 echo ""
 
 if [[ $ISSUES -eq 0 ]]; then

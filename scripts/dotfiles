@@ -697,7 +697,6 @@ _import_one() {
     if [[ ! -f "$sys_file" ]]; then
         mkdir -p "$(dirname "$sys_file")"
         /bin/cp "$repo_file" "$sys_file"
-        [[ "$sys_file" == */aerc/accounts.conf ]] && chmod 600 "$sys_file"
         success "Created $sys_file"
         synced=$((synced + 1))
         return 0
@@ -708,7 +707,6 @@ _import_one() {
     fi
     if [[ $force -eq 1 ]]; then
         /bin/cp "$repo_file" "$sys_file"
-        [[ "$sys_file" == */aerc/accounts.conf ]] && chmod 600 "$sys_file"
         success "Updated $sys_file"
         synced=$((synced + 1))
     else

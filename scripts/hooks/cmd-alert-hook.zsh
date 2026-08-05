@@ -51,7 +51,7 @@ if (( ! ${+_CMD_ALERT_EXCLUDE} )); then
         less more man
         vim nvim v vi nano bat diffnav
         psql sqlite3 tmux
-        jiru lazycron
+        jiru
         fg bg
     )
 fi

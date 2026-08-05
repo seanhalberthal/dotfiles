@@ -40,10 +40,6 @@ require('lazy').setup({
   -- kickstart plugins (neo-tree, autopairs, gitsigns, indent guides)
   { import = 'kickstart.plugins' },
 }, {
-  dev = {
-    path = '~/playground',
-    fallback = true,
-  },
   ui = {
     icons = vim.g.have_nerd_font and {} or {
       cmd = '⌘',

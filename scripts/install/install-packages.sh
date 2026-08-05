@@ -135,8 +135,10 @@ fi
 if is_linux && command_exists brew && brew list postgresql@17 &>/dev/null; then
     PG_DATADIR="$(brew --prefix)/var/postgresql@17"
     if [[ -d "$PG_DATADIR" ]] && [[ ! -f "$PG_DATADIR/PG_VERSION" ]]; then
-        PG_LOCALE=$(locale -a | grep -im1 '^en_US\.utf-\?8$')
-        PG_LOCALE="${PG_LOCALE:-$(locale -a | grep -im1 'utf-\?8$')}"
+        # grep exits 1 when the locale is absent; guard both lookups so set -e
+        # doesn't abort the install before the fallbacks below can run
+        PG_LOCALE=$(locale -a | grep -im1 '^en_US\.utf-\?8$' || true)
+        PG_LOCALE="${PG_LOCALE:-$(locale -a | grep -im1 'utf-\?8$' || true)}"
         PG_LOCALE="${PG_LOCALE:-C}"
         echo "Initializing postgresql@17 data cluster (locale: $PG_LOCALE)..."
         if LC_ALL="$PG_LOCALE" "$(brew --prefix)/opt/postgresql@17/bin/initdb" \
