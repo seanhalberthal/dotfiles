@@ -149,6 +149,8 @@ Branch vs main → diagnostics qf | <leader>xb
 Git ticket commits → diagnostics qf | <leader>xT
 Whole project scan → diagnostics qf | <leader>xS
 Grep yank register → quickfix | <leader>x/
+Grep → quickfix (silent, opens list) | :grep pat
+Grep → quickfix without jumping | :grep! pat
 Filter qf list (keep matching) | :Cfilter /pat/
 Filter qf list (drop matching) | :Cfilter! /pat/
 Filter loclist (keep / drop) | :Lfilter[!] /pat/
