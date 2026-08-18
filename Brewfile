@@ -14,7 +14,6 @@ tap "morantron/tmux-fingers"
 tap "neur0map/tap"
 tap "oven-sh/bun"
 tap "undont/tap"
-tap "teamookla/speedtest"
 
 # =============================================================================
 # @preset: minimal
@@ -150,7 +149,6 @@ brew "btop"                          # System monitor (htop replacement)
 brew "gdu"                           # Disk usage analyzer TUI (du replacement)
 brew "watch"                         # Periodic command refresh (flicker-free re-render)
 brew "fastfetch"                     # neofetch replacement (faster, maintained)
-brew "teamookla/speedtest/speedtest" # Speedtest CLI from Ookla
 brew "glow"                          # Markdown renderer
 brew "asciinema"                     # Terminal session recorder
 brew "figlet"                        # ASCII art text banners

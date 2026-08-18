@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Removed
+
+- The Ookla `speedtest` CLI and its `teamookla/speedtest` tap from the Brewfile. Nothing in the dotfiles referenced it: no alias, no tools-table row, no docs mention. As with the `lazycron` removal, no uninstall migration ships alongside it, so it stays usable wherever it is already installed. `Brewfile`
+
 ## [0.2.138] - 2026-08-05
 
 ### Added
