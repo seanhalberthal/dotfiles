@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 
 - The empty-buffer cleanup checks a tracked candidate set instead of rescanning every open buffer. It ran the full list on every `BufEnter`, six `nvim_buf_*` calls per buffer, on an event that fires about as often as a keystroke does. Only a buffer that was created unnamed can ever qualify, so `BufNew`/`BufAdd` collect those (seeded once from the buffer list, since the startup `[No Name]` buffer predates the autocmd) and the scheduled pass walks just them, returning before it schedules anything when the set is empty. The pass re-validates each candidate, so one that has since been named, filled or given a `buftype` drops out of the set rather than being rechecked forever. Which buffers get deleted is unchanged. `nvim/lua/custom/core/autocmds.lua`
+- The telescope grep pickers exclude `.git/` at the rg level rather than after the fact. `--hidden` lifts ripgrep's own skip of dotfiles, so every search descended into the repository's object store: 2707 files opened and scanned in this repo, all of them then discarded by the `%.git/` entry in `file_ignore_patterns`. `--glob=!.git/` stops the walk instead, so the results are unchanged and the work isn't done. The exclusion is repeated at the `<leader>sG` call site because telescope merges picker config with a shallow `tbl_extend("force", ...)`, so a call-site `additional_args` replaces the picker default outright rather than adding to it. `nvim/lua/custom/plugins/telescope.lua`
 
 ### Fixed
 
