@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Removed
 
 - The Ookla `speedtest` CLI and its `teamookla/speedtest` tap from the Brewfile. Nothing in the dotfiles referenced it: no alias, no tools-table row, no docs mention. As with the `lazycron` removal, no uninstall migration ships alongside it, so it stays usable wherever it is already installed. `Brewfile`
+- The cursor-hold diagnostic float, reinstated in 0.2.138, goes again. Its `_hover_open` guard was only ever set by a `K` wrapper that 0.2.137 deleted along with the rest of the float, so the guard came back inert and the float opened over the LSP hover on every idle. It also won that overlap outright: `open_float` derives its `zindex` as `50` from the parent window, while noice renders hover at `45`. The virtual lines under the cursor line already carry the message, which is why the float was dropped in the first place. Its `CursorMoved` handler went with it, taking the `virtual_text` restore that had been switching end-of-line text back on after the first float closed, leaving both renderings of the same diagnostic on screen. `nvim/lua/custom/core/autocmds.lua`
 
 ## [0.2.138] - 2026-08-05
 
