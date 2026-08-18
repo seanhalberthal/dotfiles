@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- busted and luassert types in lua spec files, through lazydev rather than `.luarc.json`: `${3rd}/busted/library` behind a `describe%s*%(` trigger and `${3rd}/luassert/library` behind `assert%.`. Any `workspace.library` entry in `.luarc.json`, including a lone `${3rd}` one, makes lua_ls stop resolving a project's own `require`d modules, so `gd` on a cross-file symbol reports "No definitions found" while same-file lookups still work; routing third-party libraries through lazydev keeps that file clean. `words` are matched with a bare substring find, so there is no `it%s*%(` trigger, which would fire inside `split(`, `edit(` and `wait(`; busted's library declares `it` alongside `describe`, so the one trigger covers a whole spec file. `nvim/lua/custom/plugins/lazydev.lua`, `.claude/rules/neovim.md`
+
 ### Changed
 
 - The empty-buffer cleanup checks a tracked candidate set instead of rescanning every open buffer. It ran the full list on every `BufEnter`, six `nvim_buf_*` calls per buffer, on an event that fires about as often as a keystroke does. Only a buffer that was created unnamed can ever qualify, so `BufNew`/`BufAdd` collect those (seeded once from the buffer list, since the startup `[No Name]` buffer predates the autocmd) and the scheduled pass walks just them, returning before it schedules anything when the set is empty. The pass re-validates each candidate, so one that has since been named, filled or given a `buftype` drops out of the set rather than being rechecked forever. Which buffers get deleted is unchanged. `nvim/lua/custom/core/autocmds.lua`
