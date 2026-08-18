@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- The empty-buffer cleanup checks a tracked candidate set instead of rescanning every open buffer. It ran the full list on every `BufEnter`, six `nvim_buf_*` calls per buffer, on an event that fires about as often as a keystroke does. Only a buffer that was created unnamed can ever qualify, so `BufNew`/`BufAdd` collect those (seeded once from the buffer list, since the startup `[No Name]` buffer predates the autocmd) and the scheduled pass walks just them, returning before it schedules anything when the set is empty. The pass re-validates each candidate, so one that has since been named, filled or given a `buftype` drops out of the set rather than being rechecked forever. Which buffers get deleted is unchanged. `nvim/lua/custom/core/autocmds.lua`
+
 ### Fixed
 
 - Quitting nvim no longer waits on a language server. nvim's own `VimLeavePre` handler takes the largest `exit_timeout` across every attached client and `vim.wait`s for them all to close, so a server too busy to answer spends the whole budget: copilot's 1000 cost a full second per quit under a loaded solution, where an idle one answers in about 10ms. The `ExitPre` hook that already force-killed roslyn now covers every client, and copilot's timeout drops to 200. roslyn's `filewatching` moves off `auto` to `roslyn`, sparing `Client:stop` the cancellation of ~500 FSEvents watchers at ~1.2ms each, another ~560ms on `:q` in a .NET repo. Runtime restarts (`:lsp restart roslyn`) still get the per-client timeouts. `nvim/lua/custom/plugins/lsp.lua`, `nvim/lua/custom/plugins/copilot.lua`, `nvim/lua/custom/plugins/dotnet.lua`
