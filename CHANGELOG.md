@@ -4,11 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [0.2.139] - 2026-08-18
 
 ### Added
 
 - busted and luassert types in lua spec files, through lazydev rather than `.luarc.json`: `${3rd}/busted/library` behind a `describe%s*%(` trigger and `${3rd}/luassert/library` behind `assert%.`. Any `workspace.library` entry in `.luarc.json`, including a lone `${3rd}` one, makes lua_ls stop resolving a project's own `require`d modules, so `gd` on a cross-file symbol reports "No definitions found" while same-file lookups still work; routing third-party libraries through lazydev keeps that file clean. `words` are matched with a bare substring find, so there is no `it%s*%(` trigger, which would fire inside `split(`, `edit(` and `wait(`; busted's library declares `it` alongside `describe`, so the one trigger covers a whole spec file. `nvim/lua/custom/plugins/lazydev.lua`, `.claude/rules/neovim.md`
+- `<leader>sS` and `:Snippets` open a telescope picker over every snippet that can expand in the current buffer, previewing the body with the buffer's filetype and expanding the selection at the cursor. Snippets were the one completion source with nothing behind them: friendly-snippets ships JSON data with no vimdoc, blink exposes no browser command, and its menu only reveals a body once a prefix has already been typed, so a prefix you don't know is unreachable. The picker reads blink's own registry, built from the live source opts, so the search paths and `friendly_snippets` setting always match what the menu serves rather than a second guess at them. It also lists the lua snippets loaded into LuaSnip, which the menu never shows at all: blink's `default` preset scans for `%.json$` only, so `nvim/snippets/all.lua` is invisible to it, and those entries expand through `snip_expand` instead of `vim.snippet.expand`. `nvim/lua/custom/features/snippets.lua`, `nvim/lua/custom/core/keymaps.lua`, `nvim/cheatsheet.txt`
 
 ### Changed
 

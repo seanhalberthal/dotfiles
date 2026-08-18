@@ -47,6 +47,7 @@ Search Neovim config | <leader>sn
 Select Telescope picker | <leader>ss
 Grep (literal/fixed-strings) | <leader>sG
 Search git modified files | <leader>sm
+Browse snippets for filetype | <leader>sS
 Search & replace (grug-far) | <leader>sR
 Open cheatsheet | <leader>?
 Telescope: toggle selection, move down | <Tab>
