@@ -317,10 +317,14 @@ function M.setup()
         client:stop(true)
       end
 
-      -- terminate debug adapter if running
-      pcall(function()
-        require('dap').terminate()
-      end)
+      -- terminate debug adapter if running. only when dap is already loaded:
+      -- requiring it here pulls the whole plugin in at exit (~18ms) just to
+      -- terminate a session that cannot exist if it was never loaded
+      if package.loaded['dap'] then
+        pcall(function()
+          require('dap').terminate()
+        end)
+      end
 
       -- close all terminal buffers (forces child process termination)
       for _, buf in ipairs(vim.api.nvim_list_bufs()) do

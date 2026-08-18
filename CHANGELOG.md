@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Quitting nvim no longer waits on a language server. nvim's own `VimLeavePre` handler takes the largest `exit_timeout` across every attached client and `vim.wait`s for them all to close, so a server too busy to answer spends the whole budget: copilot's 1000 cost a full second per quit under a loaded solution, where an idle one answers in about 10ms. The `ExitPre` hook that already force-killed roslyn now covers every client, and copilot's timeout drops to 200. roslyn's `filewatching` moves off `auto` to `roslyn`, sparing `Client:stop` the cancellation of ~500 FSEvents watchers at ~1.2ms each, another ~560ms on `:q` in a .NET repo. Runtime restarts (`:lsp restart roslyn`) still get the per-client timeouts. `nvim/lua/custom/plugins/lsp.lua`, `nvim/lua/custom/plugins/copilot.lua`, `nvim/lua/custom/plugins/dotnet.lua`
+- The exit hook no longer loads dap just to terminate it. `require('dap')` in the config's own `VimLeavePre` pulled the whole plugin in, ~18ms, to end a session that cannot exist if dap was never loaded, so it is guarded on `package.loaded['dap']`. `nvim/lua/custom/core/autocmds.lua`
+
 ### Removed
 
 - The Ookla `speedtest` CLI and its `teamookla/speedtest` tap from the Brewfile. Nothing in the dotfiles referenced it: no alias, no tools-table row, no docs mention. As with the `lazycron` removal, no uninstall migration ships alongside it, so it stays usable wherever it is already installed. `Brewfile`
