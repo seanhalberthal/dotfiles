@@ -51,16 +51,13 @@ function M.apply_first_suggestion()
   return true
 end
 
---- autocorrect all misspelled words in a line range
----@param start_line integer 1-indexed start line
----@param end_line integer 1-indexed end line (inclusive)
----@return integer fixed number of words corrected
-function M.autocorrect_range(start_line, end_line)
-  local view = vim.fn.winsaveview()
-  local wrapscan = vim.o.wrapscan
+--- walk the range applying the first suggestion to each misspelling. assumes the
+--- caller has already cleared wrapscan, so `]s` can't wrap past the range
+---@param start_line integer
+---@param end_line integer
+---@return integer fixed
+local function correct_in_range(start_line, end_line)
   local fixed = 0
-
-  vim.o.wrapscan = false
   vim.api.nvim_win_set_cursor(0, { start_line, 0 })
 
   local prev_row, prev_col = -1, -1
@@ -95,9 +92,29 @@ function M.autocorrect_range(start_line, end_line)
     end
   end
 
+  return fixed
+end
+
+--- autocorrect all misspelled words in a line range
+---@param start_line integer 1-indexed start line
+---@param end_line integer 1-indexed end line (inclusive)
+---@return integer fixed number of words corrected
+function M.autocorrect_range(start_line, end_line)
+  local view = vim.fn.winsaveview()
+  local wrapscan = vim.o.wrapscan
+
+  -- wrapscan is global, so the walk runs under pcall: a throw mid-range (an
+  -- out-of-range cursor set, say) would otherwise leave the whole session
+  -- without search wrapping and skip the view restore
+  vim.o.wrapscan = false
+  local ok, result = pcall(correct_in_range, start_line, end_line)
   vim.fn.winrestview(view)
   vim.o.wrapscan = wrapscan
-  return fixed
+
+  if not ok then
+    error(result, 0)
+  end
+  return result
 end
 
 function M.setup()
