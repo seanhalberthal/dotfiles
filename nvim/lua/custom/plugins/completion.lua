@@ -133,7 +133,22 @@ return {
             async = true,
             score_offset = 100,
           },
-          snippets = { score_offset = -3 },
+          snippets = {
+            score_offset = -3,
+            -- nvim/snippets is scanned ahead of friendly-snippets, so keeping the
+            -- first item for a prefix lets a local json file override one upstream
+            -- snippet without taking over the whole filetype
+            transform_items = function(_, items)
+              local seen, out = {}, {}
+              for _, item in ipairs(items) do
+                if not seen[item.label] then
+                  seen[item.label] = true
+                  out[#out + 1] = item
+                end
+              end
+              return out
+            end,
+          },
           buffer = { score_offset = -5 },
         },
       },
