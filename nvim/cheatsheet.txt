@@ -175,7 +175,7 @@ Equalise windows | <leader>w=
 
 ## completion @completion
 Trigger completion | <C-Space>
-Hide completion | <C-e>
+Dismiss completion, restore typed text | <C-e>
 Accept completion | <CR>
 Smart accept (Copilot or completion) | <Tab>
 Accept Copilot word | <M-Tab>
