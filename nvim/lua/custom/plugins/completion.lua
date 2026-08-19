@@ -149,7 +149,9 @@ return {
               return out
             end,
           },
-          buffer = { score_offset = -5 },
+          -- short keywords are where buffer words are noisiest: a 3-char query
+          -- fuzzy-matches unrelated identifiers and gets preselected
+          buffer = { score_offset = -5, min_keyword_length = 4 },
         },
       },
       cmdline = {
