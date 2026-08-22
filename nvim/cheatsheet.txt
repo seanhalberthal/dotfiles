@@ -288,9 +288,15 @@ Toggle breakpoint | <leader>bb
 Conditional breakpoint | <leader>bc
 Logpoint | <leader>bL
 List breakpoints | <leader>bl
+Watch expression | <leader>bw (normal/visual)
 Toggle debug UI | F7
-Watch expression in scopes | w
-Send expression to REPL in scopes | r
+Switch panel section | W / S / T / B / E / R (in panel)
+Next/prev panel section | ]v / [v (in panel)
+Expand/collapse variable | <CR> (scopes/watches)
+Set variable value | s (scopes/watches)
+Add/edit/delete watch | a / e / d (watches)
+Jump to frame or breakpoint | <CR> (threads/breakpoints)
+Panel keymap help | g? (in panel)
 
 ## markdown @markdown
 Toggle todo | <leader>mt
