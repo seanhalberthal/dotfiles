@@ -90,27 +90,27 @@ tmux split-window -t "$SESSION:dev" -h -c "$PROJECT_DIR"
 tmux send-keys -t "$SESSION:dev.1" 'claude' Enter
 
 # window 2: edit (nvim)
-tmux new-window -t "$SESSION" -n edit -c "$PROJECT_DIR"
+tmux new-window -t "$SESSION:" -n edit -c "$PROJECT_DIR"
 tmux send-keys -t "$SESSION:edit" 'nvim' Enter
 
 # window 3: shell (general terminal)
-tmux new-window -t "$SESSION" -n shell -c "$PROJECT_DIR"
+tmux new-window -t "$SESSION:" -n shell -c "$PROJECT_DIR"
 
 # =============================================================================
 # EXAMPLES OF OTHER WINDOW CONFIGURATIONS
 # =============================================================================
 #
 # # subdirectory window:
-# tmux new-window -t "$SESSION" -n backend -c "$PROJECT_DIR/backend"
+# tmux new-window -t "$SESSION:" -n backend -c "$PROJECT_DIR/backend"
 #
 # # split pane running commands:
-# tmux new-window -t "$SESSION" -n servers -c "$PROJECT_DIR"
+# tmux new-window -t "$SESSION:" -n servers -c "$PROJECT_DIR"
 # tmux split-window -h -t "$SESSION:servers" -c "$PROJECT_DIR"
 # tmux send-keys -t "$SESSION:servers.1" 'npm run dev' Enter
 # tmux send-keys -t "$SESSION:servers.2" 'npm run watch' Enter
 #
 # # window at home directory:
-# tmux new-window -t "$SESSION" -n misc -c ~
+# tmux new-window -t "$SESSION:" -n misc -c ~
 
 # =============================================================================
 # EXAMPLES OF INSTANCE CUSTOMISATION

@@ -37,8 +37,10 @@ done < <(tmux list-panes -t "${CURRENT_SESSION}:${CURRENT_WINDOW}" -F '#{pane_in
 FIRST_DIR="${PANE_DIRS[0]:-$HOME}"
 [[ -d "$FIRST_DIR" ]] || FIRST_DIR="$HOME"
 
-# create new window with same name
-tmux new-window -t "$CURRENT_SESSION" -n "$WINDOW_NAME" -c "$FIRST_DIR"
+# create new window with same name. the trailing ':' keeps the target
+# session-scoped: a bare name resolves to a window called that instead, pinning
+# the new window to an occupied index and failing with "index in use"
+tmux new-window -t "${CURRENT_SESSION}:" -n "$WINDOW_NAME" -c "$FIRST_DIR"
 NEW_WINDOW=$(tmux display-message -p '#{window_index}')
 
 # create additional panes (we need PANE_COUNT - 1 splits)

@@ -86,7 +86,7 @@ fi
 tmux new-session -d -s "$session" -n "zsh" -c "$dir"
 
 # Window 2: nvim
-tmux new-window -t "$session" -n "nvim" -c "$dir"
+tmux new-window -t "$session:" -n "nvim" -c "$dir"
 tmux send-keys -t "$session:nvim" 'nvim' Enter
 
 # Window 3: claude (unnamed so automatic-rename-format kebab-cases claude's
