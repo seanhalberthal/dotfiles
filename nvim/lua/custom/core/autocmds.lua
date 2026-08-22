@@ -84,17 +84,32 @@ function M.setup()
   -- agent edits the file, so the FocusGained checktime above can silently
   -- reload via `autoread` instead of prompting.
   local autosave_group = vim.api.nvim_create_augroup('auto-save', { clear = true })
+  local autosaving = false
   vim.api.nvim_create_autocmd({ 'InsertLeave', 'TextChanged', 'FocusLost', 'BufLeave' }, {
     desc = 'Auto-save on text change or focus loss',
     group = autosave_group,
     callback = function(ev)
       local buf = ev.buf
       -- only save if: buffer is modifiable, has a file, is modified, and not a special buffer
-      if vim.bo[buf].modifiable and vim.bo[buf].modified and vim.fn.bufname(buf) ~= '' and vim.bo[buf].buftype == '' then
+      if autosaving or not (vim.bo[buf].modifiable and vim.bo[buf].modified and vim.fn.bufname(buf) ~= '' and vim.bo[buf].buftype == '') then
+        return
+      end
+      autosaving = true
+      pcall(function()
         vim.api.nvim_buf_call(buf, function()
           vim.cmd 'silent! write'
         end)
-      end
+        -- autocmds don't nest, so a `:write` from in here emits no write events at
+        -- all and everything keyed on BufWritePost silently stops seeing saves.
+        -- neotest re-discovers a file's test positions there, so without this its
+        -- table test cases only ever refresh when the buffer is first opened.
+        -- re-emitted rather than switching the autocmd to `nested`, which would
+        -- also re-run BufWritePre (format-on-save) on every keystroke-level edit
+        if not vim.bo[buf].modified then
+          vim.api.nvim_exec_autocmds('BufWritePost', { buffer = buf })
+        end
+      end)
+      autosaving = false
     end,
   })
 
