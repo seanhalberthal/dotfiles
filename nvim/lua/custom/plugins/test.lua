@@ -233,6 +233,12 @@ return {
       output = {
         open_on_run = false,
       },
+      -- neotest's quickfix consumer is on by default and pushes a fresh
+      -- untitled list on every failing run, which drops the forward half of
+      -- the qf stack and pauses the live <leader>xx diagnostics sync (it only
+      -- rebuilds while the current list is titled `Diagnostics: all`). the
+      -- summary, signs and ]t/[t jump-to-failed cover the same ground
+      quickfix = { enabled = false },
       floating = {
         border = 'rounded',
         max_height = 0.7,
@@ -250,6 +256,17 @@ return {
         unknown = '?',
       },
     }
+
+    -- the diagnostic consumer publishes failures as real ERROR diagnostics, so
+    -- a failing test drew an error squiggle and an error sign and read as a
+    -- file that doesn't compile. keep the message (virtual_lines still puts it
+    -- on the failing assertion) but drop both markers: neotest's own ✗ status
+    -- sign already owns the gutter cell (priority 1000 against the diagnostic
+    -- sign's 10). the statusline counts this namespace separately, as ✗N rather
+    -- than EN, and the <leader>xx list filters it out; see features/statusline.lua
+    -- and features/lists.lua. neotest-golang sets severity per error, so
+    -- `diagnostic.severity` above wouldn't reach these
+    vim.diagnostic.config({ underline = false, signs = false }, vim.api.nvim_create_namespace 'neotest')
 
     -- close output preview on any keypress for a transient popup feel
     vim.api.nvim_create_autocmd('FileType', {

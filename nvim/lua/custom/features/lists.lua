@@ -3,6 +3,11 @@
 
 local M = {}
 
+-- neotest's diagnostic namespace, resolved by name so this doesn't pull
+-- neotest in. failed tests are diagnostics but not code problems, and mixing
+-- them into the diagnostics lists made a red suite look like a broken build
+local neotest_ns = vim.api.nvim_create_namespace 'neotest'
+
 local function toggle_quickfix()
   for _, win in ipairs(vim.fn.getwininfo()) do
     if win.quickfix == 1 and win.loclist == 0 then
@@ -161,7 +166,7 @@ local function diags_to_items(diagnostics)
     -- they'd sit in the live list indefinitely. displayed buffers keep
     -- theirs (the full pass has run; entries are real). the predicate is
     -- shared with diag-scan's batch snapshot
-    if d.bufnr and d.lnum and not scan_runner.in_library(d) and not scan_runner.is_generated(d) then
+    if d.bufnr and d.lnum and d.namespace ~= neotest_ns and not scan_runner.in_library(d) and not scan_runner.is_generated(d) then
       local hidden_phantom = scan_ignored(d) and #vim.fn.win_findbuf(d.bufnr) == 0
       if not hidden_phantom then
         local item = scan_runner.diag_to_item(d)
