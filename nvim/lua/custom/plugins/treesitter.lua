@@ -38,6 +38,13 @@ return {
         'awk',
         'toml',
         'razor',
+        -- injection-only: go's injections.scm pulls regex into
+        -- regexp.MustCompile args. printf is deliberately absent from this
+        -- list: that grammar is c-shaped, and go's %t and %w are c length
+        -- modifiers rather than conversions, so the parser reads them as
+        -- incomplete specifiers and runs the node on to the next conversion
+        -- character, swallowing the text in between
+        'regex',
       }
 
       -- purge stale/bundled parsers before installing (ABI-mismatch guard)
@@ -79,6 +86,9 @@ return {
           end
         end,
       })
+
+      -- go format verbs, which no query can reach: see the module header
+      require('custom.features.go-format-verbs').setup()
 
       -- register language aliases for markdown code fence highlighting
       vim.treesitter.language.register('c_sharp', { 'csharp', 'cs' })

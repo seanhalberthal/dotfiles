@@ -293,6 +293,12 @@ return {
           gopls = {
             -- restrict workspace/symbol to our own modules, not deps in ~/go/pkg/mod
             symbolScope = 'workspace',
+            -- gopls sends one `string` token per literal at semantic-token
+            -- priority 125, burying treesitter's @string.escape and
+            -- @string.regexp at 100. all it carries that treesitter does not is
+            -- a `format` modifier on printf verbs, which no theme here styles,
+            -- and custom.features.go-format-verbs marks those anyway
+            semanticTokenTypes = { string = false },
             codelenses = {
               generate = true,
               regenerate_cgo = true,
