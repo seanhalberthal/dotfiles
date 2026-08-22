@@ -50,6 +50,24 @@ return {
       -- purge stale/bundled parsers before installing (ABI-mismatch guard)
       require('custom.features.treesitter-parsers').purge_if_updated()
 
+      -- the go grammar hardcodes new/make's first argument as a type, so go
+      -- 1.26's new(expr) is a syntax error to the parser. the errors cascade:
+      -- past the first few the file collapses into ERROR nodes, taking
+      -- highlighting, folds and neotest's test discovery with it. this is the
+      -- open upstream pr for it (tree-sitter-go#193), one commit on top of the
+      -- revision nvim-treesitter already pins; drop the entry once it merges.
+      -- it costs `new[i]` on a variable shadowing the builtin, which the
+      -- grammar mis-parses in the other direction (tree-sitter-go#189)
+      require('custom.features.treesitter-parsers').sync_pins {
+        go = {
+          -- the commit lives on a fork, but it is the head of an open pr, so
+          -- upstream holds a ref to it and serves it too; fetching from there
+          -- keeps the pin working if the fork is ever deleted or renamed
+          url = 'https://github.com/tree-sitter/tree-sitter-go',
+          revision = '5a6af13a0a5b45bc76cac289c783b315b2b74e13',
+        },
+      }
+
       -- install any parsers from the list that aren't already on disk, or whose
       -- highlights query file isn't on runtimepath (a stray/legacy parser binary
       -- can satisfy `language.inspect` while shipping no query). a file existence
