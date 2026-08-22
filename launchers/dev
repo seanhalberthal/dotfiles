@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# @description: Dev session - Claude + Neovim
-# Dev session launcher - creates a 3-window layout for development
+# @description: Dev session - Shell + Neovim
+# Dev session launcher - creates a 2-window layout for development
 # Invoked via the launcher picker (prefix + p) with a directory argument.
 
 # Help flag handling
@@ -14,10 +14,9 @@ USAGE:
     dev <DIRECTORY>
 
 DESCRIPTION:
-    Creates or attaches to a tmux development session with a 3-window layout:
+    Creates or attaches to a tmux development session with a 2-window layout:
       • Window 1 (zsh): Terminal
       • Window 2 (nvim): Neovim editor
-      • Window 3 (claude): Claude Code (tab auto-named from its title)
 
     The session name is derived from the directory basename.
     Use the launcher picker (prefix + p) to select a directory.
@@ -32,7 +31,6 @@ NOTES:
     • If a session with the same name exists, attaches to it instead
     • Session names are sanitised (alphanumeric, underscore, dash only)
     • Works both inside and outside of tmux (uses switch-client vs attach-session)
-    • Claude Code is launched via the 'claude' CLI command
 EOF
     exit 0
 fi
@@ -89,14 +87,9 @@ tmux new-session -d -s "$session" -n "zsh" -c "$dir"
 tmux new-window -t "$session:" -n "nvim" -c "$dir"
 tmux send-keys -t "$session:nvim" 'nvim' Enter
 
-# Window 3: claude (unnamed so automatic-rename-format kebab-cases claude's
-# OSC title; passing -n would pin the rename flag off and freeze the tab)
-code_win=$(tmux new-window -t "$session" -P -F '#{window_id}' -c "$dir")
-tmux send-keys -t "$code_win" 'claude' Enter
-
-# Select first window
-tmux select-window -t "$session:1"
-tmux select-pane -t "$session:1.1"
+# Select neovim window
+tmux select-window -t "$session:nvim"
+tmux select-pane -t "$session:nvim.1"
 
 # Attach to session
 if [[ -n "${TMUX:-}" ]]; then

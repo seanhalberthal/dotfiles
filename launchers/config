@@ -19,7 +19,7 @@ DESCRIPTION:
     opened in ~/.config.
 
 WINDOWS:
-    1. nvim   Neovim with Neo-tree
+    1. nvim   Neovim in oil
 
 OPTIONS:
     -h, --help   Show this help message
@@ -46,7 +46,7 @@ if tmux has-session -t "$SESSION" 2>/dev/null; then
     exit 0
 fi
 
-# Window 1: nvim (opening directory triggers Neo-tree)
+# Window 1: nvim (opening directory triggers oil)
 tmux new-session -d -s "$SESSION" -n "nvim" -c "$PROJECT_DIR"
 tmux send-keys -t "$SESSION:nvim" "nvim ." Enter
 
