@@ -14,6 +14,14 @@ local ns = vim.api.nvim_create_namespace 'go-format-verbs'
 -- above semantic tokens (125) so a server's string token can't cover a verb
 local PRIORITY = 126
 
+-- verbs take the escape-sequence colour, so `%d` and the `\n` next to it read
+-- as the same class of thing in every theme.
+local HL_GROUP = '@string.special.format'
+
+local function link_default()
+  vim.api.nvim_set_hl(0, HL_GROUP, { link = '@string.escape', default = true })
+end
+
 local VERBS = {}
 for ch in ('vTtbcdoOqxXUeEfFgGspw'):gmatch '.' do
   VERBS[ch] = true
@@ -123,7 +131,7 @@ local function mark(buf, node)
     for _, range in ipairs(verb_ranges(line)) do
       pcall(vim.api.nvim_buf_set_extmark, buf, ns, srow + k - 1, base + range[1], {
         end_col = base + range[2],
-        hl_group = '@string.special',
+        hl_group = HL_GROUP,
         priority = PRIORITY,
       })
     end
@@ -204,6 +212,14 @@ end
 
 function M.setup()
   local group = vim.api.nvim_create_augroup('go-format-verbs', { clear = true })
+
+  link_default()
+
+  vim.api.nvim_create_autocmd('ColorScheme', {
+    desc = 'Restore the Go format verb highlight link',
+    group = group,
+    callback = link_default,
+  })
 
   vim.api.nvim_create_autocmd('FileType', {
     desc = 'Highlight Go format verbs',

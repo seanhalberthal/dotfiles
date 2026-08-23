@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.2.140] - 2026-08-23
+
+### Changed
+
+- Go format verbs take the escape-sequence colour rather than `@string.special`. Seven of the fifteen colourschemes here paint `@string.escape` and `@string.special` the same, so a verb tracked the escapes beside it in those and drifted to an unrelated accent in the rest; `%d` and the `\n` next to it are now the same colour in every theme, generated ones included. The verbs are marked with `@string.special.format`, linked to `@string.escape` with `default = true` so a theme can still override the group without any of them having to define it, and the link is re-applied on `ColorScheme` since a colourscheme's `highlight clear` drops it. `nvim/lua/custom/features/go-format-verbs.lua`
+
 ## [0.2.139] - 2026-08-21
 
 ### Added
