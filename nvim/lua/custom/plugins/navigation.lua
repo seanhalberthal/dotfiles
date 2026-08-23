@@ -71,7 +71,10 @@ return {
       return vim.tbl_deep_extend('force', {
         default_file_explorer = true,
         columns = { 'icon' },
-        view_options = { show_hidden = true },
+        -- `sort` names the `notedate` column registered in config below; oil
+        -- resolves sort columns lazily at render time, so registration order
+        -- against this table doesn't matter
+        view_options = { show_hidden = true, sort = require('custom.features.dated-notes').oil_sort },
         keymaps = {
           ['-'] = { mode = 'n', callback = oil_close },
           ['<BS>'] = { 'actions.parent', mode = 'n' },
@@ -79,6 +82,10 @@ return {
           ['go'] = { 'actions.parent', mode = 'n' },
         },
       }, vim.g.oil_opts or {})
+    end,
+    config = function(_, opts)
+      require('oil').setup(opts)
+      require('custom.features.dated-notes').setup_oil()
     end,
   },
 

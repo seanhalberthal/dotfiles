@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.2.141] - 2026-08-23
+
+### Added
+
+- Note directories whose filenames carry a `DD-MM-YYYY` stamp list newest-first in oil, and `]f`/`[f` walk them by date instead of alphabetically. Dated notes are named for the day they cover, so the default listing sorted them by day-of-month: every 3rd sat above every 22nd regardless of year, and `]f` stepped through that same order. oil resolves its sort through columns that are handed one entry at a time, with no bufnr and no parent path, so a per-directory sort spec isn't expressible; the ordering is keyed off the filename instead and the per-directory behaviour follows from it, a directory of dated names orders by date and a directory with none ties on the sentinel and falls through to the existing name sort untouched. Undated siblings sort above the dated stream rather than below it, which keeps a directory's index and topic notes at the top where they were rather than burying them beneath a hundred dated files. `]f` moves forward in time, so it opens a newer note than the one below the cursor in oil's newest-first listing, and only files that are themselves dated get the shadowed mapping, leaving index notes on mini.bracketed's own directory walk. The stamp is matched anywhere in the basename, so emoji-prefixed names work alongside bare ones. `nvim/lua/custom/features/dated-notes.lua`, `nvim/lua/custom/plugins/navigation.lua`, `nvim/lua/custom/plugins/mini.lua`, `nvim/cheatsheet.txt`
+
+### Fixed
+
+- The cheatsheet's bracketed rows listed `]F`/`[F` as next/prev file; those are first/last file, and next/prev is `]f`/`[f`. `nvim/cheatsheet.txt`
+
 ## [0.2.140] - 2026-08-23
 
 ### Changed
