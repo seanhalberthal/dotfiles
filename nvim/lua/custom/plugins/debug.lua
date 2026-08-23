@@ -76,6 +76,17 @@ return {
       end,
       desc = '[B]reakpoint [L]ist',
     },
+    {
+      '<leader>bw',
+      '<Cmd>DapViewWatch<CR>',
+      desc = '[W]atch expression',
+    },
+    {
+      '<leader>bw',
+      ':DapViewWatch<CR>',
+      mode = 'v',
+      desc = '[W]atch selection',
+    },
   },
   config = function()
     local dap = require 'dap'
@@ -116,6 +127,17 @@ return {
           -- Go's delve uses an external terminal; no point reserving a split
           hide = { 'go' },
         },
+      },
+      -- `o` alongside `<CR>` for expand/jump in every view; threads' default
+      -- `o` (invert_filter) moves to `O`
+      keymaps = {
+        scopes = { toggle = { '<CR>', 'o', '<2-LeftMouse>' } },
+        watches = { toggle = { '<CR>', 'o', '<2-LeftMouse>' } },
+        hover = { toggle = { '<CR>', 'o', '<2-LeftMouse>' } },
+        threads = { invert_filter = 'O', jump_to_frame = { '<CR>', 'o', '<2-LeftMouse>' } },
+        exceptions = { toggle_filter = { '<CR>', 'o', '<2-LeftMouse>' } },
+        sessions = { switch_session = { '<CR>', 'o', '<2-LeftMouse>' } },
+        breakpoints = { jump_to_breakpoint = { '<CR>', 'o', '<2-LeftMouse>' } },
       },
       -- inline variable values next to code (like Rider/GoLand). dap-view's
       -- own implementation, registered against dap's `variables` event, so it

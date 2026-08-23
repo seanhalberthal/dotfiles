@@ -100,6 +100,13 @@ return {
       end,
       broad_search = true,
       lock_target = true,
+      -- let the server watch files instead of nvim. on `auto`, roslyn registers
+      -- ~500 didChangeWatchedFiles watchers for a solution, and on macOS each is
+      -- an FSEvents handle that costs ~1.2ms to tear down: `Client:stop` cancels
+      -- them all before it can exit, so every `:q` in a .NET repo paid ~560ms.
+      -- `roslyn` advertises dynamicRegistration=false, so nvim registers none and
+      -- the server keeps its own watch (unlike `off`, which watches nothing)
+      filewatching = 'roslyn',
     },
     init = function()
       vim.g.loaded_roslyn_plugin = true

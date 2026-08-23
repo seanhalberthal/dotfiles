@@ -84,17 +84,32 @@ function M.setup()
   -- agent edits the file, so the FocusGained checktime above can silently
   -- reload via `autoread` instead of prompting.
   local autosave_group = vim.api.nvim_create_augroup('auto-save', { clear = true })
+  local autosaving = false
   vim.api.nvim_create_autocmd({ 'InsertLeave', 'TextChanged', 'FocusLost', 'BufLeave' }, {
     desc = 'Auto-save on text change or focus loss',
     group = autosave_group,
     callback = function(ev)
       local buf = ev.buf
       -- only save if: buffer is modifiable, has a file, is modified, and not a special buffer
-      if vim.bo[buf].modifiable and vim.bo[buf].modified and vim.fn.bufname(buf) ~= '' and vim.bo[buf].buftype == '' then
+      if autosaving or not (vim.bo[buf].modifiable and vim.bo[buf].modified and vim.fn.bufname(buf) ~= '' and vim.bo[buf].buftype == '') then
+        return
+      end
+      autosaving = true
+      pcall(function()
         vim.api.nvim_buf_call(buf, function()
           vim.cmd 'silent! write'
         end)
-      end
+        -- autocmds don't nest, so a `:write` from in here emits no write events at
+        -- all and everything keyed on BufWritePost silently stops seeing saves.
+        -- neotest re-discovers a file's test positions there, so without this its
+        -- table test cases only ever refresh when the buffer is first opened.
+        -- re-emitted rather than switching the autocmd to `nested`, which would
+        -- also re-run BufWritePre (format-on-save) on every keystroke-level edit
+        if not vim.bo[buf].modified then
+          vim.api.nvim_exec_autocmds('BufWritePost', { buffer = buf })
+        end
+      end)
+      autosaving = false
     end,
   })
 
@@ -119,53 +134,6 @@ function M.setup()
     pattern = vim.env.HOME .. '/obsidian/*',
     callback = function()
       vim.bo.backupcopy = 'yes'
-    end,
-  })
-
-  -- auto-show diagnostic float on cursor hold; hide virtual_text while float is open
-  local diag_float_group = vim.api.nvim_create_augroup('diagnostic-float', { clear = true })
-  local vtext_hidden = false
-
-  -- close any diagnostic float we previously opened. open_float's own
-  -- close_events are racy (they miss window/buffer switches and can orphan the
-  -- window if a new CursorHold re-opens before the one-shot close fires), so we
-  -- track the handle ourselves and close it deterministically.
-  local function close_diag_float()
-    local win = vim.b._diag_float_win
-    if win and vim.api.nvim_win_is_valid(win) then
-      pcall(vim.api.nvim_win_close, win, true)
-    end
-    vim.b._diag_float_win = nil
-  end
-
-  vim.api.nvim_create_autocmd('CursorHold', {
-    desc = 'Show diagnostic float and suppress virtual text',
-    group = diag_float_group,
-    callback = function()
-      -- skip diagnostic float while LSP hover is open
-      if vim.b._hover_open then
-        return
-      end
-      close_diag_float()
-      local _, win = vim.diagnostic.open_float(nil, { focusable = false, scope = 'cursor' })
-      if win then
-        vim.b._diag_float_win = win
-        vtext_hidden = true
-        vim.diagnostic.config { virtual_text = false }
-      end
-    end,
-  })
-
-  vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI', 'InsertEnter', 'BufLeave', 'WinLeave' }, {
-    desc = 'Close diagnostic float and restore virtual text',
-    group = diag_float_group,
-    callback = function()
-      vim.b._hover_open = nil
-      close_diag_float()
-      if vtext_hidden then
-        vtext_hidden = false
-        vim.diagnostic.config { virtual_text = { source = 'if_many', spacing = 2 } }
-      end
     end,
   })
 
@@ -317,10 +285,14 @@ function M.setup()
         client:stop(true)
       end
 
-      -- terminate debug adapter if running
-      pcall(function()
-        require('dap').terminate()
-      end)
+      -- terminate debug adapter if running. only when dap is already loaded:
+      -- requiring it here pulls the whole plugin in at exit (~18ms) just to
+      -- terminate a session that cannot exist if it was never loaded
+      if package.loaded['dap'] then
+        pcall(function()
+          require('dap').terminate()
+        end)
+      end
 
       -- close all terminal buffers (forces child process termination)
       for _, buf in ipairs(vim.api.nvim_list_bufs()) do
@@ -331,26 +303,60 @@ function M.setup()
     end,
   })
 
-  -- clean up unnamed empty buffers when opening a file
-  -- removes the default [No Name] buffer that nvim creates at startup
-  -- deferred via vim.schedule to avoid interfering with plugin layout creation
-  -- (a plugin's window-splitting during layout setup can trigger BufEnter mid-layout)
+  -- clean up unnamed empty buffers when opening a file: the default [No Name]
+  -- buffer nvim creates at startup, and the blank landing buffers left behind
+  -- when something closes over one. only a buffer that was created unnamed can
+  -- ever qualify, so track those and check just them on entry; rescanning every
+  -- open buffer on every BufEnter costs O(buffers) per keystroke-ish event. the
+  -- check re-validates, so a tracked buffer that has since been named, filled or
+  -- given a buftype drops out of the set on the next pass
   local cleanup_group = vim.api.nvim_create_augroup('cleanup-empty-buffers', { clear = true })
+  local unnamed = {}
+
+  local function track(buf)
+    if vim.api.nvim_buf_is_valid(buf) and vim.fn.bufname(buf) == '' then
+      unnamed[buf] = true
+    end
+  end
+
+  -- the startup [No Name] buffer predates this autocmd, so seed from the list
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    track(buf)
+  end
+
+  vim.api.nvim_create_autocmd({ 'BufNew', 'BufAdd' }, {
+    desc = 'Track unnamed buffers as deletion candidates',
+    group = cleanup_group,
+    callback = function(args)
+      track(args.buf)
+    end,
+  })
+
+  local function is_disposable(buf)
+    return vim.api.nvim_buf_is_valid(buf)
+      and vim.fn.bufname(buf) == ''
+      and vim.api.nvim_buf_line_count(buf) == 1
+      and vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] == ''
+      and not vim.bo[buf].modified
+      and vim.bo[buf].buftype == ''
+  end
+
   vim.api.nvim_create_autocmd('BufEnter', {
     desc = 'Delete unnamed empty buffers',
     group = cleanup_group,
     callback = function()
+      if next(unnamed) == nil then
+        return
+      end
+      -- deferred via vim.schedule to avoid interfering with plugin layout creation
+      -- (a plugin's window-splitting during layout setup can trigger BufEnter mid-layout)
       vim.schedule(function()
-        for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-          if
-            vim.api.nvim_buf_is_valid(buf)
-            and vim.fn.bufname(buf) == ''
-            and vim.api.nvim_buf_line_count(buf) == 1
-            and vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] == ''
-            and not vim.bo[buf].modified
-            and buf ~= vim.api.nvim_get_current_buf()
-            and vim.bo[buf].buftype == ''
-          then
+        local current = vim.api.nvim_get_current_buf()
+        for buf in pairs(unnamed) do
+          if not is_disposable(buf) then
+            unnamed[buf] = nil
+          elseif buf ~= current then
+            unnamed[buf] = nil
             vim.api.nvim_buf_delete(buf, { force = true })
           end
         end

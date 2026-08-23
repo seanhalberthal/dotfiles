@@ -35,10 +35,15 @@ listed here — they are supplied on demand by `lazydev.nvim`
 word appears in a lua buffer, giving `K` hover and completion for those globals. This is
 why `.luarc.json` must **not** declare `workspace.library`: lua_ls treats `.luarc.json` as
 authoritative, so a static `workspace.library` would override the libraries lazydev pushes
-through the client and break hover (lazydev's own README recommends disabling it when a
-`.luarc.json` with a library is present). To add hover for another plugin, add a
-`{ path = '<plugin>', words = { '<Global>' } }` entry in `lazydev.lua` — not a library path
-here. Partial plugin-opts tables that trip `missing-fields` (e.g. `Snacks.dashboard.open`)
+through the client (lazydev's own README recommends disabling it when a `.luarc.json` with
+a library is present). The damage reaches past hover: in any project whose `.luarc.json`
+declares `workspace.library`, lua_ls stops resolving that project's own `require`d modules,
+so `gd` on a cross-file symbol reports "No definitions found" while same-file lookups still
+work. Any entry triggers it, including a lone `${3rd}` one. To add hover for another plugin,
+add a `{ path = '<plugin>', words = { '<Global>' } }` entry in `lazydev.lua` — not a library
+path here; third-party libraries (`${3rd}/busted`, `${3rd}/luassert`) go there for the same
+reason. `words` are matched with a bare substring find, so a trigger has to be long enough
+not to fire inside ordinary identifiers. Partial plugin-opts tables that trip `missing-fields` (e.g. `Snacks.dashboard.open`)
 get an inline `---@diagnostic disable-next-line: missing-fields` at the call site rather
 than a blanket disable, so the check still catches real omissions elsewhere.
 

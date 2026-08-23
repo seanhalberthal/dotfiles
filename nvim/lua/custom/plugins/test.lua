@@ -49,6 +49,65 @@ local function neotest_fn(fn)
   end
 end
 
+--- neotest parses with nvim's default 256 in-progress tree-sitter match cap, and
+--- past it the earliest-starting matches are dropped, so long table-driven tests
+--- are silently truncated to their tail (43 cases for a keyed `tt := []struct{}`
+--- table, 84 for map and unkeyed shapes). neotest takes a match_limit, but no
+--- adapter passes one
+local function raise_treesitter_match_limit()
+  local ok, ts = pcall(require, 'neotest.lib.treesitter')
+  if not ok or ts.match_limit_raised then
+    return
+  end
+  local parse_positions = ts.parse_positions
+  ts.parse_positions = function(path, query, opts)
+    return parse_positions(path, query, vim.tbl_extend('keep', opts or {}, { match_limit = 100000 }))
+  end
+  ts.match_limit_raised = true
+end
+
+--- neotest-golang keys its per-file discovery cache on whole-second mtime, so a
+--- second write inside the same second is served the stale tree, and nothing
+--- expires it afterwards. autosave writes on every normal-mode edit (see
+--- core/autocmds.lua), so deleting table test cases strands them in the summary.
+--- re-key on the full stat signature, captured before the parse: a write landing
+--- mid-parse then leaves the entry stamped stale rather than fresh, costing a
+--- re-parse instead of serving stale positions
+local function fix_golang_discovery_cache()
+  local ok, cache = pcall(require, 'neotest-golang.lib.discovery_cache')
+  if not ok or type(cache.get) ~= 'function' or type(cache.set) ~= 'function' then
+    return
+  end
+  local store = {} ---@type table<string, {tree: neotest.Tree|nil, sig: string|nil}>
+  local pending = {} ---@type table<string, string|nil>
+  local function signature(path)
+    local stat = vim.uv.fs_stat(path)
+    return stat and string.format('%d:%d:%d', stat.mtime.sec, stat.mtime.nsec, stat.size) or nil
+  end
+  cache.get = function(path)
+    local sig = signature(path)
+    pending[path] = sig
+    local entry = store[path]
+    if entry and sig and entry.sig == sig then
+      return entry.tree
+    end
+    return nil
+  end
+  cache.set = function(path, tree)
+    store[path] = { tree = tree, sig = pending[path] }
+  end
+  cache.invalidate = function(path)
+    store[path] = nil
+  end
+  cache.clear = function()
+    store, pending = {}, {}
+  end
+  cache.stats = function()
+    local files = vim.tbl_keys(store)
+    return { size = #files, files = files }
+  end
+end
+
 return {
   'nvim-neotest/neotest',
   dependencies = {
@@ -109,10 +168,14 @@ return {
     },
   },
   config = function()
+    raise_treesitter_match_limit()
+    fix_golang_discovery_cache()
+
     require('neotest').setup {
       adapters = {
         require 'neotest-golang' {
           go_test_args = { '-v', '-count=1' },
+          warn_test_name_dupes = false,
         },
         require 'neotest-vitest' {
           vitestCommand = function(path)
@@ -170,6 +233,12 @@ return {
       output = {
         open_on_run = false,
       },
+      -- neotest's quickfix consumer is on by default and pushes a fresh
+      -- untitled list on every failing run, which drops the forward half of
+      -- the qf stack and pauses the live <leader>xx diagnostics sync (it only
+      -- rebuilds while the current list is titled `Diagnostics: all`). the
+      -- summary, signs and ]t/[t jump-to-failed cover the same ground
+      quickfix = { enabled = false },
       floating = {
         border = 'rounded',
         max_height = 0.7,
@@ -187,6 +256,17 @@ return {
         unknown = '?',
       },
     }
+
+    -- the diagnostic consumer publishes failures as real ERROR diagnostics, so
+    -- a failing test drew an error squiggle and an error sign and read as a
+    -- file that doesn't compile. keep the message (virtual_lines still puts it
+    -- on the failing assertion) but drop both markers: neotest's own ✗ status
+    -- sign already owns the gutter cell (priority 1000 against the diagnostic
+    -- sign's 10). the statusline counts this namespace separately, as ✗N rather
+    -- than EN, and the <leader>xx list filters it out; see features/statusline.lua
+    -- and features/lists.lua. neotest-golang sets severity per error, so
+    -- `diagnostic.severity` above wouldn't reach these
+    vim.diagnostic.config({ underline = false, signs = false }, vim.api.nvim_create_namespace 'neotest')
 
     -- close output preview on any keypress for a transient popup feel
     vim.api.nvim_create_autocmd('FileType', {

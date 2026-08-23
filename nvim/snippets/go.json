@@ -1,0 +1,7 @@
+{
+  "table driven test": {
+    "prefix": "tdt",
+    "body": "func Test$1(t *testing.T) {\n\ttests := []struct {\n\t\tname string\n\t\t$2\n\t}{\n\t\t{\n\t\t\tname: \"$3\",\n\t\t\t$4\n\t\t},\n\t}\n\tfor _, tt := range tests {\n\t\tt.Run(tt.name, func(t *testing.T) {\n\t\t\t$0\n\t\t})\n\t}\n}",
+    "description": "Snippet for table driven test"
+  }
+}

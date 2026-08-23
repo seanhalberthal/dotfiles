@@ -64,7 +64,10 @@ function M.setup()
 
   -- whitespace characters
   vim.o.list = true
-  vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+  -- blank tab: indent-blankline draws leading indentation, so a glyph here only
+  -- shows up where ibl doesn't paint. two spaces, not omitted; omitting it with
+  -- `list` on falls back to `^I`
+  vim.opt.listchars = { tab = '  ', trail = '·', nbsp = '␣' }
 
   -- live substitution preview
   vim.o.inccommand = 'split'

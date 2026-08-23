@@ -53,14 +53,16 @@ return {
       keymap = {
         preset = 'default',
         ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
-        ['<C-e>'] = { 'hide', 'fallback' },
+        -- cancel rather than hide: auto_insert previews the selected item into
+        -- the buffer, and only cancel undoes that, so the typed text survives
+        ['<C-e>'] = { 'cancel', 'fallback' },
         ['<CR>'] = { 'select_and_accept', 'fallback' },
         -- Shift+Enter (Ghostty sends ESC+CR = M-CR) inserts a literal newline
         -- without accepting the visible completion item
         ['<M-CR>'] = {
           function(cmp)
             if cmp.is_visible() then
-              cmp.hide()
+              cmp.cancel()
             end
             vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<CR>', true, false, true), 'n', false)
             return true
@@ -133,8 +135,25 @@ return {
             async = true,
             score_offset = 100,
           },
-          snippets = { score_offset = -3 },
-          buffer = { score_offset = -5 },
+          snippets = {
+            score_offset = -3,
+            -- nvim/snippets is scanned ahead of friendly-snippets, so keeping the
+            -- first item for a prefix lets a local json file override one upstream
+            -- snippet without taking over the whole filetype
+            transform_items = function(_, items)
+              local seen, out = {}, {}
+              for _, item in ipairs(items) do
+                if not seen[item.label] then
+                  seen[item.label] = true
+                  out[#out + 1] = item
+                end
+              end
+              return out
+            end,
+          },
+          -- short keywords are where buffer words are noisiest: a 3-char query
+          -- fuzzy-matches unrelated identifiers and gets preselected
+          buffer = { score_offset = -5, min_keyword_length = 4 },
         },
       },
       cmdline = {

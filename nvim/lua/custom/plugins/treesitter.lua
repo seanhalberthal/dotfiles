@@ -38,10 +38,35 @@ return {
         'awk',
         'toml',
         'razor',
+        -- injection-only: go's injections.scm pulls regex into
+        -- regexp.MustCompile args. printf is deliberately absent from this
+        -- list: that grammar is c-shaped, and go's %t and %w are c length
+        -- modifiers rather than conversions, so the parser reads them as
+        -- incomplete specifiers and runs the node on to the next conversion
+        -- character, swallowing the text in between
+        'regex',
       }
 
       -- purge stale/bundled parsers before installing (ABI-mismatch guard)
       require('custom.features.treesitter-parsers').purge_if_updated()
+
+      -- the go grammar hardcodes new/make's first argument as a type, so go
+      -- 1.26's new(expr) is a syntax error to the parser. the errors cascade:
+      -- past the first few the file collapses into ERROR nodes, taking
+      -- highlighting, folds and neotest's test discovery with it. this is the
+      -- open upstream pr for it (tree-sitter-go#193), one commit on top of the
+      -- revision nvim-treesitter already pins; drop the entry once it merges.
+      -- it costs `new[i]` on a variable shadowing the builtin, which the
+      -- grammar mis-parses in the other direction (tree-sitter-go#189)
+      require('custom.features.treesitter-parsers').sync_pins {
+        go = {
+          -- the commit lives on a fork, but it is the head of an open pr, so
+          -- upstream holds a ref to it and serves it too; fetching from there
+          -- keeps the pin working if the fork is ever deleted or renamed
+          url = 'https://github.com/tree-sitter/tree-sitter-go',
+          revision = '5a6af13a0a5b45bc76cac289c783b315b2b74e13',
+        },
+      }
 
       -- install any parsers from the list that aren't already on disk, or whose
       -- highlights query file isn't on runtimepath (a stray/legacy parser binary
@@ -79,6 +104,9 @@ return {
           end
         end,
       })
+
+      -- go format verbs, which no query can reach: see the module header
+      require('custom.features.go-format-verbs').setup()
 
       -- register language aliases for markdown code fence highlighting
       vim.treesitter.language.register('c_sharp', { 'csharp', 'cs' })

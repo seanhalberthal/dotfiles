@@ -7,11 +7,16 @@ local function fg_of(group)
   return vim.api.nvim_get_hl(0, { name = group, link = false }).fg
 end
 
--- snacks only hides the statusline for the dashboard it opens at startup, and
--- restores it the first time another window is entered. a dashboard opened
--- after that (oil_close re-rendering it, say) gets a statusline drawn over it,
--- so mirror the hide on the dashboard's own lifecycle events
-local saved_laststatus
+-- the dashboard reclaims the statusline row by zeroing laststatus, a global
+-- option, so the toggle has to follow focus, not fire once on open. hiding on
+-- open alone leaks both ways: snacks' own startup hide gives up the first time
+-- another window is entered and never returns (`:Differ` opens a tabpage, so
+-- closing it lands back on a dashboard with a statusline over it), while our
+-- own hide followed the live dashboard buffer into every other window. the
+-- focus watcher is created and torn down with the dashboard buffer, so ordinary
+-- editing carries no per-buffer hook
+local saved_laststatus = vim.o.laststatus
+local focus_group = 'SnacksDashboardStatuslineFocus'
 
 local function hide_statusline()
   if vim.o.laststatus ~= 0 then
@@ -21,9 +26,34 @@ local function hide_statusline()
 end
 
 local function restore_statusline()
-  if saved_laststatus then
-    vim.o.laststatus, saved_laststatus = saved_laststatus, nil
+  if vim.o.laststatus == 0 then
+    vim.o.laststatus = saved_laststatus
   end
+end
+
+-- floats are skipped so a picker opened over the dashboard doesn't flip it
+local function sync_statusline()
+  if vim.api.nvim_win_get_config(0).relative ~= '' then
+    return
+  end
+  if vim.bo.filetype == 'snacks_dashboard' then
+    hide_statusline()
+  else
+    restore_statusline()
+  end
+end
+
+local function watch_focus()
+  hide_statusline()
+  vim.api.nvim_create_autocmd({ 'BufEnter', 'WinEnter' }, {
+    group = vim.api.nvim_create_augroup(focus_group, { clear = true }),
+    callback = sync_statusline,
+  })
+end
+
+local function unwatch_focus()
+  pcall(vim.api.nvim_del_augroup_by_name, focus_group)
+  restore_statusline()
 end
 
 --- set dashboard highlight groups by linking to standard vim groups.
@@ -133,12 +163,12 @@ return {
       vim.api.nvim_create_autocmd('User', {
         pattern = 'SnacksDashboardOpened',
         group = statusline_group,
-        callback = hide_statusline,
+        callback = watch_focus,
       })
       vim.api.nvim_create_autocmd('User', {
         pattern = 'SnacksDashboardClosed',
         group = statusline_group,
-        callback = restore_statusline,
+        callback = unwatch_focus,
       })
     end,
   },

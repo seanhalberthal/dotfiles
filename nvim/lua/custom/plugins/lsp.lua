@@ -268,15 +268,20 @@ return {
         exit_timeout = 5000,
       })
 
-      -- override `exit_timeout` to 0 on actual nvim exit so closing the
-      -- editor is instant when .cs buffers are open. VimLeavePre computes
-      -- `max_timeout` from every client's `exit_timeout`; if it's > 100
-      -- it schedules a deferred warning and `vim.wait`s on it. runtime
-      -- `:lsp restart roslyn` still gets the 5s timeout above
+      -- kill every server outright on actual nvim exit, so closing the editor
+      -- never waits on one. nvim's own VimLeavePre handler takes the max
+      -- `exit_timeout` across all clients and `vim.wait`s for them to close
+      -- (with a deferred "Waiting Ns for LSP exit" warning above 100), and a
+      -- server busy enough not to answer burns the whole budget: roslyn's 5s,
+      -- copilot's under a loaded solution. ExitPre runs before that handler,
+      -- and `stop(true)` terminates the process synchronously (SIGTERM via
+      -- rpc.terminate) rather than asking politely and waiting, so nothing is
+      -- left to wait for and nothing is left orphaned either. runtime restarts
+      -- (`:lsp restart roslyn`) still get the per-client timeouts above
       vim.api.nvim_create_autocmd('ExitPre', {
-        desc = 'force-kill roslyn so nvim does not wait on exit',
+        desc = 'force-kill LSP servers so nvim does not wait on exit',
         callback = function()
-          for _, c in pairs(vim.lsp.get_clients { name = 'roslyn' }) do
+          for _, c in pairs(vim.lsp.get_clients()) do
             c.exit_timeout = 0
             c:stop(true)
           end
@@ -288,6 +293,12 @@ return {
           gopls = {
             -- restrict workspace/symbol to our own modules, not deps in ~/go/pkg/mod
             symbolScope = 'workspace',
+            -- gopls sends one `string` token per literal at semantic-token
+            -- priority 125, burying treesitter's @string.escape and
+            -- @string.regexp at 100. all it carries that treesitter does not is
+            -- a `format` modifier on printf verbs, which no theme here styles,
+            -- and custom.features.go-format-verbs marks those anyway
+            semanticTokenTypes = { string = false },
             codelenses = {
               generate = true,
               regenerate_cgo = true,

@@ -3,6 +3,11 @@
 
 local M = {}
 
+-- neotest's diagnostic namespace, resolved by name so this doesn't pull
+-- neotest in. failed tests are diagnostics but not code problems, and mixing
+-- them into the diagnostics lists made a red suite look like a broken build
+local neotest_ns = vim.api.nvim_create_namespace 'neotest'
+
 local function toggle_quickfix()
   for _, win in ipairs(vim.fn.getwininfo()) do
     if win.quickfix == 1 and win.loclist == 0 then
@@ -161,7 +166,7 @@ local function diags_to_items(diagnostics)
     -- they'd sit in the live list indefinitely. displayed buffers keep
     -- theirs (the full pass has run; entries are real). the predicate is
     -- shared with diag-scan's batch snapshot
-    if d.bufnr and d.lnum and not scan_runner.in_library(d) and not scan_runner.is_generated(d) then
+    if d.bufnr and d.lnum and d.namespace ~= neotest_ns and not scan_runner.in_library(d) and not scan_runner.is_generated(d) then
       local hidden_phantom = scan_ignored(d) and #vim.fn.win_findbuf(d.bufnr) == 0
       if not hidden_phantom then
         local item = scan_runner.diag_to_item(d)
@@ -381,6 +386,37 @@ function M.setup()
     vim.cmd('silent grep! -F ' .. arg)
     vim.cmd 'botright copen'
   end, { desc = 'Grep [/] yanked text → quickfix' })
+
+  -- :grep shells grepprg out through :!, so nvim echoes the command line (tmpfile
+  -- path and all), every raw match, then the jump message, and ends on a
+  -- hit-enter prompt. with cmdheight=0 that balloons the cmdline area open and
+  -- collapses it again. rewrite the typed command to its silent form; the
+  -- QuickFixCmdPost hook below puts the list on screen instead.
+  --
+  -- guarded on the cmdline being nothing but the command, so an explicit
+  -- `:silent grep`, a range, or a `:Ggrep` is left alone
+  for _, cmd in ipairs { 'grep', 'grepadd', 'lgrep', 'lgrepadd' } do
+    local abbrev = "cnoreabbrev <expr> %s (getcmdtype() == ':' && getcmdline() ==# '%s') ? 'silent %s' : '%s'"
+    vim.cmd(abbrev:format(cmd, cmd, cmd, cmd))
+  end
+
+  -- :grep fills a list without showing it. cwindow opens the window only when
+  -- there are entries and closes a stale one when there aren't, so it doubles as
+  -- the "open it if it isn't already" the abbreviation above needs. silencing
+  -- swallows the zero-match case whole (grepprg-based :grep emits no E480), so
+  -- that gets its own notify
+  vim.api.nvim_create_autocmd('QuickFixCmdPost', {
+    group = vim.api.nvim_create_augroup('GrepShowList', { clear = true }),
+    pattern = { 'grep', 'grepadd', 'lgrep', 'lgrepadd' },
+    callback = function(ev)
+      local loclist = ev.match:sub(1, 1) == 'l'
+      local count = loclist and #vim.fn.getloclist(0) or #vim.fn.getqflist()
+      vim.cmd(loclist and 'lwindow' or 'botright cwindow')
+      if count == 0 then
+        vim.notify('No matches', vim.log.levels.WARN)
+      end
+    end,
+  })
 
   vim.keymap.set('n', ']q', bracketed_qf 'forward', { desc = 'Next quickfix entry' })
   vim.keymap.set('n', '[q', bracketed_qf 'backward', { desc = 'Previous quickfix entry' })

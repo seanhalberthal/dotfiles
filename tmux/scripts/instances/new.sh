@@ -27,13 +27,18 @@ case "$PROCESS" in
         ;;
 esac
 
-# get current session and directory
-SESSION=$(tmux display-message -p '#{session_name}')
+# session id, not name: 'new-window -t <name>' resolves a window with that name
+# ahead of the session, pinning the new window to an occupied index and failing
+# with "index in use". the trailing ':' keeps the target session-scoped
+SESSION=$(tmux display-message -p '#{session_id}')
 DIR=$(tmux display-message -p '#{pane_current_path}')
 
-# create new window and capture its exact target (avoids name collision
-# when multiple windows share the same name, e.g. several "nvim" windows)
-TARGET=$(tmux new-window -P -F '#{session_name}:#{window_index}' -t "$SESSION" -n "$PROCESS" -c "$DIR")
+# capture the window id so later commands stay unambiguous when several windows
+# share a name, and survive renumber-windows shifting indices underneath us
+if ! TARGET=$(tmux new-window -P -F '#{window_id}' -t "${SESSION}:" -n "$PROCESS" -c "$DIR" 2>&1); then
+    show_error "Could not create $PROCESS window: $TARGET"
+    exit 1
+fi
 
 # claude windows track the session title via the OSC title branch of
 # automatic-rename-format; others stay static. new-window -n disables

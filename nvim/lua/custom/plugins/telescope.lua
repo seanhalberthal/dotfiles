@@ -106,11 +106,13 @@ return {
           find_files = {
             hidden = true,
           },
+          -- --hidden makes rg descend into .git; file_ignore_patterns only
+          -- discards those results afterwards, so exclude the dir up front
           live_grep = {
-            additional_args = { '--hidden' },
+            additional_args = { '--hidden', '--glob=!.git/' },
           },
           grep_string = {
-            additional_args = { '--hidden' },
+            additional_args = { '--hidden', '--glob=!.git/' },
           },
         },
         extensions = {
@@ -192,7 +194,9 @@ return {
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = 'Search [W]ord' })
       vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = 'Search [G]rep' })
       vim.keymap.set('n', '<leader>sG', function()
-        builtin.live_grep { additional_args = { '--hidden', '--fixed-strings' } }
+        -- call-site additional_args replaces the picker default outright
+        -- (shallow tbl_extend), so the .git exclusion has to be repeated here
+        builtin.live_grep { additional_args = { '--hidden', '--glob=!.git/', '--fixed-strings' } }
       end, { desc = 'Search [G]rep (literal)' })
       vim.keymap.set('n', '<leader>sm', function()
         -- same file set as the <leader>xm / <leader>lm scans (features/ticket.lua):

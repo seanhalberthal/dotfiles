@@ -77,6 +77,7 @@ function M.setup()
   require('custom.features.build').setup()
   require('custom.features.binary-view').setup()
   require('custom.features.go').setup()
+  require('custom.features.snippets').setup()
 end
 
 return M

@@ -47,6 +47,7 @@ Search Neovim config | <leader>sn
 Select Telescope picker | <leader>ss
 Grep (literal/fixed-strings) | <leader>sG
 Search git modified files | <leader>sm
+Browse snippets for filetype | <leader>sS
 Search & replace (grug-far) | <leader>sR
 Open cheatsheet | <leader>?
 Telescope: toggle selection, move down | <Tab>
@@ -149,6 +150,8 @@ Branch vs main → diagnostics qf | <leader>xb
 Git ticket commits → diagnostics qf | <leader>xT
 Whole project scan → diagnostics qf | <leader>xS
 Grep yank register → quickfix | <leader>x/
+Grep → quickfix (silent, opens list) | :grep pat
+Grep → quickfix without jumping | :grep! pat
 Filter qf list (keep matching) | :Cfilter /pat/
 Filter qf list (drop matching) | :Cfilter! /pat/
 Filter loclist (keep / drop) | :Lfilter[!] /pat/
@@ -172,7 +175,7 @@ Equalise windows | <leader>w=
 
 ## completion @completion
 Trigger completion | <C-Space>
-Hide completion | <C-e>
+Dismiss completion, restore typed text | <C-e>
 Accept completion | <CR>
 Smart accept (Copilot or completion) | <Tab>
 Accept Copilot word | <M-Tab>
@@ -285,9 +288,15 @@ Toggle breakpoint | <leader>bb
 Conditional breakpoint | <leader>bc
 Logpoint | <leader>bL
 List breakpoints | <leader>bl
+Watch expression | <leader>bw (normal/visual)
 Toggle debug UI | F7
-Watch expression in scopes | w
-Send expression to REPL in scopes | r
+Switch panel section | W / S / T / B / E / R (in panel)
+Next/prev panel section | ]v / [v (in panel)
+Expand/collapse variable | <CR> (scopes/watches)
+Set variable value | s (scopes/watches)
+Add/edit/delete watch | a / e / d (watches)
+Jump to frame or breakpoint | <CR> (threads/breakpoints)
+Panel keymap help | g? (in panel)
 
 ## markdown @markdown
 Toggle todo | <leader>mt

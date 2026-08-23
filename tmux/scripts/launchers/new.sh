@@ -936,7 +936,7 @@ VALIDATE
             printf 'tmux new-session -d -s "$SESSION" -n "%s" -c "$PROJECT_DIR"\n' "$wname"
         else
             printf '\n# Window %d: %s\n' "$((i + 1))" "$wname"
-            printf 'tmux new-window -t "$SESSION" -n "%s" -c "$PROJECT_DIR"\n' "$wname"
+            printf 'tmux new-window -t "$SESSION:" -n "%s" -c "$PROJECT_DIR"\n' "$wname"
         fi
 
         if [[ "$wsplit" == "yes" ]]; then

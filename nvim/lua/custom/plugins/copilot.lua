@@ -27,10 +27,17 @@ return {
       -- that window outlives nvim and reparents to pid 1, still holding its RSS.
       -- under memory pressure that is every session, and the orphans compound the
       -- pressure that caused them. a number makes VimLeavePre wait (exiting early
-      -- once the server closes) and force-stop on timeout
+      -- once the server closes) and force-stop on timeout.
+      --
+      -- the number is what nvim's handler waits, and it takes the max across every
+      -- client, so it sets the floor for `:q`. an idle copilot answers in ~10ms, but
+      -- under a loaded solution (roslyn attached) it never answers inside the window
+      -- and the whole budget is spent: 1000 made every quit in a .NET session cost a
+      -- second. 200 keeps the graceful path on a quiet editor and still force-stops,
+      -- so the orphan protection above is unchanged
       server_opts_overrides = {
         flags = { allow_incremental_sync = false },
-        exit_timeout = 1000,
+        exit_timeout = 200,
       },
       suggestion = {
         enabled = true,

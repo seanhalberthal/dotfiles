@@ -4,6 +4,11 @@
 
 local M = {}
 
+-- neotest's diagnostic consumer namespace, resolved by name so it doesn't
+-- pull neotest in. nvim_create_namespace returns the existing id when one is
+-- already registered, and an empty namespace when it isn't
+local neotest_ns = vim.api.nvim_create_namespace 'neotest'
+
 -- modified/readonly flag suffix, shared by the active content closure and the
 -- inactive section_filename override.
 local function flags()
@@ -82,6 +87,7 @@ local function derive_statusline_hl()
     MiniStatuslineDiagWarn = fg 'DiagnosticWarn',
     MiniStatuslineDiagInfo = fg 'DiagnosticInfo',
     MiniStatuslineDiagHint = fg 'DiagnosticHint',
+    MiniStatuslineTestFail = fg 'NeotestFailed' or fg 'DiagnosticError',
   }
   for name, colour in pairs(groups) do
     vim.api.nvim_set_hl(0, name, { fg = colour })
@@ -240,12 +246,23 @@ function M.setup()
       return ''
     end
     local counts = vim.diagnostic.count(0)
+    -- neotest publishes failed tests into its own namespace as real ERROR
+    -- diagnostics. subtract them from E/W/I/H and give them a ✗ of their own,
+    -- so a red test never reads as a file that doesn't compile
+    local tests = vim.diagnostic.count(0, { namespace = neotest_ns })
     local parts = {}
     for _, spec in ipairs(diag_specs) do
-      local n = counts[spec[1]]
-      if n and n > 0 then
+      local n = (counts[spec[1]] or 0) - (tests[spec[1]] or 0)
+      if n > 0 then
         table.insert(parts, string.format('%%#%s#%s%d', spec[2], spec[3], n))
       end
+    end
+    local failed = 0
+    for _, n in pairs(tests) do
+      failed = failed + n
+    end
+    if failed > 0 then
+      table.insert(parts, string.format('%%#MiniStatuslineTestFail#✗%d', failed))
     end
     if #parts == 0 then
       return ''
