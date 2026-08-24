@@ -170,8 +170,9 @@ apply_theme() {
         if [[ "$quiet" != "true" ]]; then
             theme_info "Theme '$theme_name' not found locally, checking Ghostty themes..."
         fi
-        local generated_name
-        if generated_name=$("$SCRIPT_DIR/generate-theme" "$theme_name" ${quiet:+--quiet}); then
+        local generated_name quiet_flag=""
+        [[ "$quiet" == "true" ]] && quiet_flag="--quiet"
+        if generated_name=$("$SCRIPT_DIR/generate-theme" "$theme_name" $quiet_flag); then
             theme_file="$THEMES_DIR/generated/$generated_name.theme"
         else
             [[ "$quiet" != "true" ]] && theme_error "Theme '$theme_name' not found"

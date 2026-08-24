@@ -241,7 +241,7 @@ if [[ $AUTO_YES -eq 0 ]]; then
 fi
 
 # step 1: install/update Homebrew
-if [[ $SKIP_BREW -eq 0 ]] && ! is_step_skipped "homebrew"; then
+if [[ $SKIP_BREW -eq 0 && $CHECK_ONLY -eq 0 ]] && ! is_step_skipped "homebrew"; then
     print_step 1 "$STEP1_LABEL"
     "$DOTFILES_DIR/scripts/install/install-homebrew.sh"
     record_step "homebrew"
@@ -254,7 +254,9 @@ if [[ $SKIP_BREW -eq 0 ]] && ! is_step_skipped "homebrew"; then
     fi
     echo ""
 else
-    if is_step_skipped "homebrew"; then
+    if [[ $CHECK_ONLY -eq 1 ]]; then
+        print_skip 1 "Homebrew setup" "--check-only"
+    elif is_step_skipped "homebrew"; then
         print_skip 1 "Homebrew" "unchanged"
     else
         print_skip 1 "Homebrew setup" "--skip-brew flag"
@@ -262,13 +264,15 @@ else
 fi
 
 # step 2: install packages from Brewfile
-if [[ $SKIP_BREW -eq 0 ]] && ! is_step_skipped "packages"; then
+if [[ $SKIP_BREW -eq 0 && $CHECK_ONLY -eq 0 ]] && ! is_step_skipped "packages"; then
     print_step 2 "$STEP2_LABEL"
     "$DOTFILES_DIR/scripts/install/install-packages.sh"
     record_step "packages"
     echo ""
 else
-    if is_step_skipped "packages"; then
+    if [[ $CHECK_ONLY -eq 1 ]]; then
+        print_skip 2 "package installation" "--check-only"
+    elif is_step_skipped "packages"; then
         print_skip 2 "packages" "unchanged"
     else
         print_skip 2 "package installation" "--skip-brew flag"
@@ -280,7 +284,9 @@ print_step 3 "Checking prerequisites..."
 if ! "$DOTFILES_DIR/scripts/install/check-prerequisites.sh"; then
     echo ""
     error "Some required tools are missing."
-    if [[ $SKIP_BREW -eq 1 ]]; then
+    if [[ $CHECK_ONLY -eq 1 ]]; then
+        echo "Run './install.sh --core' to install them."
+    elif [[ $SKIP_BREW -eq 1 ]]; then
         echo "Try running without --skip-brew to install missing packages."
     fi
     exit 1
@@ -509,7 +515,9 @@ if [[ -n "${DOTFILES_LOCAL_DIR:-}" || -f "$LOCAL_PTR" ]]; then
     record_step "local-import"
 fi
 
-# clean up rollback state on success
+# clean up rollback state on success. everything below this point is
+# reporting, so the last mutating step has already succeeded
+cleanup_rollback_state
 
 # detect what's already configured to tailor next steps
 has_tmux_plugins=false

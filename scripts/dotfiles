@@ -1295,8 +1295,11 @@ cmd_set() {
         dir=$(cd "$(dirname "$dir")" && pwd)/$(basename "$dir")
     fi
 
-    # Store with $HOME for portability
-    local stored_value="\$HOME${dir#"$HOME"}"
+    # store $HOME-relative for portability; paths outside $HOME stay literal
+    local stored_value="$dir"
+    if [[ "$dir" == "$HOME" || "$dir" == "$HOME"/* ]]; then
+        stored_value="\$HOME${dir#"$HOME"}"
+    fi
 
     update_zshrc_export "$var_name" "$stored_value"
 

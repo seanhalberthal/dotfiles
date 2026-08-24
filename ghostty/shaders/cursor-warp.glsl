@@ -284,7 +284,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
         if (BLUR < 2.5) {
           // no antialising on horizontal/vertical movement, fixes 'pulse' like thing on end cursor
           float isDiagonal = abs(s.x) * abs(s.y); // 1.0 if diagonal, 0.0 if H/V
-          float effectiveBlur = mix(0.0, BLUR, isDiagonal);
+          effectiveBlur = mix(0.0, BLUR, isDiagonal);
         }
         float shapeAlpha = antialising(sdfTrail, effectiveBlur); // shape mask
 
