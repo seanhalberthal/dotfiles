@@ -281,6 +281,7 @@ Toggle file viewed | <Tab>
 
 ## debug @debug
 Start/Continue | F5
+Pause (cancels an interrupted step) | F6
 Step into | F1
 Step over | F2
 Step out | F3
