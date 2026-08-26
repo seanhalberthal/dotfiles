@@ -118,7 +118,7 @@ export PATH="$PATH:$HOME/.local/launchers"
 # user scripts directory (custom shell scripts)
 export PATH="$HOME/bin:$PATH"
 
-# nvim Mason LSP/tools (lua-language-server, gopls, pyright, etc.)
+# nvim Mason LSP/tools (lua-language-server, gopls, basedpyright, etc.)
 # appended (not prepended) so Homebrew-installed versions take priority
 export PATH="$PATH:$HOME/.local/share/nvim/mason/bin"
 

@@ -34,6 +34,7 @@ local SOURCE_LABEL = {
   omnisharp = 'cs',
   rust_analyzer = 'rust',
   rustc = 'rust',
+  basedpyright = 'py',
   pyright = 'py',
   pylsp = 'py',
   ruff = 'py',
