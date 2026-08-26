@@ -10,18 +10,13 @@ vim.filetype.add {
 local M = {}
 
 function M.setup()
-  -- highlight on yank, and mirror only yanks (not deletes/changes) to the
-  -- system clipboard. clipboard is otherwise decoupled (see options.lua), so
-  -- d/c/x leave the clipboard untouched while y still syncs it. tmux also
-  -- needs `set-clipboard on` so the clipboard reaches the outer terminal.
+  -- highlight on yank. the clipboard sync itself is `unnamedplus` in
+  -- options.lua; tmux needs `set-clipboard on` to pass it to the terminal
   vim.api.nvim_create_autocmd('TextYankPost', {
-    desc = 'Highlight on yank; sync yanks to the system clipboard',
+    desc = 'Highlight on yank',
     group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
     callback = function()
       vim.hl.on_yank()
-      if vim.v.event.operator == 'y' then
-        vim.fn.setreg('+', vim.v.event.regcontents, vim.v.event.regtype)
-      end
     end,
   })
 

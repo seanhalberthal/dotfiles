@@ -21,20 +21,12 @@ return {
       -- setqflist re-renders a tracked buffer (:Cfilter, live-diagnostics qf).
       -- full sync never runs compute_diff, so the assert is unreachable. see
       -- neovim/neovim#33224 and the incremental-sync assert family
-      -- exit_timeout defaults to false, and on that default nvim's VimLeavePre
-      -- handler neither force-stops the server nor waits for it: it fires an async
-      -- shutdown request, vim.wait(0), then exits. a server too slow to answer in
-      -- that window outlives nvim and reparents to pid 1, still holding its RSS.
-      -- under memory pressure that is every session, and the orphans compound the
-      -- pressure that caused them. a number makes VimLeavePre wait (exiting early
-      -- once the server closes) and force-stop on timeout.
-      --
-      -- the number is what nvim's handler waits, and it takes the max across every
-      -- client, so it sets the floor for `:q`. an idle copilot answers in ~10ms, but
-      -- under a loaded solution (roslyn attached) it never answers inside the window
-      -- and the whole budget is spent: 1000 made every quit in a .NET session cost a
-      -- second. 200 keeps the graceful path on a quiet editor and still force-stops,
-      -- so the orphan protection above is unchanged
+      -- exit_timeout defaults to false, on which nvim fires an async shutdown,
+      -- vim.wait(0), then exits, so a slow server outlives nvim and reparents
+      -- to pid 1 still holding its RSS. a number makes the handler wait and
+      -- force-stop instead. quitting doesn't reach it: the ExitPre hook in
+      -- plugins/lsp.lua stops every client first, so 200 governs runtime
+      -- restarts, where an idle copilot answers in ~10ms
       server_opts_overrides = {
         flags = { allow_incremental_sync = false },
         exit_timeout = 200,

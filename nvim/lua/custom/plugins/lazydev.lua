@@ -15,10 +15,11 @@ return {
         { path = 'mini.nvim', words = { 'Mini' } },
         -- luvit types when `vim.uv` is used
         { path = '${3rd}/luv/library', words = { 'vim%.uv' } },
-        -- busted/luassert types in spec files. `words` are matched with a bare
-        -- substring find, so no plain `it%s*%(` trigger: it would fire on
-        -- `split(`/`edit(`/`wait(`. busted's library declares `it` alongside
-        -- `describe`, so the one trigger covers a whole spec file
+        -- busted/luassert types in spec files. `words` are lua patterns, run
+        -- through line:find with no plain flag, so there is no `it%s*%(`
+        -- trigger: it would match inside `split(`/`edit(`/`wait(`. busted's
+        -- library declares `it` alongside `describe`, so one trigger covers
+        -- a whole spec file
         { path = '${3rd}/busted/library', words = { 'describe%s*%(' } },
         { path = '${3rd}/luassert/library', words = { 'assert%.' } },
       },

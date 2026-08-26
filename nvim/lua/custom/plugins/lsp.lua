@@ -3,7 +3,6 @@
 local lsp_nav = require 'custom.features.lsp-navigation'
 local lsp_fix_all = require 'custom.features.lsp-fix-all'
 local lsp_patches = require 'custom.features.lsp-patches'
-local roslyn_diagnostics = require 'custom.features.roslyn-diagnostics'
 
 --- true only for ordinary on-disk file buffers. differ/fugitive views and
 --- other plugin buffers carry a `scheme://` name and/or a non-empty `buftype`;
@@ -242,7 +241,6 @@ return {
 
       lsp_patches.patch_lsp_start()
       lsp_patches.patch_show_document()
-      roslyn_diagnostics.patch_pull_diagnostics_bufstate()
 
       vim.lsp.config('cssls', {
         settings = {

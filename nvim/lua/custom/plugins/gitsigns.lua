@@ -16,7 +16,8 @@ return {
         topdelete = { text = '‾' },
         changedelete = { text = '~' },
       },
-      sign_priority = 30, -- above easy-dotnet test signs (priority 20)
+      -- above diagnostics (10), below test signs (100 dotnet, 1000 neotest)
+      sign_priority = 30,
       numhl = false,
       linehl = false,
       on_attach = function(bufnr)

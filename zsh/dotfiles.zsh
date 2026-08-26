@@ -1207,8 +1207,8 @@ compdef _dotfiles dot
 # =============================================================================
 # COMMAND EXIT ALERTS (auto-alert for long-running commands)
 # =============================================================================
-# automatically sends a tmux alert when a command finishes after ≥10 seconds
-# and you've switched away from the window while it was running
+# automatically sends a tmux alert when a command outlives
+# $_CMD_ALERT_MIN_SECONDS (default 1) and you've switched away from the window
 [[ -f "$DOTFILES_ROOT/scripts/hooks/cmd-alert-hook.zsh" ]] && source "$DOTFILES_ROOT/scripts/hooks/cmd-alert-hook.zsh"
 
 # =============================================================================
