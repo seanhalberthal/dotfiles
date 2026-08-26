@@ -47,8 +47,8 @@ fi
 _FZF_THEME_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles"
 _FZF_THEME_CACHE_FILE="$_FZF_THEME_CACHE_DIR/fzf-env"
 
-if [[ -f "$_FZF_THEME_CACHE_FILE" && -f "$CURRENT_THEME_FILE" \
-      && "$_FZF_THEME_CACHE_FILE" -nt "$CURRENT_THEME_FILE" ]]; then
+if [[ -f "$_FZF_THEME_CACHE_FILE" && -f "$CURRENT_THEME_FILE" &&
+    "$_FZF_THEME_CACHE_FILE" -nt "$CURRENT_THEME_FILE" ]]; then
     _fzf_cache_stale=0
     for _fzf_input in \
         "$THEMES_DIR/$CURRENT_THEME.theme" \
@@ -114,13 +114,13 @@ for _ghostty_file in "${XDG_CONFIG_HOME:-$HOME/.config}/ghostty/config" "${XDG_C
     while IFS= read -r _ghostty_line; do
         _ghostty_line="${_ghostty_line#"${_ghostty_line%%[![:space:]]*}"}"
         case "$_ghostty_line" in
-            (\#*|'') ;;
-            (background-opacity*=*)
+            \#* | '') ;;
+            background-opacity*=*)
                 _ghostty_opacity="${_ghostty_line#*=}"
                 _ghostty_opacity="${_ghostty_opacity#"${_ghostty_opacity%%[![:space:]]*}"}"
                 ;;
         esac
-    done < "$_ghostty_file"
+    done <"$_ghostty_file"
 done
 if [[ "${_ghostty_opacity:-1}" == 0.* ]]; then
     FZF_BG="-1"
@@ -174,7 +174,7 @@ if {
     printf 'export TMUX_ACCENT_YELLOW=%q\n' "${TMUX_ACCENT_YELLOW:-}"
     printf 'export TMUX_ACCENT_RED=%q\n' "${TMUX_ACCENT_RED:-}"
     printf 'export NVIM_COLORSCHEME=%q\n' "${NVIM_COLORSCHEME:-}"
-} > "$_FZF_THEME_TMP" 2>/dev/null; then
+} >"$_FZF_THEME_TMP" 2>/dev/null; then
     mv -f "$_FZF_THEME_TMP" "$_FZF_THEME_CACHE_FILE" 2>/dev/null || rm -f "$_FZF_THEME_TMP" 2>/dev/null
 else
     rm -f "$_FZF_THEME_TMP" 2>/dev/null

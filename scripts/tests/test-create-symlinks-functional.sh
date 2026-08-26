@@ -47,7 +47,7 @@ else
 fi
 
 # test 2: symlink replaces existing file
-echo "existing content" > "$TEST_HOME/.test-existing"
+echo "existing content" >"$TEST_HOME/.test-existing"
 test_source2="$DOTFILES_DIR/zsh/zprofile"
 ln -sf "$test_source2" "$TEST_HOME/.test-existing"
 if [[ -L "$TEST_HOME/.test-existing" ]]; then
@@ -76,7 +76,7 @@ test_template="$DOTFILES_DIR/ghostty/local.template"
 test_local_dest="$TEST_HOME/.config/ghostty/local"
 mkdir -p "$(dirname "$test_local_dest")"
 if [[ -f "$test_template" ]]; then
-    echo "my custom overrides" > "$test_local_dest"
+    echo "my custom overrides" >"$test_local_dest"
     # simulate install_local, should NOT overwrite existing
     if [[ -f "$test_local_dest" ]]; then
         # install_local only copies if dest doesn't exist

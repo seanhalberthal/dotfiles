@@ -43,10 +43,10 @@ fi
 
 # record launcher usage for MRU ordering
 mkdir -p "$(dirname "$LAUNCHER_HISTORY")"
-printf '%s\n' "$name" >> "$LAUNCHER_HISTORY"
+printf '%s\n' "$name" >>"$LAUNCHER_HISTORY"
 # trim to last 100 entries
-if [[ $(wc -l < "$LAUNCHER_HISTORY") -gt 100 ]]; then
-    tail -100 "$LAUNCHER_HISTORY" > "$LAUNCHER_HISTORY.tmp" && mv "$LAUNCHER_HISTORY.tmp" "$LAUNCHER_HISTORY"
+if [[ $(wc -l <"$LAUNCHER_HISTORY") -gt 100 ]]; then
+    tail -100 "$LAUNCHER_HISTORY" >"$LAUNCHER_HISTORY.tmp" && mv "$LAUNCHER_HISTORY.tmp" "$LAUNCHER_HISTORY"
 fi
 
 # ─────────────────────────────────────────

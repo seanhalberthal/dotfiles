@@ -118,7 +118,7 @@ main() {
     export XDG_CONFIG_HOME="$_THEME_TEST_XDG"
     mkdir -p "$_THEME_TEST_XDG/dotfiles" "$_THEME_TEST_XDG/tmux" "$_THEME_TEST_XDG/ghostty"
     # seed the isolated current-theme file so fzf-theme.sh has a starting point
-    echo "$original_theme" > "$_THEME_TEST_XDG/dotfiles/current-theme"
+    echo "$original_theme" >"$_THEME_TEST_XDG/dotfiles/current-theme"
 
     # test: switching to each theme loads correct colours
     for theme_file in "$DOTFILES_ROOT/themes"/*.theme; do

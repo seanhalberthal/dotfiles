@@ -54,9 +54,9 @@ copilot_panes=()
 # iterate through all panes in all sessions, sorted by last viewed (most recent first)
 while IFS= read -r line; do
     # parse: "last_viewed session:window_index.pane_index pane_pid"
-    rest="${line#* }"          # strip last_viewed
-    target="${rest%% *}"       # session:window_index.pane_index
-    pane_pid="${rest##* }"     # pane_pid
+    rest="${line#* }"      # strip last_viewed
+    target="${rest%% *}"   # session:window_index.pane_index
+    pane_pid="${rest##* }" # pane_pid
 
     # check if this pane has an active copilot child
     [[ -n "${active_copilot_ppids[$pane_pid]:-}" ]] || continue

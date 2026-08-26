@@ -42,7 +42,7 @@ EXTENSIONS=(go cs lua md ts tsx env json yaml yml toml css js jsx log)
 bind_target() {
     case "$1" in
         log) printf '%s' 'com.apple.log' ;;
-        *)   printf '.%s' "$1" ;;
+        *) printf '.%s' "$1" ;;
     esac
 }
 
@@ -99,15 +99,15 @@ declined_before() {
 }
 
 record_declined() {
-    declined_before "$1" || printf '%s\n' "$1" >> "$DECLINED_FILE"
+    declined_before "$1" || printf '%s\n' "$1" >>"$DECLINED_FILE"
 }
 
 mkdir -p "$STATE_DIR"
 
-set_count=0       # newly bound this run
-already_count=0   # already handled by Zed
-declined_count=0  # skipped or recorded as declined
-skip_count=0      # unbindable, no stable UTI
+set_count=0      # newly bound this run
+already_count=0  # already handled by Zed
+declined_count=0 # skipped or recorded as declined
+skip_count=0     # unbindable, no stable UTI
 for ext in "${EXTENSIONS[@]}"; do
     if ! has_real_uti "$ext"; then
         skip_count=$((skip_count + 1))

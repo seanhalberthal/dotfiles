@@ -17,7 +17,7 @@ section "Brewfile Library Tests"
 # create test Brewfile
 TEST_BREWFILE=$(mktemp)
 trap 'rm -f "$TEST_BREWFILE"' EXIT
-cat > "$TEST_BREWFILE" << 'EOF'
+cat >"$TEST_BREWFILE" <<'EOF'
 tap "homebrew/bundle"
 # @preset: minimal
 brew "zsh"
@@ -93,7 +93,7 @@ section "macOS-only Formula Filtering"
 
 # create test Brewfile with macOS-only markers
 MACOS_BREWFILE=$(mktemp)
-cat > "$MACOS_BREWFILE" << 'EOF'
+cat >"$MACOS_BREWFILE" <<'EOF'
 tap "homebrew/bundle"
 # @preset: core
 brew "fnm"                    # macOS-only (Linux uses curl installer)

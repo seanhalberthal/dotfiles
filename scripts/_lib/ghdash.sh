@@ -37,7 +37,7 @@ ghdash_merge_local() {
 
     local merge_tmp="${GHDASH_CONFIG}.merge.$$"
     if yq eval-all '. as $item ireduce ({}; . *+ $item)' \
-        "$GHDASH_BASE" "$GHDASH_LOCAL" > "$merge_tmp" 2>/dev/null; then
+        "$GHDASH_BASE" "$GHDASH_LOCAL" >"$merge_tmp" 2>/dev/null; then
         mv "$merge_tmp" "$GHDASH_CONFIG"
         [[ "$quiet" != "true" ]] && echo "Merged gh-dash local overrides"
         return 0

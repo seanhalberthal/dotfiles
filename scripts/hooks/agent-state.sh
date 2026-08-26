@@ -37,7 +37,7 @@ case "$event" in
     PreToolUse)
         # a question or plan-approval prompt is presented before the tool runs
         case "$tool" in
-            AskUserQuestion|ExitPlanMode) state="needs-input" ;;
+            AskUserQuestion | ExitPlanMode) state="needs-input" ;;
             *) state="working" ;;
         esac
         ;;
@@ -48,7 +48,7 @@ case "$event" in
     PermissionRequest) state="needs-input" ;;
     Notification)
         case "$ntype" in
-            permission_prompt|elicitation_dialog|agent_needs_input) state="needs-input" ;;
+            permission_prompt | elicitation_dialog | agent_needs_input) state="needs-input" ;;
             idle_prompt) state="idle" ;;
             *) exit 0 ;;
         esac
@@ -70,5 +70,5 @@ fi
 # atomic write: the readers scan this dir on every popup refresh
 printf '%s\t%s\t%s\t%s\t%s\t%s\n' \
     "$AGENT" "$state" "$(date +%s)" "$event${ntype:+:$ntype}${tool:+:$tool}" \
-    "$session_id" "$cwd" > "$STATE_FILE.tmp.$$"
+    "$session_id" "$cwd" >"$STATE_FILE.tmp.$$"
 mv -f "$STATE_FILE.tmp.$$" "$STATE_FILE"

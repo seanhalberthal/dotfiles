@@ -29,9 +29,9 @@ hex_fg() {
 hex_dim() {
     local hex="$1" pct="${2:-65}"
     printf '#%02x%02x%02x' \
-        "$(( 16#${hex:1:2} * pct / 100 ))" \
-        "$(( 16#${hex:3:2} * pct / 100 ))" \
-        "$(( 16#${hex:5:2} * pct / 100 ))"
+        "$((16#${hex:1:2} * pct / 100))" \
+        "$((16#${hex:3:2} * pct / 100))" \
+        "$((16#${hex:5:2} * pct / 100))"
 }
 
 # print the dotfiles ASCII art logo with theme-aware gradient
@@ -60,9 +60,9 @@ print_dotfiles_logo() {
     printf "\n"
     local i
     for i in 0 1 2 3 4; do
-        local r=$(( r1 + (r2 - r1) * i / 4 ))
-        local g=$(( g1 + (g2 - g1) * i / 4 ))
-        local b=$(( b1 + (b2 - b1) * i / 4 ))
+        local r=$((r1 + (r2 - r1) * i / 4))
+        local g=$((g1 + (g2 - g1) * i / 4))
+        local b=$((b1 + (b2 - b1) * i / 4))
         printf "\033[38;2;%d;%d;%dm%s${NC}\n" "$r" "$g" "$b" "${lines[$i]}"
     done
     printf "\n"
@@ -161,7 +161,7 @@ sanitise_launcher_name() {
     raw="${raw#"${raw%%[[:alnum:]_]*}"}"
     raw="${raw:0:64}"
     case "$raw" in
-        test|cd|ls|rm|cp|mv|cat|echo|printf|export|source|exec|eval|exit) raw="${raw}_launcher" ;;
+        test | cd | ls | rm | cp | mv | cat | echo | printf | export | source | exec | eval | exit) raw="${raw}_launcher" ;;
     esac
     printf '%s' "$raw"
 }
@@ -320,7 +320,7 @@ is_pane_running() {
 list_project_dirs() {
     local project_dirs="${PROJECT_DIRS:-$HOME/src}"
     local roots
-    IFS=':' read -ra roots <<< "$project_dirs"
+    IFS=':' read -ra roots <<<"$project_dirs"
     for root in "${roots[@]}"; do
         [[ -n "$root" ]] || continue
         root="${root/#\~/$HOME}"
@@ -401,7 +401,7 @@ sed_inplace() {
     # preserve the original file's permissions across the swap (mktemp
     # defaults to 600, which would silently drop e.g. an executable bit)
     cp -p "$file" "$tmp" 2>/dev/null
-    if sed "${sed_args[@]}" "$file" > "$tmp"; then
+    if sed "${sed_args[@]}" "$file" >"$tmp"; then
         mv "$tmp" "$file"
     else
         rm -f "$tmp"

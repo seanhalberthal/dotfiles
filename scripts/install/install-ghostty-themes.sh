@@ -36,7 +36,7 @@ for d in /usr/share/ghostty/themes /usr/local/share/ghostty/themes; do
 done
 
 # idempotent: skip if we already populated the user dir
-if [[ "$FORCE" != "--force" ]] && compgen -G "$DEST/*" > /dev/null 2>&1; then
+if [[ "$FORCE" != "--force" ]] && compgen -G "$DEST/*" >/dev/null 2>&1; then
     echo "Ghostty theme catalogue already installed at $DEST."
     exit 0
 fi

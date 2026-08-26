@@ -38,7 +38,7 @@ while IFS= read -r socket; do
     [[ -z "$socket" ]] && continue
     nvim --server "$socket" --remote-expr \
         'execute("source ~/.config/nvim/local.lua")' \
-        2>/dev/null && (( reloaded++ )) || true
+        2>/dev/null && ((reloaded++)) || true
 done < <(find "${tmpdir}nvim.${USER:-$(id -un)}" -type s -name "nvim.*" 2>/dev/null || true)
 
 nvim_msg="nvim: ${reloaded} instance(s) reloaded"

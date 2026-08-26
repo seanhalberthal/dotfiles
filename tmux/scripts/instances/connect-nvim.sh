@@ -30,9 +30,9 @@ CURRENT_SESSION=$(tmux display-message -p '#S')
 
 # list panes in current session, sorted by last-viewed, excluding nvim panes
 # format: timestamp window_index.pane_index<tab>window_name (command)
-pane_list=$(tmux list-panes -s -F '#{?#{@pane-viewed},#{@pane-viewed},0} #{window_index}.#{pane_index}	#{window_name} (#{pane_current_command})' 2>/dev/null | \
-    grep -v '(nvim)$' | \
-    sort -rn | \
+pane_list=$(tmux list-panes -s -F '#{?#{@pane-viewed},#{@pane-viewed},0} #{window_index}.#{pane_index}	#{window_name} (#{pane_current_command})' 2>/dev/null |
+    grep -v '(nvim)$' |
+    sort -rn |
     cut -d' ' -f2-)
 
 if [[ -z "$pane_list" ]]; then
@@ -53,11 +53,11 @@ TARGET_PANE=$(echo "$pane_list" | fzf --ansi --reverse --exact --disabled --cycl
     --bind 'j:down,k:up,g:first,G:last,q:abort,space:accept' \
     --bind 'enter:accept' \
     --bind '/:enable-search+change-prompt(> )+unbind(j,k,g,G,q,space)' \
-    --bind 'esc:transform:[[ $FZF_PROMPT == "> " ]] && echo "disable-search+clear-query+change-prompt(: )+rebind(j,k,g,G,q,space)" || echo "abort"' \
-    | cut -f1)
+    --bind 'esc:transform:[[ $FZF_PROMPT == "> " ]] && echo "disable-search+clear-query+change-prompt(: )+rebind(j,k,g,G,q,space)" || echo "abort"' |
+    cut -f1)
 
 if [[ -z "$TARGET_PANE" ]]; then
-    exit 0  # user cancelled
+    exit 0 # user cancelled
 fi
 
 # build full target with session name

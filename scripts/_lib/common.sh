@@ -48,7 +48,7 @@ print_header() {
     local title="$1"
     echo ""
     echo "${CYAN}╔════════════════════════════════════════════╗${NC}"
-    printf "${CYAN}║%*s%s%*s║${NC}\n" $(( (44 - ${#title}) / 2 )) "" "$title" $(( (45 - ${#title}) / 2 )) ""
+    printf "${CYAN}║%*s%s%*s║${NC}\n" $(((44 - ${#title}) / 2)) "" "$title" $(((45 - ${#title}) / 2)) ""
     echo "${CYAN}╚════════════════════════════════════════════╝${NC}"
     echo ""
 }
@@ -162,7 +162,7 @@ sed_inplace() {
     # preserve the original file's permissions across the swap (mktemp
     # defaults to 600, which would silently drop e.g. an executable bit)
     cp -p "$file" "$tmp" 2>/dev/null
-    if sed "${sed_args[@]}" "$file" > "$tmp"; then
+    if sed "${sed_args[@]}" "$file" >"$tmp"; then
         mv "$tmp" "$file"
     else
         rm -f "$tmp"
@@ -257,7 +257,7 @@ update_zshrc_export() {
             line_num=$(grep -n "$marker" "$zshrc" | head -1 | cut -d: -f1)
             # skip past the comment block (lines starting with #) after the marker
             local total_lines
-            total_lines=$(wc -l < "$zshrc" | tr -d ' ')
+            total_lines=$(wc -l <"$zshrc" | tr -d ' ')
             local insert_after=$line_num
             for ((i = line_num + 1; i <= total_lines; i++)); do
                 local line
@@ -273,7 +273,7 @@ export ${var_name}=\"${value}\"
 " "$zshrc"
         else
             # no marker found, append to end
-            printf '\nexport %s="%s"\n' "$var_name" "$value" >> "$zshrc"
+            printf '\nexport %s="%s"\n' "$var_name" "$value" >>"$zshrc"
         fi
     fi
 
@@ -288,8 +288,8 @@ export ${var_name}=\"${value}\"
         if [[ -n "$existing" ]]; then
             # rewrite only if the existing line is missing one of the refs;
             # otherwise the user's customisation already picks up the change
-            if ! { [[ "$existing" == *'$DEV_ROOT'* || "$existing" == *'${DEV_ROOT}'* ]] \
-                && [[ "$existing" == *'$PROJECTS_ROOT'* || "$existing" == *'${PROJECTS_ROOT}'* ]]; }; then
+            if ! { [[ "$existing" == *'$DEV_ROOT'* || "$existing" == *'${DEV_ROOT}'* ]] &&
+                [[ "$existing" == *'$PROJECTS_ROOT'* || "$existing" == *'${PROJECTS_ROOT}'* ]]; }; then
                 sed_inplace "s|^export PROJECT_DIRS=.*|${project_dirs_line}|" "$zshrc"
             fi
         else
@@ -325,7 +325,7 @@ should_install() {
 
     case "$required_preset" in
         minimal)
-            return 0  # always include minimal
+            return 0 # always include minimal
             ;;
         core)
             [[ "$current_preset" == "core" || "$current_preset" == "full" ]]
@@ -377,17 +377,17 @@ print_logo() {
 
             local i=0
             while IFS= read -r line || [[ -n "$line" ]]; do
-                local r=$(( r1 + (r2 - r1) * i / 4 ))
-                local g=$(( g1 + (g2 - g1) * i / 4 ))
-                local b=$(( b1 + (b2 - b1) * i / 4 ))
+                local r=$((r1 + (r2 - r1) * i / 4))
+                local g=$((g1 + (g2 - g1) * i / 4))
+                local b=$((b1 + (b2 - b1) * i / 4))
                 printf "\033[38;2;%d;%d;%dm%s${NC}\n" "$r" "$g" "$b" "$line"
                 i=$((i + 1))
-            done < "$logo_file"
+            done <"$logo_file"
         else
             # fallback: basic ANSI green
             while IFS= read -r line || [[ -n "$line" ]]; do
                 printf "${GREEN}%s${NC}\n" "$line"
-            done < "$logo_file"
+            done <"$logo_file"
         fi
         echo ""
     fi

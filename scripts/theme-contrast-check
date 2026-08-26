@@ -216,7 +216,7 @@ check_theme() {
 
 # Show usage information
 show_usage() {
-    cat << EOF
+    cat <<EOF
 Usage: $(basename "$0") [OPTIONS] [THEME_FILE]
 
 Check WCAG 2.1 contrast ratios for dotfiles themes.
@@ -258,7 +258,7 @@ main() {
                 FIX_MODE=1
                 shift
                 ;;
-            -h|--help)
+            -h | --help)
                 show_usage
                 exit 0
                 ;;

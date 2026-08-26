@@ -252,7 +252,7 @@ fi
 
 # test: exits cleanly with invalid JSON
 export NVIM_SOCKET="/tmp/fake-socket-$$"
-touch "$NVIM_SOCKET"  # create a regular file (not a socket)
+touch "$NVIM_SOCKET" # create a regular file (not a socket)
 if echo 'not json' | "$BUFFER_SYNC" 2>/dev/null; then
     pass "Exits cleanly with invalid JSON"
 else

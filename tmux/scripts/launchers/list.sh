@@ -30,7 +30,7 @@ contains_line() {
     local haystack="$2"
     while IFS= read -r line; do
         [[ "$line" == "$needle" ]] && return 0
-    done <<< "$haystack"
+    done <<<"$haystack"
     return 1
 }
 
@@ -40,14 +40,14 @@ extract_description() {
     local line
     while IFS= read -r line; do
         case "$line" in
-            ("# @description:"*)
+            "# @description:"*)
                 line="${line#"# @description:"}"
                 line="${line#"${line%%[![:space:]]*}"}"
                 printf '%s\n' "$line"
                 return 0
                 ;;
         esac
-    done < "$file"
+    done <"$file"
     return 1
 }
 
@@ -55,7 +55,7 @@ extract_description() {
 list_launchers_for_fzf() {
     # header (consumed by fzf --header-lines)
     # prefix with tab so --with-nth=2 in picker.sh still displays the logo
-    if (( SHOW_LOGO )); then
+    if ((SHOW_LOGO)); then
         local logo_line
         while IFS= read -r logo_line; do
             printf '\t%s\n' "$logo_line"
@@ -114,9 +114,9 @@ list_launchers_for_fzf() {
         while IFS= read -r hist_line; do
             [[ -n "$hist_line" ]] || continue
             history_lines+=("$hist_line")
-        done < "$LAUNCHER_HISTORY"
+        done <"$LAUNCHER_HISTORY"
 
-        for (( idx=${#history_lines[@]}-1; idx>=0; idx-- )); do
+        for ((idx = ${#history_lines[@]} - 1; idx >= 0; idx--)); do
             hist_line="${history_lines[$idx]}"
             contains_line "$hist_line" "$mru_list" && continue
             mru_list+="${hist_line}"$'\n'
@@ -135,12 +135,12 @@ list_launchers_for_fzf() {
             [[ "$scan_entry" == "$hist_name|"* ]] || continue
             entry="$scan_entry"
             break
-        done <<< "$all_launchers"
+        done <<<"$all_launchers"
         [[ -n "$entry" ]] || continue
 
         # parse entry: name|description|source
         local name desc source suffix=""
-        IFS='|' read -r name desc source <<< "$entry"
+        IFS='|' read -r name desc source <<<"$entry"
 
         if [[ "$source" == "user" ]]; then
             suffix=" ${GREY}(user)${NC}"
@@ -150,7 +150,7 @@ list_launchers_for_fzf() {
 
         printf "%s\t    %-16s ${GREY}%s${NC}%s\n" "$name" "$name" "$desc" "$suffix"
         outputted+="${name}"$'\n'
-    done <<< "$mru_list"
+    done <<<"$mru_list"
 
     # output remaining launchers alphabetically
     local remaining=""
@@ -159,7 +159,7 @@ list_launchers_for_fzf() {
         # skip if already output
         contains_line "$name" "$outputted" && continue
         remaining+="${name}|${desc}|${source}"$'\n'
-    done <<< "$all_launchers"
+    done <<<"$all_launchers"
 
     # sort and output remaining
     while IFS='|' read -r name desc source; do

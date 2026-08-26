@@ -20,13 +20,13 @@ SCRIPT_DIR="${BASH_SOURCE%/*}"
 client_width="${1:-80}"
 client_height="${2:-40}"
 
-if (( client_width >= 80 && client_height >= 40 )); then
+if ((client_width >= 80 && client_height >= 40)); then
     width=74
     height=40
-elif (( client_width >= 76 && client_height >= 24 )); then
+elif ((client_width >= 76 && client_height >= 24)); then
     width=74
     height=24
-elif (( client_height >= 24 )); then
+elif ((client_height >= 24)); then
     width="95%"
     height=24
 else

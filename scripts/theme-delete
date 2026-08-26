@@ -191,20 +191,20 @@ main() {
     # Parse flags
     for arg in "$@"; do
         case "$arg" in
-            --yes|-y) force=true ;;
+            --yes | -y) force=true ;;
             *) [[ -z "$command" ]] && command="$arg" ;;
         esac
     done
 
     case "$command" in
-        all|--all|-a)
+        all | --all | -a)
             remove_all "$force"
             ;;
-        list|--list|-l)
+        list | --list | -l)
             list_generated
             ;;
-        help|-h|--help|"")
-            cat << EOF
+        help | -h | --help | "")
+            cat <<EOF
 Usage: $invoked_as <theme-name>    Remove a specific generated theme
        $invoked_as all             Remove all generated themes
        $invoked_as all --yes       Remove all (non-interactive)

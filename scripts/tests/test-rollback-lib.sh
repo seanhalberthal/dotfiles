@@ -27,7 +27,7 @@ trap 'HOME="$ORIGINAL_HOME"; rm -rf "$TEST_DIR"' EXIT INT TERM
 
 # source the libraries under test
 # shellcheck source=scripts/_lib/common.sh
-source "$DOTFILES_DIR/../../dotfiles/scripts/_lib/common.sh" 2>/dev/null || \
+source "$DOTFILES_DIR/../../dotfiles/scripts/_lib/common.sh" 2>/dev/null ||
     source "$(cd "$SCRIPT_DIR/.." && pwd)/_lib/common.sh"
 # shellcheck source=scripts/_lib/rollback.sh
 source "$(cd "$SCRIPT_DIR/.." && pwd)/_lib/rollback.sh"
@@ -86,7 +86,7 @@ record_step "prerequisites"
 record_step "packages"
 record_step "symlinks"
 
-step_count=$(wc -l < "$ROLLBACK_STATE_FILE" | tr -d ' ')
+step_count=$(wc -l <"$ROLLBACK_STATE_FILE" | tr -d ' ')
 assert_equals "Records three steps" "3" "$step_count"
 
 last_step=$(get_last_step)
@@ -101,7 +101,7 @@ section "record_symlink"
 record_symlink "$TEST_HOME/.zshrc" "$DOTFILES_DIR/zsh/zshrc"
 record_symlink "$TEST_HOME/.tmux.conf" "$DOTFILES_DIR/tmux/tmux.conf"
 
-symlink_count=$(wc -l < "$SYMLINKS_CREATED_FILE" | tr -d ' ')
+symlink_count=$(wc -l <"$SYMLINKS_CREATED_FILE" | tr -d ' ')
 assert_equals "Records two symlinks" "2" "$symlink_count"
 
 # verify pipe-delimited format
@@ -131,8 +131,8 @@ section "perform_rollback - Symlink Removal"
 
 # create actual symlinks that rollback should remove
 mkdir -p "$DOTFILES_DIR/zsh" "$DOTFILES_DIR/tmux"
-echo "zshrc content" > "$DOTFILES_DIR/zsh/zshrc"
-echo "tmux content" > "$DOTFILES_DIR/tmux/tmux.conf"
+echo "zshrc content" >"$DOTFILES_DIR/zsh/zshrc"
+echo "tmux content" >"$DOTFILES_DIR/tmux/tmux.conf"
 
 ln -sf "$DOTFILES_DIR/zsh/zshrc" "$TEST_HOME/.zshrc"
 ln -sf "$DOTFILES_DIR/tmux/tmux.conf" "$TEST_HOME/.tmux.conf"
@@ -150,7 +150,7 @@ record_symlink "$TEST_HOME/.tmux.conf" "$DOTFILES_DIR/tmux/tmux.conf"
 
 # create a backup to restore from
 mkdir -p "$TEST_BACKUP/.config"
-echo "original zshrc" > "$TEST_BACKUP/.zshrc"
+echo "original zshrc" >"$TEST_BACKUP/.zshrc"
 record_backup_location "$TEST_BACKUP"
 
 # run rollback

@@ -27,7 +27,7 @@ NO_CONFIRM=""
 
 for arg in "$@"; do
     case "$arg" in
-        --force|--no-confirm)
+        --force | --no-confirm)
             NO_CONFIRM="--no-confirm"
             ;;
         *)
@@ -88,7 +88,7 @@ if [[ "$NO_CONFIRM" != "--no-confirm" ]]; then
     fi
 
     if ! show_visual_confirm "$TITLE" "$MESSAGE"; then
-        exit 0  # exit cleanly on cancellation
+        exit 0 # exit cleanly on cancellation
     fi
 fi
 
@@ -104,7 +104,7 @@ cleanup_undo_files "window"
 d=$'\t'
 
 # save window target
-echo "$WINDOW_TARGET" > "$UNDO_FILE"
+echo "$WINDOW_TARGET" >"$UNDO_FILE"
 chmod 600 "$UNDO_FILE"
 
 # get window info
@@ -113,7 +113,7 @@ WINDOW_FLAGS=$(tmux display-message -t "$WINDOW_TARGET" -p '#{window_flags}')
 AUTO_RENAME=$(tmux show-window-option -t "$WINDOW_TARGET" -v automatic-rename 2>/dev/null || echo "on")
 
 # write window line
-echo "window${d}${TARGET_SESSION}${d}${TARGET_WINDOW}${d}:${WINDOW_NAME}${d}${WINDOW_ACTIVE}${d}${WINDOW_FLAGS}${d}${WINDOW_LAYOUT}${d}${AUTO_RENAME}" > "$UNDO_STATE"
+echo "window${d}${TARGET_SESSION}${d}${TARGET_WINDOW}${d}:${WINDOW_NAME}${d}${WINDOW_ACTIVE}${d}${WINDOW_FLAGS}${d}${WINDOW_LAYOUT}${d}${AUTO_RENAME}" >"$UNDO_STATE"
 chmod 600 "$UNDO_STATE"
 
 # get pane info for each pane
@@ -122,11 +122,11 @@ while IFS='|' read -r pane_index pane_title pane_dir pane_active pane_cmd; do
     escaped_dir="${pane_dir// /\\ }"
 
     # write pane line
-    echo "pane${d}${TARGET_SESSION}${d}${TARGET_WINDOW}${d}${WINDOW_ACTIVE}${d}${WINDOW_FLAGS}${d}${pane_index}${d}${pane_title}${d}:${escaped_dir}${d}${pane_active}${d}${pane_cmd}${d}:" >> "$UNDO_STATE"
+    echo "pane${d}${TARGET_SESSION}${d}${TARGET_WINDOW}${d}${WINDOW_ACTIVE}${d}${WINDOW_FLAGS}${d}${pane_index}${d}${pane_title}${d}:${escaped_dir}${d}${pane_active}${d}${pane_cmd}${d}:" >>"$UNDO_STATE"
 
     # capture pane contents
     tmux capture-pane -t "${WINDOW_TARGET}.${pane_index}" -p -S -32768 \
-        > "$UNDO_CONTENTS_DIR/pane-${pane_index}.txt" 2>/dev/null || true
+        >"$UNDO_CONTENTS_DIR/pane-${pane_index}.txt" 2>/dev/null || true
     chmod 600 "$UNDO_CONTENTS_DIR/pane-${pane_index}.txt"
 done < <(tmux list-panes -t "$WINDOW_TARGET" -F '#{pane_index}|#{pane_title}|#{pane_current_path}|#{pane_active}|#{pane_current_command}')
 

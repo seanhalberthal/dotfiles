@@ -51,7 +51,7 @@ NO_LOGO=0
 UPDATE_MODE=0
 AUTO_YES=0
 SKIP_STEPS=""
-PRESET="full"  # default preset
+PRESET="full" # default preset
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -92,11 +92,11 @@ while [[ $# -gt 0 ]]; do
             NO_LOGO=1
             shift
             ;;
-        --yes|-y)
+        --yes | -y)
             AUTO_YES=1
             shift
             ;;
-        -h|--help)
+        -h | --help)
             echo "Usage: ./install.sh [PRESET] [OPTIONS]"
             echo ""
             echo "Presets (pick one; default --full):"
@@ -139,7 +139,7 @@ done
 # validate --skip-steps against known step names
 if [[ -n "$SKIP_STEPS" ]]; then
     VALID_STEPS="homebrew,packages,symlinks,keyd"
-    IFS=',' read -ra _skip_arr <<< "$SKIP_STEPS"
+    IFS=',' read -ra _skip_arr <<<"$SKIP_STEPS"
     for _step in "${_skip_arr[@]}"; do
         if [[ ",$VALID_STEPS," != *",$_step,"* ]]; then
             error "Unknown step name in --skip-steps: $_step"
@@ -158,7 +158,7 @@ is_step_skipped() {
 
 # validate preset value
 case "$PRESET" in
-    minimal|core|full)
+    minimal | core | full)
         # valid preset
         ;;
     *)
@@ -229,7 +229,7 @@ if [[ $AUTO_YES -eq 0 ]]; then
         exit 1
     fi
     case "$response" in
-        [yY][eE][sS]|[yY])
+        [yY][eE][sS] | [yY])
             echo ""
             ;;
         *)
@@ -401,7 +401,7 @@ if [[ ! -f "$SECRETS_DIR/secrets.zsh" ]]; then
             umask 077
             touch "$SECRETS_DIR/secrets.zsh"
         )
-        chmod 600 "$SECRETS_DIR/secrets.zsh"  # belt and suspenders
+        chmod 600 "$SECRETS_DIR/secrets.zsh" # belt and suspenders
         warn "Created empty secrets file."
     fi
 else
@@ -424,7 +424,7 @@ echo ""
 print_step 12 "Saving preset configuration..."
 PRESET_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles"
 mkdir -p "$PRESET_CONFIG_DIR"
-echo "$PRESET" > "$PRESET_CONFIG_DIR/preset"
+echo "$PRESET" >"$PRESET_CONFIG_DIR/preset"
 success "Preset '$PRESET' saved to $PRESET_CONFIG_DIR/preset"
 record_step "save-preset"
 
@@ -445,7 +445,7 @@ elif [[ -t 0 ]]; then
     printf '  Enter path (or press Enter for default, "skip" to skip): '
     read -r dev_root_input
     case "$dev_root_input" in
-        skip|s)
+        skip | s)
             info "Skipped. Set later with: dotfiles set dev <path>"
             ;;
         "")
@@ -472,7 +472,7 @@ elif [[ -t 0 ]]; then
     printf '  Enter path (or press Enter to skip): '
     read -r projects_root_input
     case "$projects_root_input" in
-        ""|skip|s)
+        "" | skip | s)
             info "Skipped. Set later with: dotfiles set projects <path>"
             ;;
         *)
@@ -498,10 +498,10 @@ record_step "project-dirs"
 LOCAL_PTR="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/local-repo"
 DEFAULT_LOCAL_DIR="$HOME/.dotfiles-local"
 LOCAL_ADOPTED=0
-if [[ -z "${DOTFILES_LOCAL_DIR:-}" && ! -f "$LOCAL_PTR" ]] \
-    && git -C "$DEFAULT_LOCAL_DIR" rev-parse --git-dir &>/dev/null; then
+if [[ -z "${DOTFILES_LOCAL_DIR:-}" && ! -f "$LOCAL_PTR" ]] &&
+    git -C "$DEFAULT_LOCAL_DIR" rev-parse --git-dir &>/dev/null; then
     mkdir -p "$(dirname "$LOCAL_PTR")"
-    printf '%s\n' "$DEFAULT_LOCAL_DIR" > "$LOCAL_PTR"
+    printf '%s\n' "$DEFAULT_LOCAL_DIR" >"$LOCAL_PTR"
     LOCAL_ADOPTED=1
 fi
 if [[ -n "${DOTFILES_LOCAL_DIR:-}" || -f "$LOCAL_PTR" ]]; then
@@ -510,8 +510,8 @@ if [[ -n "${DOTFILES_LOCAL_DIR:-}" || -f "$LOCAL_PTR" ]]; then
     if [[ $LOCAL_ADOPTED -eq 1 ]]; then
         info "Found local layer repo at $DEFAULT_LOCAL_DIR, registered it"
     fi
-    "$DOTFILES_DIR/scripts/dotfiles" import \
-        || warn "Local layer import reported issues (non-fatal)"
+    "$DOTFILES_DIR/scripts/dotfiles" import ||
+        warn "Local layer import reported issues (non-fatal)"
     record_step "local-import"
 fi
 
@@ -665,4 +665,4 @@ fi
 # `dotfiles version`/`status` as the "Updated" field (UPDATE_STAMP_FILE in cli.sh)
 update_stamp_dir="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/.state"
 mkdir -p "$update_stamp_dir"
-date '+%Y-%m-%d %H:%M' > "$update_stamp_dir/last-update"
+date '+%Y-%m-%d %H:%M' >"$update_stamp_dir/last-update"

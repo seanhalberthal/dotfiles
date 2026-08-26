@@ -49,7 +49,7 @@ default_project_root() {
 # ensure stdin/stdout use terminal (needed when called via fzf become() in a pipeline)
 # security note: this redirects to the controlling terminal, bypassing any pipe isolation
 # safe here because this script is only invoked interactively from the launcher picker
-exec < /dev/tty > /dev/tty
+exec </dev/tty >/dev/tty
 
 # ─────────────────────────────────────────
 # argument parsing
@@ -110,8 +110,8 @@ load_existing_launcher() {
     # new format: separate `_<SESSION>_ROOT_DEFAULT="$HOME/path"` line, handles
     # paths containing apostrophes (which break `"${VAR:-default}"` parsing)
     # old format (kept for backward compat): `PROJECT_DIR="${VAR:-default}"`
-    project_dir=$(grep -m1 '^_[A-Z0-9_]*_ROOT_DEFAULT=' "$file" 2>/dev/null \
-        | sed 's/^[^=]*=//' | sed 's/^"//; s/"$//' || true)
+    project_dir=$(grep -m1 '^_[A-Z0-9_]*_ROOT_DEFAULT=' "$file" 2>/dev/null |
+        sed 's/^[^=]*=//' | sed 's/^"//; s/"$//' || true)
     if [[ -z "$project_dir" ]]; then
         project_dir=$(grep -m1 '^PROJECT_DIR=' "$file" 2>/dev/null | sed 's/^PROJECT_DIR=//' | tr -d '"' || true)
         if [[ "$project_dir" =~ :-(.+)\}$ ]]; then
@@ -123,8 +123,8 @@ load_existing_launcher() {
     # detect worktree configuration
     if grep -q '^WORKTREES_DIR=\|^_[A-Z0-9_]*_WORKTREES_DEFAULT=' "$file" 2>/dev/null; then
         worktree_aware="y"
-        worktrees_dir=$(grep -m1 '^_[A-Z0-9_]*_WORKTREES_DEFAULT=' "$file" 2>/dev/null \
-            | sed 's/^[^=]*=//' | sed 's/^"//; s/"$//' || true)
+        worktrees_dir=$(grep -m1 '^_[A-Z0-9_]*_WORKTREES_DEFAULT=' "$file" 2>/dev/null |
+            sed 's/^[^=]*=//' | sed 's/^"//; s/"$//' || true)
         if [[ -z "$worktrees_dir" ]]; then
             worktrees_dir=$(grep -m1 '^WORKTREES_DIR=' "$file" 2>/dev/null | sed 's/^WORKTREES_DIR=//' | tr -d '"' || true)
             if [[ "$worktrees_dir" =~ :-(.+)\}$ ]]; then
@@ -182,7 +182,7 @@ load_existing_launcher() {
                 win_cmds[idx]="$cmd"
             fi
         fi
-    done < "$file"
+    done <"$file"
 
     if [[ ${#win_names[@]} -gt 0 ]]; then
         num_windows="${#win_names[@]}"
@@ -230,8 +230,8 @@ draw_header() {
 
     # centre the box horizontally
     local term_width=${COLUMNS:-$(tput cols)}
-    local box_width=$((width + 2))  # ╭ + inner + ╮
-    local margin=$(( (term_width - box_width) / 2 ))
+    local box_width=$((width + 2)) # ╭ + inner + ╮
+    local margin=$(((term_width - box_width) / 2))
     [[ $margin -lt 0 ]] && margin=0
     local pad
     pad=$(printf '%*s' "$margin" '')
@@ -253,7 +253,7 @@ draw_footer() {
     local back_hint="$1"
     local hints=" enter"
     case "$back_hint" in
-        true)   hints="$hints · ^b back" ;;
+        true) hints="$hints · ^b back" ;;
         rename) hints="$hints · ^b rename" ;;
     esac
     hints="$hints · ^c cancel "
@@ -262,7 +262,7 @@ draw_footer() {
     local term_width=${COLUMNS:-$(tput cols)}
     local term_height=${LINES:-$(tput lines)}
     local hints_len=${#hints}
-    local side_len=$(( (term_width - hints_len) / 2 ))
+    local side_len=$(((term_width - hints_len) / 2))
     [[ $side_len -lt 1 ]] && side_len=1
     local left_border
     left_border=$(printf '─%.0s' $(seq 1 $side_len))
@@ -433,7 +433,7 @@ if [[ -n "$name" ]]; then
         _err_tw=${COLUMNS:-$(tput cols)}
         _err_th=${LINES:-$(tput lines)}
         _err_hint=" spc/enter back · q/esc close "
-        _err_side=$(( (_err_tw - ${#_err_hint}) / 2 ))
+        _err_side=$(((_err_tw - ${#_err_hint}) / 2))
         [[ $_err_side -lt 1 ]] && _err_side=1
         _err_border=$(printf '─%.0s' $(seq 1 $_err_side))
         printf '\033[%d;1H' "$((_err_th - 1))"
@@ -443,8 +443,8 @@ if [[ -n "$name" ]]; then
         while true; do
             read -rsn1 _err_key
             case "$_err_key" in
-                r|' '|'') exec "$SCRIPT_DIR/prompt.sh" ;;
-                q|$'\x1b') exit 0 ;;
+                r | ' ' | '') exec "$SCRIPT_DIR/prompt.sh" ;;
+                q | $'\x1b') exit 0 ;;
             esac
         done
     fi
@@ -720,7 +720,7 @@ while true; do
 
         *)
             # steps 5+: window configuration
-            local_win_idx=$((step - 4))  # 1-based window index
+            local_win_idx=$((step - 4)) # 1-based window index
 
             if [[ $local_win_idx -gt $num_windows ]]; then
                 # past last window, done
@@ -833,7 +833,7 @@ session_var=$(printf '%s' "$name" | tr '[:lower:]' '[:upper:]' | tr '.-' '_')
         instance_tag=$'\n'"# @instance: prompt"
     fi
 
-    cat << PREAMBLE
+    cat <<PREAMBLE
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -869,7 +869,7 @@ PREAMBLE
     # override (e.g. `FOO_ROOT="~/x"`) ships a literal tilde
     if [[ "$worktree_aware" == "y" ]]; then
         worktree_prefix=$(printf '%s' "$name" | tr '[:lower:]' '[:upper:]')
-        cat << WTBLOCK
+        cat <<WTBLOCK
 SESSION="\${SESSION_NAME:-$session_name}"
 _${session_var}_WORKTREES_DEFAULT="$worktrees_dir"
 _${session_var}_ROOT_DEFAULT="$project_dir"
@@ -891,7 +891,7 @@ if [[ "\$SESSION" =~ -([0-9]+)\$ ]]; then
 fi
 WTBLOCK
     else
-        cat << SIMPLE
+        cat <<SIMPLE
 SESSION="\${SESSION_NAME:-$session_name}"
 _${session_var}_ROOT_DEFAULT="$project_dir"
 PROJECT_DIR="\${${session_var}_ROOT:-\$_${session_var}_ROOT_DEFAULT}"
@@ -899,7 +899,7 @@ PROJECT_DIR="\${PROJECT_DIR/#\\~/\$HOME}"
 SIMPLE
     fi
 
-    cat << 'VALIDATE'
+    cat <<'VALIDATE'
 
 # Validate project directory exists
 if [[ ! -d "$PROJECT_DIR" ]]; then
@@ -952,7 +952,7 @@ VALIDATE
         fi
     done
 
-    cat << 'FOOTER'
+    cat <<'FOOTER'
 
 # Select first window
 tmux select-window -t "$SESSION:1"
@@ -965,7 +965,7 @@ else
     tmux attach-session -t "=$SESSION"
 fi
 FOOTER
-} > "$target_path"
+} >"$target_path"
 
 chmod +x "$target_path"
 

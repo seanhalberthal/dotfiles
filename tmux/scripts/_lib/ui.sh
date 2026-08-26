@@ -20,11 +20,11 @@ _hex_fg() {
 # usage: tmux_confirm_last_item "window" "session_name" "target" "window_name" ["window_id"]
 #        tmux_confirm_last_item "pane" "session_name" "target" "" ""
 tmux_confirm_last_item() {
-    local item_type="$1"        # "window" or "pane"
-    local current_session="$2"   # session being affected
-    local target="$3"            # full target (e.g. "session:window" or "session:window.pane")
-    local window_name="$4"       # window name (for clearing alerts, optional)
-    local window_id="${5:-}"     # window id (for clearing alerts, optional)
+    local item_type="$1"       # "window" or "pane"
+    local current_session="$2" # session being affected
+    local target="$3"          # full target (e.g. "session:window" or "session:window.pane")
+    local window_name="$4"     # window name (for clearing alerts, optional)
+    local window_id="${5:-}"   # window id (for clearing alerts, optional)
 
     local other_session
     other_session=$(find_other_session "$current_session")
@@ -71,10 +71,10 @@ show_centered_message() {
     term_height=${LINES:-$(tput lines)}
     term_width=${COLUMNS:-$(tput cols)}
 
-    local v_pad=$(( (term_height - box_height) / 2 ))
+    local v_pad=$(((term_height - box_height) / 2))
     [[ $v_pad -lt 0 ]] && v_pad=0
 
-    local h_pad=$(( (term_width - box_width) / 2 ))
+    local h_pad=$(((term_width - box_width) / 2))
     [[ $h_pad -lt 0 ]] && h_pad=0
 
     local pad
@@ -83,7 +83,7 @@ show_centered_message() {
     clear
 
     # vertical padding
-    for ((i=0; i<v_pad; i++)); do
+    for ((i = 0; i < v_pad; i++)); do
         printf '\n'
     done
 
@@ -168,7 +168,7 @@ wait_for_key() {
     if [[ "$centred" == "true" ]]; then
         local term_width
         term_width=${COLUMNS:-$(tput cols)}
-        local h_pad=$(( (term_width - ${#prompt}) / 2 ))
+        local h_pad=$(((term_width - ${#prompt}) / 2))
         [[ $h_pad -lt 0 ]] && h_pad=0
         prompt=$(printf '%*s%s' "$h_pad" '' "$prompt")
     fi
@@ -187,13 +187,13 @@ show_notification() {
     term_height=${LINES:-$(tput lines)}
     term_width=${COLUMNS:-$(tput cols)}
 
-    local h_pad=$(( (term_width - ${#message}) / 2 ))
+    local h_pad=$(((term_width - ${#message}) / 2))
     [[ $h_pad -lt 0 ]] && h_pad=0
 
-    local v_pad=$(( term_height / 2 ))
+    local v_pad=$((term_height / 2))
 
     clear
-    for ((i=0; i<v_pad; i++)); do
+    for ((i = 0; i < v_pad; i++)); do
         printf '\n'
     done
 

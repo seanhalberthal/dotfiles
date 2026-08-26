@@ -19,39 +19,39 @@ DRY_RUN=0
 
 zsh_bin="$(command -v zsh || true)"
 if [[ -z "$zsh_bin" ]]; then
-  echo "zsh not found on PATH; nothing to audit" >&2
-  exit 0
+    echo "zsh not found on PATH; nothing to audit" >&2
+    exit 0
 fi
 
 audit() {
-  "$zsh_bin" -fc 'autoload -Uz compaudit; compaudit' 2>/dev/null || true
+    "$zsh_bin" -fc 'autoload -Uz compaudit; compaudit' 2>/dev/null || true
 }
 
 insecure="$(audit)"
 if [[ -z "$insecure" ]]; then
-  echo "compaudit clean; completion dirs already secure"
-  exit 0
+    echo "compaudit clean; completion dirs already secure"
+    exit 0
 fi
 
 skipped=0
 while IFS= read -r path; do
-  [[ -n "$path" ]] || continue
-  if [[ ! -O "$path" ]]; then
-    echo "SKIP (not owner, needs sudo): $path" >&2
-    skipped=$((skipped + 1))
-    continue
-  fi
-  if [[ $DRY_RUN -eq 1 ]]; then
-    echo "would chmod go-w: $path"
-  else
-    echo "chmod go-w: $path"
-    chmod go-w "$path"
-  fi
-done <<< "$insecure"
+    [[ -n "$path" ]] || continue
+    if [[ ! -O "$path" ]]; then
+        echo "SKIP (not owner, needs sudo): $path" >&2
+        skipped=$((skipped + 1))
+        continue
+    fi
+    if [[ $DRY_RUN -eq 1 ]]; then
+        echo "would chmod go-w: $path"
+    else
+        echo "chmod go-w: $path"
+        chmod go-w "$path"
+    fi
+done <<<"$insecure"
 
 if [[ $DRY_RUN -eq 1 ]]; then
-  echo "dry run: no changes made"
-  exit 0
+    echo "dry run: no changes made"
+    exit 0
 fi
 
 # force a clean dump rebuild so the next shell doesn't reuse a stale one
@@ -59,10 +59,10 @@ rm -f "${HOME}/.zcompdump" "${HOME}"/.zcompdump.* 2>/dev/null || true
 
 remaining="$(audit)"
 if [[ -n "$remaining" ]]; then
-  echo "still insecure (fix manually, likely root-owned):" >&2
-  echo "$remaining" >&2
-  echo "  e.g. sudo chmod go-w <path>" >&2
-  exit 1
+    echo "still insecure (fix manually, likely root-owned):" >&2
+    echo "$remaining" >&2
+    echo "  e.g. sudo chmod go-w <path>" >&2
+    exit 1
 fi
 
 echo "done; open a new shell to clear the compinit prompt"

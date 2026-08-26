@@ -116,7 +116,7 @@ if [[ -d "/Applications/Ghostty.app/Contents/Resources/ghostty/themes" ]]; then
     "$GENERATE_THEME" zenburn --quiet >/dev/null 2>&1
 
     # pretend zenburn is the current theme
-    echo "zenburn" > "$TEST_XDG/dotfiles/current-theme"
+    echo "zenburn" >"$TEST_XDG/dotfiles/current-theme"
 
     output=$(XDG_CONFIG_HOME="$TEST_XDG" "$THEME_DELETE" zenburn 2>&1) || true
 
@@ -153,7 +153,7 @@ if [[ -d "/Applications/Ghostty.app/Contents/Resources/ghostty/themes" ]]; then
     "$GENERATE_THEME" zenburn --quiet >/dev/null 2>&1
 
     # set current theme to dracula (a custom theme, not the one being deleted)
-    echo "dracula" > "$TEST_XDG/dotfiles/current-theme"
+    echo "dracula" >"$TEST_XDG/dotfiles/current-theme"
 
     XDG_CONFIG_HOME="$TEST_XDG" "$THEME_DELETE" zenburn >/dev/null 2>&1 || true
 
@@ -179,7 +179,7 @@ if [[ -d "/Applications/Ghostty.app/Contents/Resources/ghostty/themes" ]]; then
     "$GENERATE_THEME" zenburn --quiet >/dev/null 2>&1
 
     # pretend zenburn is the current theme
-    echo "zenburn" > "$TEST_XDG/dotfiles/current-theme"
+    echo "zenburn" >"$TEST_XDG/dotfiles/current-theme"
 
     output=$(XDG_CONFIG_HOME="$TEST_XDG" "$THEME_DELETE" all --yes 2>&1) || true
 
@@ -205,7 +205,7 @@ if [[ -d "/Applications/Ghostty.app/Contents/Resources/ghostty/themes" ]]; then
     "$GENERATE_THEME" zenburn --quiet >/dev/null 2>&1
 
     # current theme is a custom theme, should not be affected
-    echo "catppuccin-mocha" > "$TEST_XDG/dotfiles/current-theme"
+    echo "catppuccin-mocha" >"$TEST_XDG/dotfiles/current-theme"
 
     XDG_CONFIG_HOME="$TEST_XDG" "$THEME_DELETE" all --yes >/dev/null 2>&1 || true
 

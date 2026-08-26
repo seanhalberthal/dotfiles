@@ -18,7 +18,6 @@ source "$SCRIPT_DIR/../_lib/symlink.sh"
 PRESET="${DOTFILES_PRESET:-full}"
 FAILED=0
 
-
 print_section "Creating symlinks"
 echo "Source: $DOTFILES_DIR"
 echo "Preset: $PRESET"
@@ -30,17 +29,17 @@ echo ""
 echo "Zsh configuration:"
 
 if [[ -f "$HOME/.zshrc" ]]; then
-  if grep -q "dotfiles.zsh" "$HOME/.zshrc" 2>/dev/null; then
-    success "Personal ~/.zshrc exists (sources dotfiles framework)"
-  else
-    warn "$HOME/.zshrc exists but doesn't source dotfiles.zsh"
-    info "Add this line to source the framework: source ~/dotfiles/zsh/dotfiles.zsh"
-  fi
+    if grep -q "dotfiles.zsh" "$HOME/.zshrc" 2>/dev/null; then
+        success "Personal ~/.zshrc exists (sources dotfiles framework)"
+    else
+        warn "$HOME/.zshrc exists but doesn't source dotfiles.zsh"
+        info "Add this line to source the framework: source ~/dotfiles/zsh/dotfiles.zsh"
+    fi
 else
-  # no .zshrc at all, create from template
-  cp "$DOTFILES_DIR/zsh/zshrc.template" "$HOME/.zshrc"
-  success "Created ~/.zshrc from template"
-  printf '  %s→%s Edit with: nvim ~/.zshrc\n' "${CYAN}" "${NC}"
+    # no .zshrc at all, create from template
+    cp "$DOTFILES_DIR/zsh/zshrc.template" "$HOME/.zshrc"
+    success "Created ~/.zshrc from template"
+    printf '  %s→%s Edit with: nvim ~/.zshrc\n' "${CYAN}" "${NC}"
 fi
 
 # these are still symlinked (shared config, not personal)

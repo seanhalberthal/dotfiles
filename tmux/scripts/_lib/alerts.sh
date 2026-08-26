@@ -85,9 +85,12 @@ _ansi() {
 # humanise elapsed seconds: 45s, 12m, 1h03m
 _fmt_elapsed() {
     local s="$1"
-    if (( s < 60 )); then printf '%ds' "$s"
-    elif (( s < 3600 )); then printf '%dm' "$(( s / 60 ))"
-    else printf '%dh%02dm' "$(( s / 3600 ))" "$(( (s % 3600) / 60 ))"
+    if ((s < 60)); then
+        printf '%ds' "$s"
+    elif ((s < 3600)); then
+        printf '%dm' "$((s / 60))"
+    else
+        printf '%dh%02dm' "$((s / 3600))" "$(((s % 3600) / 60))"
     fi
 }
 
@@ -111,11 +114,11 @@ get_agent_icon() {
 get_agent_colour() {
     local agent="$1"
     case "$agent" in
-        claude) echo "#f1fa8c" ;;      # yellow
-        codex) echo "#50fa7b" ;;       # dracula green (matches codex logo)
-        opencode) echo "#bd93f9" ;;    # dracula purple
-        copilot) echo "#58a6ff" ;;     # GitHub blue
-        *) echo "#6272a4" ;;           # dracula blue
+        claude) echo "#f1fa8c" ;;   # yellow
+        codex) echo "#50fa7b" ;;    # dracula green (matches codex logo)
+        opencode) echo "#bd93f9" ;; # dracula purple
+        copilot) echo "#58a6ff" ;;  # GitHub blue
+        *) echo "#6272a4" ;;        # dracula blue
     esac
 }
 
@@ -124,11 +127,11 @@ get_agent_colour() {
 # returns: "icon|colour"
 get_agent_display() {
     case "$1" in
-        claude)   echo "⚡|#f1fa8c" ;;
-        codex)    echo "⌘|#50fa7b" ;;
+        claude) echo "⚡|#f1fa8c" ;;
+        codex) echo "⌘|#50fa7b" ;;
         opencode) echo "|#bd93f9" ;;
-        copilot)  echo "|#58a6ff" ;;
-        *)        echo "󱜙|#6272a4" ;;
+        copilot) echo "|#58a6ff" ;;
+        *) echo "󱜙|#6272a4" ;;
     esac
 }
 
@@ -138,12 +141,12 @@ get_agent_display() {
 # returns: "icon|colour"
 get_agent_state_display() {
     case "$1" in
-        working)     echo "●|#d8a657" ;;    # amber: in progress
-        needs-input) echo "◐|#f1fa8c" ;;    # yellow: waiting on permission/question
-        idle)        echo "○|#8a8f98" ;;    # muted grey: finished, awaiting prompt
-        error)       echo "✗|#c07878" ;;    # muted red: turn died on an API error
-        stuck)       echo "⚠|#d77757" ;;    # terracotta: working but no recent activity
-        *)           echo "·|#6272a4" ;;    # unknown: no state recorded
+        working) echo "●|#d8a657" ;;     # amber: in progress
+        needs-input) echo "◐|#f1fa8c" ;; # yellow: waiting on permission/question
+        idle) echo "○|#8a8f98" ;;        # muted grey: finished, awaiting prompt
+        error) echo "✗|#c07878" ;;       # muted red: turn died on an API error
+        stuck) echo "⚠|#d77757" ;;       # terracotta: working but no recent activity
+        *) echo "·|#6272a4" ;;           # unknown: no state recorded
     esac
 }
 
@@ -151,17 +154,20 @@ get_agent_state_display() {
 # SIGKILL 137, SIGHUP 129). those are interruptions, not run-to-completion
 # failures, so they get a neutral state rather than the red ✗
 _exit_code_is_signal() {
-    [[ "$1" =~ ^[0-9]+$ ]] && (( $1 > 128 ))
+    [[ "$1" =~ ^[0-9]+$ ]] && (($1 > 128))
 }
 
 # exit code icon (separate from agent icons)
 # usage: get_exit_code_icon "exit_code"
 get_exit_code_icon() {
     local code="$1"
-    _exit_code_is_signal "$code" && { echo "⊘"; return; }
+    _exit_code_is_signal "$code" && {
+        echo "⊘"
+        return
+    }
     case "$code" in
-        0)   echo "✓" ;;
-        *)   echo "✗" ;;
+        0) echo "✓" ;;
+        *) echo "✗" ;;
     esac
 }
 
@@ -169,10 +175,13 @@ get_exit_code_icon() {
 # usage: get_exit_code_colour "exit_code"
 get_exit_code_colour() {
     local code="$1"
-    _exit_code_is_signal "$code" && { echo "#8a8f98"; return; }    # muted grey
+    _exit_code_is_signal "$code" && {
+        echo "#8a8f98"
+        return
+    } # muted grey
     case "$code" in
-        0)   echo "#7aab88" ;;    # muted green
-        *)   echo "#c07878" ;;    # muted red
+        0) echo "#7aab88" ;; # muted green
+        *) echo "#c07878" ;; # muted red
     esac
 }
 
@@ -180,17 +189,20 @@ get_exit_code_colour() {
 # distinct from the ✓/✗ exit icons: an in-flight command has no exit code yet
 # usage: get_running_display
 get_running_display() {
-    echo "●|#d8a657"    # amber: in progress
+    echo "●|#d8a657" # amber: in progress
 }
 
 # exit code display (combined icon|colour, avoids subshell forks)
 # usage: get_exit_code_display "exit_code"
 get_exit_code_display() {
     local code="$1"
-    _exit_code_is_signal "$code" && { echo "⊘|#8a8f98"; return; }    # interrupted
+    _exit_code_is_signal "$code" && {
+        echo "⊘|#8a8f98"
+        return
+    } # interrupted
     case "$code" in
-        0)   echo "✓|#7aab88" ;;
-        *)   echo "✗|#c07878" ;;
+        0) echo "✓|#7aab88" ;;
+        *) echo "✗|#c07878" ;;
     esac
 }
 
@@ -255,15 +267,18 @@ build_alert_icons() {
     local icons="" seen_agents="" display icon colour line prefix
 
     case "$pattern" in
-        (^*:*) prefix="${pattern#^}" ; prefix="${prefix%:}" ;;
-        (*) prefix="" ;;
+        ^*:*)
+            prefix="${pattern#^}"
+            prefix="${prefix%:}"
+            ;;
+        *) prefix="" ;;
     esac
 
     while IFS= read -r line; do
         [[ -n "$line" ]] || continue
         [[ -n "$prefix" && "$line" != "$prefix:"* ]] && continue
 
-        IFS=: read -r _sess _win field3 rest <<< "$line"
+        IFS=: read -r _sess _win field3 rest <<<"$line"
         if [[ "$field3" == "exit" ]]; then
             # exit alert: rest is "window_id:code:label" (id is the match key)
             local _cl="${rest#*:}"
@@ -294,7 +309,7 @@ build_alert_icons() {
                     ;;
             esac
         fi
-    done <<< "$alerts_content"
+    done <<<"$alerts_content"
 
     printf '%s' "$icons"
 }
@@ -348,7 +363,7 @@ set_exit_alert() {
     if [[ -z "$_meta" && -n "${TMUX:-}" ]]; then
         _meta=$(tmux display-message -p $'#S\t#{window_id}\t#W' 2>/dev/null || true)
     fi
-    [[ -n "$_meta" ]] && IFS=$'\t' read -r sess wid win <<< "$_meta"
+    [[ -n "$_meta" ]] && IFS=$'\t' read -r sess wid win <<<"$_meta"
 
     # add window to alerts file (6-field format:
     # session:window:exit:window_id:code:label). window_id is the dismiss/GC key
@@ -359,7 +374,7 @@ set_exit_alert() {
         local enc_win
         enc_win=$(alerts_encode_window "$win")
         local entry="${sess}:${enc_win}:exit:${wid}:${code}:${label}"
-        grep -qxF "$entry" "$ALERTS_FILE" 2>/dev/null || echo "$entry" >> "$ALERTS_FILE"
+        grep -qxF "$entry" "$ALERTS_FILE" 2>/dev/null || echo "$entry" >>"$ALERTS_FILE"
     fi
 
     # ring the bell at the attached client terminal(s) rather than the origin
@@ -370,7 +385,7 @@ set_exit_alert() {
     if [[ "$ring_bell" == "true" ]]; then
         local _ctty
         while IFS= read -r _ctty; do
-            [[ -n "$_ctty" && -w "$_ctty" ]] && printf '\a' > "$_ctty" 2>/dev/null
+            [[ -n "$_ctty" && -w "$_ctty" ]] && printf '\a' >"$_ctty" 2>/dev/null
         done < <(tmux list-clients -F '#{client_tty}' 2>/dev/null)
     fi
 }
@@ -384,7 +399,7 @@ set_window_alert() {
 
     # validate agent name against whitelist
     case "$agent" in
-        claude|codex|opencode|copilot) ;;
+        claude | codex | opencode | copilot) ;;
         *) return 1 ;;
     esac
 
@@ -424,14 +439,14 @@ set_window_alert() {
         local enc_win
         enc_win=$(alerts_encode_window "$win")
         local entry="${sess}:${enc_win}:${agent}"
-        grep -qxF "$entry" "$ALERTS_FILE" 2>/dev/null || echo "$entry" >> "$ALERTS_FILE"
+        grep -qxF "$entry" "$ALERTS_FILE" 2>/dev/null || echo "$entry" >>"$ALERTS_FILE"
     fi
 
     # ring the terminal bell (only if requested and /dev/tty is available)
     if [[ "$ring_bell" == "true" ]]; then
         {
             if [[ -w /dev/tty ]]; then
-                printf '\a' > /dev/tty
+                printf '\a' >/dev/tty
             fi
         } 2>/dev/null || true
     fi
@@ -457,7 +472,7 @@ _acquire_alerts_lock() {
 
     for _ in {1..10}; do
         if mkdir "$lock_dir" 2>/dev/null; then
-            echo $$ > "$pid_file" 2>/dev/null
+            echo $$ >"$pid_file" 2>/dev/null
             return 0
         fi
 
@@ -500,7 +515,7 @@ clear_window_finished() {
 
     local tmpf
     tmpf=$(mktemp "${FINISHED_FILE}.XXXXXX") || return 0
-    if awk -F'\t' -v w="$window_id" '$4 != w' "$FINISHED_FILE" > "$tmpf" 2>/dev/null; then
+    if awk -F'\t' -v w="$window_id" '$4 != w' "$FINISHED_FILE" >"$tmpf" 2>/dev/null; then
         mv "$tmpf" "$FINISHED_FILE" 2>/dev/null || rm -f "$tmpf"
     else
         rm -f "$tmpf"
@@ -524,7 +539,7 @@ clear_session_finished() {
 
     local tmpf
     tmpf=$(mktemp "${FINISHED_FILE}.XXXXXX") || return 0
-    if awk -F'\t' -v s="$session" '$3 != s' "$FINISHED_FILE" > "$tmpf" 2>/dev/null; then
+    if awk -F'\t' -v s="$session" '$3 != s' "$FINISHED_FILE" >"$tmpf" 2>/dev/null; then
         mv "$tmpf" "$FINISHED_FILE" 2>/dev/null || rm -f "$tmpf"
     else
         rm -f "$tmpf"
@@ -555,7 +570,7 @@ clear_window_exit_alert() {
     _acquire_alerts_lock || return 0
     local tmp_file
     tmp_file=$(mktemp "${ALERTS_FILE}.tmp.XXXXXX")
-    if awk -F: -v w="$window_id" '!($3 == "exit" && $4 == w)' "$ALERTS_FILE" > "$tmp_file" 2>/dev/null; then
+    if awk -F: -v w="$window_id" '!($3 == "exit" && $4 == w)' "$ALERTS_FILE" >"$tmp_file" 2>/dev/null; then
         mv "$tmp_file" "$ALERTS_FILE" 2>/dev/null || rm -f "$tmp_file" 2>/dev/null
     else
         rm -f "$tmp_file" 2>/dev/null
@@ -585,7 +600,7 @@ clear_window_alerts() {
             ($1 == s && $2 == w) { next }
             (wid != "" && $3 == "exit" && $4 == wid) { next }
             { print }
-        ' "$ALERTS_FILE" > "$tmp_file" 2>/dev/null; then
+        ' "$ALERTS_FILE" >"$tmp_file" 2>/dev/null; then
             mv "$tmp_file" "$ALERTS_FILE" 2>/dev/null || rm -f "$tmp_file" 2>/dev/null
         else
             rm -f "$tmp_file" 2>/dev/null
@@ -608,7 +623,7 @@ clear_window_alerts() {
     if [[ -n "$alert_options" ]]; then
         while IFS= read -r option; do
             tmux set-option -wt "$target" -u "$option" 2>/dev/null || true
-        done <<< "$alert_options"
+        done <<<"$alert_options"
     fi
 }
 
@@ -628,7 +643,7 @@ cleanup_stale_alerts() {
     # (session:window:exit:window_id:code:label), so read the leading fields and
     # validate per type: agent alerts by window name, exit alerts by window_id
     while IFS= read -r line; do
-        IFS=':' read -r session window field3 field4 _rest <<< "$line"
+        IFS=':' read -r session window field3 field4 _rest <<<"$line"
 
         # validate format, need at least session, window, and one more field
         if [[ -z "$session" || -z "$window" || -z "$field3" ]]; then
@@ -662,14 +677,14 @@ cleanup_stale_alerts() {
         fi
 
         # target exists, keep the alert, preserve original line intact
-        echo "$line" >> "$tmp_file"
-    done < "$ALERTS_FILE"
+        echo "$line" >>"$tmp_file"
+    done <"$ALERTS_FILE"
 
     if [[ $cleaned -eq 1 ]]; then
         if [[ -f "$tmp_file" ]]; then
             mv "$tmp_file" "$ALERTS_FILE" 2>/dev/null
         else
-            : > "$ALERTS_FILE"
+            : >"$ALERTS_FILE"
         fi
     else
         rm -f "$tmp_file"
@@ -692,7 +707,7 @@ cleanup_stale_agent_state() {
     for f in "$AGENT_STATE_DIR"/*; do
         [[ -e "$f" ]] || continue
         pane="${f##*/}"
-        grep -qxF "$pane" <<< "$live_panes" || rm -f "$f"
+        grep -qxF "$pane" <<<"$live_panes" || rm -f "$f"
     done
 }
 
@@ -721,7 +736,7 @@ update_window_name_in_alerts() {
     tmp_file=$(mktemp "${ALERTS_FILE}.tmp.XXXXXX")
     local update_success=0
 
-    if sed "s|^${session}:${enc_old}:|${session}:${enc_new}:|" "$ALERTS_FILE" > "$tmp_file" 2>/dev/null; then
+    if sed "s|^${session}:${enc_old}:|${session}:${enc_new}:|" "$ALERTS_FILE" >"$tmp_file" 2>/dev/null; then
         if mv "$tmp_file" "$ALERTS_FILE" 2>/dev/null; then
             update_success=1
         fi
@@ -754,7 +769,7 @@ update_session_name_in_alerts() {
     tmp_file=$(mktemp "${ALERTS_FILE}.tmp.XXXXXX")
     local update_success=0
 
-    if sed "s|^${old_session}:|${new_session}:|" "$ALERTS_FILE" > "$tmp_file" 2>/dev/null; then
+    if sed "s|^${old_session}:|${new_session}:|" "$ALERTS_FILE" >"$tmp_file" 2>/dev/null; then
         if mv "$tmp_file" "$ALERTS_FILE" 2>/dev/null; then
             update_success=1
         fi
@@ -782,7 +797,7 @@ clear_session_alerts() {
         local tmp_file
         tmp_file=$(mktemp "${ALERTS_FILE}.tmp.XXXXXX")
         local grep_exit=0
-        grep -vF "${session}:" "$ALERTS_FILE" > "$tmp_file" 2>/dev/null || grep_exit=$?
+        grep -vF "${session}:" "$ALERTS_FILE" >"$tmp_file" 2>/dev/null || grep_exit=$?
 
         # exit code 0 or 1 are both success (0 = matches found, 1 = no matches/all filtered)
         if [[ $grep_exit -le 1 ]]; then
@@ -803,7 +818,7 @@ clear_session_alerts() {
         if [[ -n "$alert_options" ]]; then
             while IFS= read -r option; do
                 tmux set-option -wt "$win" -u "$option" 2>/dev/null || true
-            done <<< "$alert_options"
+            done <<<"$alert_options"
         fi
     done
 }

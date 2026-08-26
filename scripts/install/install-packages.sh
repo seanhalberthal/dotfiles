@@ -40,7 +40,8 @@ trap cleanup EXIT
 # no-op on Homebrew versions that predate the command
 if brew trust --help >/dev/null 2>&1; then
     while read -r _ tap_name; do
-        tap_name="${tap_name%\"}"; tap_name="${tap_name#\"}"
+        tap_name="${tap_name%\"}"
+        tap_name="${tap_name#\"}"
         [[ -n "$tap_name" ]] && brew trust --tap "$tap_name" >/dev/null 2>&1 || true
     done < <(grep -E '^tap "' "$FILTERED_BREWFILE")
 fi
@@ -93,8 +94,8 @@ if is_linux; then
     # fix gcc symlinks (brew post-install often fails on non-standard distros)
     # without these, formulas that need source compilation can't find gcc/g++
     if [[ -n "$BREW_BIN" ]]; then
-        GCC_VERSION=$(find "$BREW_BIN" -maxdepth 1 -name 'gcc-[0-9]*' -printf '%f\n' 2>/dev/null \
-            | grep -oP 'gcc-\K\d+' | sort -rn | head -1 || true)
+        GCC_VERSION=$(find "$BREW_BIN" -maxdepth 1 -name 'gcc-[0-9]*' -printf '%f\n' 2>/dev/null |
+            grep -oP 'gcc-\K\d+' | sort -rn | head -1 || true)
         if [[ -n "$GCC_VERSION" ]] && [[ -x "$BREW_BIN/gcc-$GCC_VERSION" ]] && [[ ! -e "$BREW_BIN/gcc" ]]; then
             echo "Fixing gcc symlinks (gcc-$GCC_VERSION -> gcc)..."
             ln -sf "$BREW_BIN/gcc-$GCC_VERSION" "$BREW_BIN/gcc"
@@ -184,9 +185,9 @@ if should_install "core" && is_linux; then
             echo "Installing Ghostty (dnf)..."
             if ! sudo dnf install -y ghostty; then
                 echo "  Ghostty not found in default repos. Trying Terra repository..."
-                if sudo rpm --import https://repos.fyralabs.com/terra/gpg.key \
-                    && sudo dnf install -y --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release \
-                    && sudo dnf install -y ghostty; then
+                if sudo rpm --import https://repos.fyralabs.com/terra/gpg.key &&
+                    sudo dnf install -y --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release &&
+                    sudo dnf install -y ghostty; then
                     success "Ghostty installed via Terra"
                 else
                     warn "Ghostty install failed."
@@ -284,7 +285,7 @@ fi
 # gh extensions
 if command_exists gh; then
     echo "Installing gh extensions..."
-    gh extension install dlvhdr/gh-dash    2>/dev/null || true
+    gh extension install dlvhdr/gh-dash 2>/dev/null || true
     gh extension install dlvhdr/gh-enhance 2>/dev/null || true
     gh extension install undont/gh-bench 2>/dev/null || true
 fi

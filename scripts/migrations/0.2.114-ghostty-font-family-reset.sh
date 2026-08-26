@@ -47,7 +47,7 @@ awk '
         done = 1
     }
     { print }
-' "$f" > "$tmp" && mv "$tmp" "$f"
+' "$f" >"$tmp" && mv "$tmp" "$f"
 
 echo "    Added a font-family reset to $f"
 echo "    (your font-family override now applies as the primary font, not a fallback)"

@@ -18,7 +18,7 @@ MOD=$(mod_key)
 popup_height=40
 read -r popup_height _ < <(stty size 2>/dev/null) || true
 
-if (( popup_height < 38 )); then
+if ((popup_height < 38)); then
     TEMPLATE="$SCRIPT_DIR/../../tmux-help-compact.template"
 else
     TEMPLATE="$SCRIPT_DIR/../../tmux-help.template"

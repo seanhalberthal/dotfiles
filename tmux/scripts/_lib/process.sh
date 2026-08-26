@@ -73,7 +73,7 @@ graceful_kill_pids() {
 
     # wait for graceful exit (polling at 100ms intervals)
     local i=0
-    local max_wait=$(( grace_seconds * 10 ))
+    local max_wait=$((grace_seconds * 10))
     while [ "$i" -lt "$max_wait" ]; do
         local any_alive=false
         for pid in "${pids[@]}"; do
@@ -84,7 +84,7 @@ graceful_kill_pids() {
         done
         $any_alive || return 0
         sleep 0.1
-        i=$(( i + 1 ))
+        i=$((i + 1))
     done
 
     # SIGKILL survivors

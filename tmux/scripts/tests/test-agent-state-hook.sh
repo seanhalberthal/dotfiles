@@ -27,7 +27,7 @@ run_hook() {
 
 # read a single field from the state file (1-based)
 field() {
-    cut -f"$1" < "$STATE_FILE"
+    cut -f"$1" <"$STATE_FILE"
 }
 
 # ===========================================================================
@@ -171,8 +171,8 @@ fi
 
 section "Wrapper Delegation"
 
-printf '%s\n' '{"hook_event_name":"Stop","session_id":"w1","cwd":"/tmp/proj"}' \
-    | TMUX_PANE="$PANE" AGENT_STATE_DIR="$STATE_DIR" bash "$WRAPPER_SCRIPT"
+printf '%s\n' '{"hook_event_name":"Stop","session_id":"w1","cwd":"/tmp/proj"}' |
+    TMUX_PANE="$PANE" AGENT_STATE_DIR="$STATE_DIR" bash "$WRAPPER_SCRIPT"
 assert_equals "wrapper writes claude agent rows" "claude" "$(field 1)"
 assert_equals "wrapper passes stdin through" "w1" "$(field 5)"
 

@@ -34,8 +34,9 @@ else
 fi
 
 # test sed_inplace works for simple substitution
-test_file=$(mktemp); _TEST_TMPFILES+=("$test_file")
-echo "hello world" > "$test_file"
+test_file=$(mktemp)
+_TEST_TMPFILES+=("$test_file")
+echo "hello world" >"$test_file"
 sed_inplace "s/hello/goodbye/" "$test_file"
 result=$(cat "$test_file")
 if [[ "$result" == "goodbye world" ]]; then
@@ -45,8 +46,9 @@ else
 fi
 
 # test sed_inplace works for in-place replacement (no leftover backup files)
-test_file2=$(mktemp); _TEST_TMPFILES+=("$test_file2")
-echo "foo bar" > "$test_file2"
+test_file2=$(mktemp)
+_TEST_TMPFILES+=("$test_file2")
+echo "foo bar" >"$test_file2"
 sed_inplace "s/foo/baz/" "$test_file2"
 # check no backup files exist (BSD sed creates file-e or file.bak patterns)
 backup_files=$(find "$(dirname "$test_file2")" -name "$(basename "$test_file2")*" ! -name "$(basename "$test_file2")" 2>/dev/null || true)
@@ -57,8 +59,9 @@ else
 fi
 
 # test sed_inplace with append command (used by update_zshrc_export)
-test_file3=$(mktemp); _TEST_TMPFILES+=("$test_file3")
-cat > "$test_file3" <<'EOF'
+test_file3=$(mktemp)
+_TEST_TMPFILES+=("$test_file3")
+cat >"$test_file3" <<'EOF'
 line1
 line2
 line3
@@ -78,7 +81,7 @@ section "update_zshrc_export (Portable sed)"
 # test that update_zshrc_export works on current platform
 # the function reads $HOME/.zshrc, so we use a sandbox with fake HOME
 setup_sandbox
-cat > "$HOME/.zshrc" <<'EOF'
+cat >"$HOME/.zshrc" <<'EOF'
 # YOUR PERSONAL CONFIGURATION
 # Add your settings below
 
@@ -200,9 +203,9 @@ section "Generate-Theme Ghostty Path Fallbacks"
 GENERATE_THEME="$DOTFILES_ROOT/scripts/generate-theme"
 
 # verify generate-theme searches multiple Linux paths
-if grep -q '/usr/share/ghostty/themes' "$GENERATE_THEME" \
-    && grep -q '/usr/local/share/ghostty/themes' "$GENERATE_THEME" \
-    && grep -q '.local/share/ghostty/themes' "$GENERATE_THEME"; then
+if grep -q '/usr/share/ghostty/themes' "$GENERATE_THEME" &&
+    grep -q '/usr/local/share/ghostty/themes' "$GENERATE_THEME" &&
+    grep -q '.local/share/ghostty/themes' "$GENERATE_THEME"; then
     pass "generate-theme searches multiple Linux Ghostty theme paths"
 else
     fail "generate-theme should search multiple Linux paths for Ghostty themes"
@@ -219,9 +222,9 @@ section "Install Script Linux Compatibility"
 
 # verify install-packages.sh has distro-specific Ghostty handling
 INSTALL_PACKAGES="$DOTFILES_ROOT/scripts/install/install-packages.sh"
-if grep -q 'pacman' "$INSTALL_PACKAGES" \
-    && grep -q 'apt-get' "$INSTALL_PACKAGES" \
-    && grep -q 'dnf' "$INSTALL_PACKAGES"; then
+if grep -q 'pacman' "$INSTALL_PACKAGES" &&
+    grep -q 'apt-get' "$INSTALL_PACKAGES" &&
+    grep -q 'dnf' "$INSTALL_PACKAGES"; then
     pass "install-packages.sh handles multiple Linux distros for Ghostty"
 else
     fail "install-packages.sh should handle pacman, apt-get, and dnf for Ghostty"
@@ -230,8 +233,8 @@ fi
 # verify no remaining sed -i '' calls outside of sed_inplace (exclude common.sh and this test file)
 # scans both scripts/ (installer) and tmux/scripts/ (tmux tooling has its own
 # sed_inplace in tmux/scripts/_lib/common.sh)
-other_sed_files=$(grep -rl "sed -i ''" "$DOTFILES_ROOT/scripts/" "$DOTFILES_ROOT/tmux/scripts/" 2>/dev/null \
-    | grep -v '_lib/common.sh' | grep -v 'test-linux-compat.sh' || true)
+other_sed_files=$(grep -rl "sed -i ''" "$DOTFILES_ROOT/scripts/" "$DOTFILES_ROOT/tmux/scripts/" 2>/dev/null |
+    grep -v '_lib/common.sh' | grep -v 'test-linux-compat.sh' || true)
 if [[ -z "$other_sed_files" ]]; then
     pass "no sed -i '' calls outside of sed_inplace helper"
 else
@@ -244,16 +247,17 @@ section "Clipboard Detection (Functional)"
 # test cannot silently drift from the implementation it is meant to pin.
 # fakes a Linux PATH containing only the named tools.
 # usage: clipboard_test "<tools>" "<WAYLAND_DISPLAY>" "<DISPLAY>"
-_CLIP_FAKE_BIN="$(mktemp -d)"; _TEST_TMPDIRS+=("$_CLIP_FAKE_BIN")
+_CLIP_FAKE_BIN="$(mktemp -d)"
+_TEST_TMPDIRS+=("$_CLIP_FAKE_BIN")
 _clipboard_call() {
     local fn="$1" available_cmds="$2" wayland="${3:-}" x11="${4:-}"
     local bin="$_CLIP_FAKE_BIN"
 
     rm -f "${bin:?}"/*
-    printf '#!/bin/sh\necho Linux\n' > "$bin/uname"
+    printf '#!/bin/sh\necho Linux\n' >"$bin/uname"
     local c
     for c in $available_cmds; do
-        printf '#!/bin/sh\nexit 0\n' > "$bin/$c"
+        printf '#!/bin/sh\nexit 0\n' >"$bin/$c"
     done
     chmod +x "$bin"/*
 
@@ -343,7 +347,7 @@ section "update_zshrc_export Edge Cases"
 
 # test with path containing slashes
 setup_sandbox
-cat > "$HOME/.zshrc" <<'EOF'
+cat >"$HOME/.zshrc" <<'EOF'
 # YOUR PERSONAL CONFIGURATION
 EOF
 update_zshrc_export "DEV_ROOT" "/home/user/dev/projects"
@@ -356,7 +360,7 @@ fi
 # test with no marker in .zshrc
 cleanup_sandbox
 setup_sandbox
-echo "# Plain zshrc with no marker" > "$HOME/.zshrc"
+echo "# Plain zshrc with no marker" >"$HOME/.zshrc"
 update_zshrc_export "TEST_VAR" "some_value"
 if grep -q 'export TEST_VAR="some_value"' "$HOME/.zshrc"; then
     pass "update_zshrc_export appends when no marker found"

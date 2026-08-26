@@ -91,9 +91,9 @@ __sl_theme_resolve() {
     __sl_blend() {
         local a="${1#\#}" b="${2#\#}" p="$3" inv=$((100 - $3))
         printf '#%02x%02x%02x' \
-            $(( (16#${a:0:2} * inv + 16#${b:0:2} * p) / 100 )) \
-            $(( (16#${a:2:2} * inv + 16#${b:2:2} * p) / 100 )) \
-            $(( (16#${a:4:2} * inv + 16#${b:4:2} * p) / 100 ))
+            $(((16#${a:0:2} * inv + 16#${b:0:2} * p) / 100)) \
+            $(((16#${a:2:2} * inv + 16#${b:2:2} * p) / 100)) \
+            $(((16#${a:4:2} * inv + 16#${b:4:2} * p) / 100))
     }
     # pin a hex onto a semantic hue band while keeping the theme's own lightness
     # and saturation -> hex. converts to HSL, clamps the hue into [lo,hi] (the

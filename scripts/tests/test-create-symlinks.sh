@@ -361,7 +361,7 @@ info() { :; }
 eval "$(sed -n '/^copy_config()/,/^}/p' "$SYMLINK_LIB")"
 
 # test 1: copies to new destination
-echo "test content" > "$TEST_DIR/source.conf"
+echo "test content" >"$TEST_DIR/source.conf"
 copy_config "$TEST_DIR/source.conf" "$TEST_DIR/dest/config.conf"
 if [[ -f "$TEST_DIR/dest/config.conf" ]] && [[ ! -L "$TEST_DIR/dest/config.conf" ]]; then
     pass "copy_config creates regular file at new destination"
@@ -380,7 +380,7 @@ else
 fi
 
 # test 3: preserves existing regular file
-echo "user customised" > "$TEST_DIR/existing.conf"
+echo "user customised" >"$TEST_DIR/existing.conf"
 copy_config "$TEST_DIR/source.conf" "$TEST_DIR/existing.conf"
 assert_equals "copy_config preserves existing file content" "user customised" "$(cat "$TEST_DIR/existing.conf")"
 

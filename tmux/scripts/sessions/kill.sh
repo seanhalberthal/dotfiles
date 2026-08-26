@@ -26,7 +26,10 @@ save_undo_state() {
     cleanup_undo_files "session"
 
     # save session name for undo
-    (umask 077; echo "$session" > "$undo_file")
+    (
+        umask 077
+        echo "$session" >"$undo_file"
+    )
 
     # capture pane state (matches resurrect pane format)
     # fields: pane, session, window_index, window_active, :window_flags,
@@ -53,7 +56,7 @@ save_undo_state() {
             [[ -z "$auto_rename" ]] && auto_rename=":"
             printf '%s\t%s\n' "$line" "$auto_rename"
         done < <(tmux list-windows -t "$session" -F "$win_fmt" 2>/dev/null || true)
-    } > "$undo_backup"
+    } >"$undo_backup"
 
     if [[ -s "$undo_backup" ]]; then
         chmod 600 "$undo_backup"
@@ -95,7 +98,7 @@ if [[ "$SESSION_NAME" == "$CURRENT_SESSION" ]]; then
             MESSAGE="Kill session '${SESSION_NAME}' and switch to '${OTHER_SESSION}'?"
 
             if ! show_visual_confirm "$TITLE" "$MESSAGE"; then
-                exit 0  # exit cleanly on cancellation
+                exit 0 # exit cleanly on cancellation
             fi
         fi
 
@@ -124,7 +127,7 @@ else
         MESSAGE="Kill inactive session '${SESSION_NAME}'?"
 
         if ! show_visual_confirm "$TITLE" "$MESSAGE"; then
-            exit 0  # Exit cleanly on cancellation
+            exit 0 # Exit cleanly on cancellation
         fi
     fi
 

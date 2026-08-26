@@ -530,11 +530,9 @@ return {
         json = { 'prettier' },
         lua = { 'stylua' },
         python = { 'ruff_organize_imports', 'ruff_format' },
-        -- shfmt indents with tabs unless told otherwise, and the two dialects
-        -- here disagree: scripts are 4-space, zsh is 2-space
         sh = { 'shfmt' },
         bash = { 'shfmt' },
-        zsh = { 'shfmt_zsh' },
+        zsh = { 'shfmt' },
         typescript = { 'prettier' },
         typescriptreact = { 'prettier' },
         yaml = { 'prettier' },
@@ -543,11 +541,9 @@ return {
         -- `-ci` keeps case bodies indented, which is how the scripts here are
         -- written; without it shfmt pulls every case arm back a level
         shfmt = {
+          -- shfmt indents with tabs unless told otherwise;
+          -- explicitly set all shfmt runs to 4-space
           args = { '-i', '4', '-ci', '-filename', '$FILENAME' },
-        },
-        shfmt_zsh = {
-          command = 'shfmt',
-          args = { '-i', '2', '-ci', '-filename', '$FILENAME' },
         },
         goimports = {
           command = vim.fn.stdpath 'data' .. '/mason/bin/goimports',

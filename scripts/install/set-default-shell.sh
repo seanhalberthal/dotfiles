@@ -26,8 +26,8 @@ echo "Changing default shell to zsh ($ZSH_PATH)..."
 # silently blocks waiting for input.
 if [[ -f /etc/shells ]] && ! grep -qx "$ZSH_PATH" /etc/shells 2>/dev/null; then
     echo "Adding $ZSH_PATH to /etc/shells (may require sudo password)..."
-    echo "$ZSH_PATH" | sudo tee -a /etc/shells > /dev/null \
-        || warn "Could not add zsh to /etc/shells"
+    echo "$ZSH_PATH" | sudo tee -a /etc/shells >/dev/null ||
+        warn "Could not add zsh to /etc/shells"
 fi
 
 # chsh prompts for your login password via PAM (written to stderr). Never

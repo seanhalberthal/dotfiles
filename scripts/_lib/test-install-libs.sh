@@ -10,7 +10,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck disable=SC2034
-VERBOSE="${1:-}"  # reserved for future verbose output
+VERBOSE="${1:-}" # reserved for future verbose output
 
 # source shared test helpers (colours, pass/fail/skip/section, assertions)
 source "$SCRIPT_DIR/../tests/_test-helpers.sh"
@@ -189,7 +189,7 @@ section "Brewfile Filtering"
 # create test Brewfile
 TEST_BREWFILE=$(mktemp)
 trap 'rm -f "$TEST_BREWFILE"' EXIT
-cat > "$TEST_BREWFILE" << 'EOF'
+cat >"$TEST_BREWFILE" <<'EOF'
 tap "homebrew/bundle"
 # @preset: minimal
 brew "zsh"
@@ -386,7 +386,7 @@ else
     fail "partial name 'home' should not match 'homebrew'"
 fi
 
-SKIP_STEPS=""  # reset
+SKIP_STEPS="" # reset
 
 section "Tab Completion - Update Sub-flags"
 
@@ -505,9 +505,9 @@ if [[ -f "$FRAMEWORK_FILE" ]]; then
         completion_content=$(<"$completion_file")
     fi
     check_content="${framework_content}${completion_content}"
-    if [[ "$check_content" == *"'update:"* ]] && \
-       [[ "$check_content" == *"'status:"* ]] && \
-       [[ "$check_content" == *"'health:"* ]]; then
+    if [[ "$check_content" == *"'update:"* ]] &&
+        [[ "$check_content" == *"'status:"* ]] &&
+        [[ "$check_content" == *"'health:"* ]]; then
         pass "dotfiles completion includes expected commands"
     else
         fail "dotfiles completion missing expected commands"

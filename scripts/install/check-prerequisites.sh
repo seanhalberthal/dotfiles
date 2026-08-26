@@ -5,7 +5,7 @@ set -euo pipefail
 # everything else is installed by `brew bundle` during install.sh
 
 if [[ "${1:-}" == "--help" ]] || [[ "${1:-}" == "-h" ]]; then
-    cat << 'EOF'
+    cat <<'EOF'
 check-prerequisites.sh - Verify install bootstrap prerequisites
 
 USAGE:

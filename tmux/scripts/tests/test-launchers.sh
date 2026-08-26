@@ -117,7 +117,7 @@ section "launchers/list.sh: Launcher Dedup (user overrides repo)"
 TEST_XDG=$(mktemp -d)
 TEST_USER_DIR="$TEST_XDG/dotfiles/launchers"
 mkdir -p "$TEST_USER_DIR"
-cat > "$TEST_USER_DIR/dev" << 'TESTEOF'
+cat >"$TEST_USER_DIR/dev" <<'TESTEOF'
 #!/usr/bin/env bash
 # @description: User override of dev
 echo "user dev"
@@ -438,7 +438,7 @@ else
 fi
 
 # should block shell reserved words
-if [[ "$common_lib_content" == *"test|cd|ls"* ]]; then
+if [[ "$common_lib_content" == *"test|cd|ls"* ]] || [[ "$common_lib_content" == *"test | cd | ls"* ]]; then
     pass "blocks shell reserved words as launcher names"
 else
     fail "should block shell reserved words (test, cd, ls, etc.)"
@@ -488,9 +488,9 @@ fi
 dev_launcher="$DOTFILES_ROOT/launchers/dev"
 if [[ -f "$dev_launcher" ]]; then
     dev_content=$(cat "$dev_launcher")
-    if [[ "$dev_content" == *'tmux has-session -t "=$session"'* ]] \
-        && [[ "$dev_content" == *'tmux switch-client -t "=$session"'* ]] \
-        && [[ "$dev_content" == *'tmux attach-session -t "=$session"'* ]]; then
+    if [[ "$dev_content" == *'tmux has-session -t "=$session"'* ]] &&
+        [[ "$dev_content" == *'tmux switch-client -t "=$session"'* ]] &&
+        [[ "$dev_content" == *'tmux attach-session -t "=$session"'* ]]; then
         pass "launchers/dev uses exact-match for all tmux session targets"
     else
         fail "launchers/dev should use =\$session for all tmux session targets"
@@ -552,7 +552,7 @@ if [[ -n "$data_lines" ]]; then
         if [[ "$line" != *$'\t'* ]]; then
             bad_lines=$((bad_lines + 1))
         fi
-    done <<< "$data_lines"
+    done <<<"$data_lines"
 
     if [[ $bad_lines -eq 0 ]]; then
         pass "all data lines contain tab delimiter"
@@ -583,7 +583,7 @@ while IFS= read -r line; do
         header_has_tabs=false
         break
     fi
-done <<< "$header_lines"
+done <<<"$header_lines"
 
 if [[ "$header_has_tabs" == true ]]; then
     pass "header lines have tab prefix for --with-nth=2 compatibility"
@@ -691,7 +691,7 @@ section "launchers/duplicate.sh: Functional Test"
 TEST_XDG=$(mktemp -d)
 TEST_USER_DIR="$TEST_XDG/dotfiles/launchers"
 mkdir -p "$TEST_USER_DIR"
-cat > "$TEST_USER_DIR/test-dup" << 'TESTEOF'
+cat >"$TEST_USER_DIR/test-dup" <<'TESTEOF'
 #!/usr/bin/env bash
 # @description: Test launcher
 echo "test"
@@ -745,7 +745,10 @@ else
 fi
 
 # empty name should exit cleanly
-empty_result=$(XDG_CONFIG_HOME="$TEST_XDG" "$DUPLICATE_LAUNCHER" "" 2>/dev/null; echo "exit:$?") || true
+empty_result=$(
+    XDG_CONFIG_HOME="$TEST_XDG" "$DUPLICATE_LAUNCHER" "" 2>/dev/null
+    echo "exit:$?"
+) || true
 if [[ "$empty_result" == *"exit:0"* ]]; then
     pass "empty name exits cleanly"
 else

@@ -60,11 +60,11 @@ nvim_panes=()
 # iterate through all panes in all sessions, sorted by last viewed (most recent first)
 while IFS= read -r line; do
     # parse: "last_viewed session:window_index.pane_index pane_pid command"
-    rest="${line#* }"              # strip last_viewed
-    target="${rest%% *}"           # session:window_index.pane_index
-    rest2="${rest#* }"             # pane_pid command
-    pane_pid="${rest2%% *}"        # pane_pid
-    command="${rest2#* }"          # command
+    rest="${line#* }"       # strip last_viewed
+    target="${rest%% *}"    # session:window_index.pane_index
+    rest2="${rest#* }"      # pane_pid command
+    pane_pid="${rest2%% *}" # pane_pid
+    command="${rest2#* }"   # command
 
     # check if the command is nvim
     [[ "$command" == "nvim" ]] || continue

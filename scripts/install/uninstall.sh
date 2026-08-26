@@ -27,8 +27,8 @@ while [[ $# -gt 0 ]]; do
             REMOVE_BREW=1
             shift
             ;;
-        -h|--help)
-            cat << 'EOF'
+        -h | --help)
+            cat <<'EOF'
 uninstall.sh - Remove dotfiles installation
 
 USAGE:

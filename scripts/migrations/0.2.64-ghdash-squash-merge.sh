@@ -34,7 +34,7 @@ if grep -q '^keybindings:' "$local_yml" 2>/dev/null; then
     fi
 else
     # no keybindings section at all, append to end of file
-    cat >> "$local_yml" <<'EOF'
+    cat >>"$local_yml" <<'EOF'
 keybindings:
     prs:
         - key: m

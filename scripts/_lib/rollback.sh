@@ -40,7 +40,7 @@ init_rollback_state() {
 record_step() {
     local step="$1"
     [[ -d "$ROLLBACK_STATE_DIR" ]] || return 0
-    echo "$step" >> "$ROLLBACK_STATE_FILE"
+    echo "$step" >>"$ROLLBACK_STATE_FILE"
 }
 
 # get last completed step
@@ -56,7 +56,7 @@ get_last_step() {
 record_backup_location() {
     local location="$1"
     [[ -d "$ROLLBACK_STATE_DIR" ]] || return 0
-    echo "$location" > "$BACKUP_LOCATION_FILE"
+    echo "$location" >"$BACKUP_LOCATION_FILE"
 }
 
 # get backup location
@@ -73,7 +73,7 @@ record_symlink() {
     local link_path="$1"
     local target_path="$2"
     [[ -d "$ROLLBACK_STATE_DIR" ]] || return 0
-    echo "${link_path}|${target_path}" >> "$SYMLINKS_CREATED_FILE"
+    echo "${link_path}|${target_path}" >>"$SYMLINKS_CREATED_FILE"
 }
 
 # get all created symlinks

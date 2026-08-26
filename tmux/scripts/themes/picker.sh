@@ -23,18 +23,18 @@ main() {
     theme_pos=1
     local line idx=0
     while IFS= read -r line; do
-        if (( idx < 5 )); then
+        if ((idx < 5)); then
             idx=$((idx + 1))
             continue
         fi
         idx=$((idx + 1))
         case "$line" in
-            (*'● '*)
+            *'● '*)
                 theme_pos=$((idx - 5))
                 break
                 ;;
         esac
-    done <<< "$theme_list"
+    done <<<"$theme_list"
 
     local selected
     selected=$(echo "$theme_list" | fzf \
@@ -64,11 +64,11 @@ main() {
     local theme="${selected%% *}"
     [[ -n "$theme" ]] || return 0
 
-    "$DOTFILES_ROOT/scripts/theme-switch" "$theme" --no-reload --quiet \
-        && tmux source-file "$HOME/.tmux.conf" \
-        && "$SCRIPT_DIR/reload-ghostty.sh" \
-        && "$SCRIPT_DIR/reload-fzf.sh" \
-        && tmux display-message "Theme: $theme"
+    "$DOTFILES_ROOT/scripts/theme-switch" "$theme" --no-reload --quiet &&
+        tmux source-file "$HOME/.tmux.conf" &&
+        "$SCRIPT_DIR/reload-ghostty.sh" &&
+        "$SCRIPT_DIR/reload-fzf.sh" &&
+        tmux display-message "Theme: $theme"
 }
 
 main "$@"

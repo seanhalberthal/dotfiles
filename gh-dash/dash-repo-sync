@@ -32,7 +32,7 @@ roots=()
 [[ -n "${DEV_ROOT:-}" && -d "${DEV_ROOT:-}" ]] && roots+=("$DEV_ROOT")
 [[ -n "${PROJECTS_ROOT:-}" && -d "${PROJECTS_ROOT:-}" ]] && roots+=("$PROJECTS_ROOT")
 
-if (( ${#roots[@]} == 0 )); then
+if ((${#roots[@]} == 0)); then
     echo "No project roots configured." >&2
     echo "Set DEV_ROOT and/or PROJECTS_ROOT:" >&2
     echo "  dotfiles set dev ~/src" >&2
@@ -62,7 +62,7 @@ for root in "${roots[@]}"; do
         display="${display#"$HOME"}"
         display="~${display}"
         yq_expr="${yq_expr} | .repoPaths.\"${owner_repo}\" = \"${display}\""
-        count=$(( count + 1 ))
+        count=$((count + 1))
     done
 done
 
@@ -83,12 +83,12 @@ while IFS=$'\t' read -r key value; do
     [[ -d "$expanded" ]] && continue
     # Stale — queue for removal
     stale_del="${stale_del} | del(.repoPaths.\"${key}\")"
-    stale_count=$(( stale_count + 1 ))
+    stale_count=$((stale_count + 1))
     stale_names="${stale_names}  - ${key} (${value})\n"
 done < <(yq -r '.repoPaths // {} | to_entries[] | [.key, .value] | @tsv' "$GHDASH_LOCAL" 2>/dev/null)
 
 # ─── Nothing to do? ─────────────────────────────────────────────────────────
-if (( count == 0 && stale_count == 0 )); then
+if ((count == 0 && stale_count == 0)); then
     echo "No changes (0 discovered, 0 stale)"
     exit 0
 fi
@@ -96,10 +96,10 @@ fi
 # ─── Dry-run report ─────────────────────────────────────────────────────────
 if [[ "$dry_run" == "true" ]]; then
     echo "Would sync repo paths: $count discovered, $stale_count to remove"
-    if (( stale_count > 0 )); then
+    if ((stale_count > 0)); then
         printf "Stale:\n%b" "$stale_names"
     fi
-    if (( count > 0 )); then
+    if ((count > 0)); then
         echo "Discovered:"
         yq eval "$yq_expr" /dev/null | sed '1d' | sed 's/^/  /'
     fi
@@ -108,7 +108,7 @@ fi
 
 # ─── Apply changes ──────────────────────────────────────────────────────────
 # Remove stale entries first
-if (( stale_count > 0 )); then
+if ((stale_count > 0)); then
     stale_del="${stale_del# | }"
     if ! yq eval -i "$stale_del" "$GHDASH_LOCAL" 2>/dev/null; then
         echo "Failed to remove stale entries" >&2
@@ -117,7 +117,7 @@ if (( stale_count > 0 )); then
 fi
 
 # Add/update discovered repos
-if (( count > 0 )); then
+if ((count > 0)); then
     if ! yq eval -i "$yq_expr" "$GHDASH_LOCAL" 2>/dev/null; then
         echo "yq update failed" >&2
         exit 1

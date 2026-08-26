@@ -71,7 +71,7 @@ extract_pane_contents() {
     local archive="${RESURRECT_DIR}/pane_contents.tar.gz"
     [[ -f "$archive" ]] || return 1
     mkdir -p "${RESURRECT_DIR}/restore"
-    gzip -d < "$archive" | tar xf - -C "${RESURRECT_DIR}/restore/" 2>/dev/null
+    gzip -d <"$archive" | tar xf - -C "${RESURRECT_DIR}/restore/" 2>/dev/null
 }
 
 # remove extracted pane contents (the archive itself belongs to save)
@@ -189,9 +189,9 @@ list_sessions() {
         [[ -e "$f" ]] || continue
         session=$(basename "$f" .txt)
         windows=$(grep -c '^window' "$f" 2>/dev/null || echo 0)
-        windows=${windows//[$'\n\r']/}  # strip newlines
+        windows=${windows//[$'\n\r']/} # strip newlines
         panes=$(grep -c '^pane' "$f" 2>/dev/null || echo 0)
-        panes=${panes//[$'\n\r']/}  # strip newlines
+        panes=${panes//[$'\n\r']/} # strip newlines
         if [[ "$(uname)" == "Darwin" ]]; then
             modified=$(stat -f "%Sm" -t "%Y-%m-%d %H:%M" "$f" 2>/dev/null)
         else
@@ -219,7 +219,7 @@ NO_SWITCH=false
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --session|-s)
+        --session | -s)
             if [[ -z "${2:-}" ]]; then
                 echo -e "${RED}Error: --session requires a session name${NC}" >&2
                 usage
@@ -248,7 +248,7 @@ while [[ $# -gt 0 ]]; do
             SESSION_FILE_OVERRIDE="$2"
             shift 2
             ;;
-        --delete|-d)
+        --delete | -d)
             if [[ -z "${2:-}" ]]; then
                 echo -e "${RED}Error: --delete requires a session name${NC}" >&2
                 usage
@@ -257,11 +257,11 @@ while [[ $# -gt 0 ]]; do
             SESSION_NAME="$2"
             shift 2
             ;;
-        --list|-l)
+        --list | -l)
             list_sessions
             exit 0
             ;;
-        --help|-h)
+        --help | -h)
             usage
             ;;
         *)
@@ -348,8 +348,8 @@ BASE_INDEX=$(tmux show -gv base-index 2>/dev/null || echo 0)
 
 # track state during restoration (bash 3.2 compatible, no associative arrays)
 SESSION_CREATED=false
-WINDOWS_CREATED_LIST=""         # space-delimited list of created window numbers
-PANES_CREATED_LIST=""           # space-delimited list of created pane keys (window.pane)
+WINDOWS_CREATED_LIST="" # space-delimited list of created window numbers
+PANES_CREATED_LIST=""   # space-delimited list of created pane keys (window.pane)
 
 # helper functions for tracking (bash 3.2 compatible)
 window_exists() {
@@ -398,7 +398,7 @@ while IFS="${d}" read -r line_type sess_name window_number window_active window_
     dir="${dir#:}"
     # expand tilde and handle escaped spaces
     dir="${dir/#\~/$HOME}"
-    dir="${dir//\\ / }"  # pure bash, safer than echo -e
+    dir="${dir//\\ / }" # pure bash, safer than echo -e
 
     # ensure directory exists, fallback to home
     if [[ ! -d "${dir}" ]]; then
@@ -455,7 +455,7 @@ while IFS="${d}" read -r line_type sess_name window_number window_active window_
         fi
     fi
 
-done < "${SESSION_FILE}"
+done <"${SESSION_FILE}"
 
 # ─────────────────────────────────────────
 # pass 2: apply window layouts and names
@@ -482,7 +482,7 @@ while IFS="${d}" read -r line_type sess_name window_number window_name window_ac
         tmux set-option -t "${SESSION_NAME}:${window_number}" automatic-rename "${automatic_rename}" 2>/dev/null || true
     fi
 
-done < "${SESSION_FILE}"
+done <"${SESSION_FILE}"
 
 # ─────────────────────────────────────────
 # pass 3: select active pane and window
@@ -495,7 +495,7 @@ while IFS="${d}" read -r line_type sess_name window_number window_active window_
     [[ -z "$window_number" || -z "$pane_index" ]] && continue
 
     tmux select-pane -t "${SESSION_NAME}:${window_number}.${pane_index}" 2>/dev/null || true
-done < "${SESSION_FILE}"
+done <"${SESSION_FILE}"
 
 # find and select active window
 ACTIVE_WINDOW=$(awk -F'\t' '/^window/ && $4 == 1 { print $3; exit }' "${SESSION_FILE}")
@@ -630,7 +630,7 @@ if restore_processes_enabled; then
 
         # restore the command in this pane
         restore_pane_command "$SESSION_NAME" "$window_number" "$pane_index" "$pane_command" "$pane_full_command"
-    done < "${SESSION_FILE}"
+    done <"${SESSION_FILE}"
 fi
 
 # extracted contents are no longer needed once panes exist

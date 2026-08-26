@@ -7,7 +7,7 @@ set -euo pipefail
 
 # Help flag handling
 if [[ "${1:-}" == "--help" ]] || [[ "${1:-}" == "-h" ]]; then
-    cat << 'EOF'
+    cat <<'EOF'
 dev - tmux development session launcher
 
 USAGE:

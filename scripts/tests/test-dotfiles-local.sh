@@ -24,20 +24,20 @@ echo "==========================================="
 # write the preset file in the sandbox (default: minimal keeps pairs small)
 seed_preset() {
     mkdir -p "$TEST_HOME/.config/dotfiles"
-    printf '%s\n' "${1:-minimal}" > "$TEST_HOME/.config/dotfiles/preset"
+    printf '%s\n' "${1:-minimal}" >"$TEST_HOME/.config/dotfiles/preset"
 }
 
 # git identity for commits made inside the sandbox HOME
 seed_gitconfig() {
-    printf '[user]\n\tname = test\n\temail = test@test\n' > "$TEST_HOME/.gitconfig"
+    printf '[user]\n\tname = test\n\temail = test@test\n' >"$TEST_HOME/.gitconfig"
 }
 
 # minimal local-layer content for export tests
 seed_local_files() {
-    printf 'export SANDBOX=1\n' > "$TEST_HOME/.zshrc"
+    printf 'export SANDBOX=1\n' >"$TEST_HOME/.zshrc"
     mkdir -p "$TEST_HOME/.config/tmux" "$TEST_HOME/.config/dotfiles"
-    printf 'set -g status off\n' > "$TEST_HOME/.config/tmux/local.conf"
-    printf 'dracula\n' > "$TEST_HOME/.config/dotfiles/current-theme"
+    printf 'set -g status off\n' >"$TEST_HOME/.config/tmux/local.conf"
+    printf 'dracula\n' >"$TEST_HOME/.config/dotfiles/current-theme"
 }
 
 # ─── 1. unconfigured behaviour ────────────────────────────────────────
@@ -129,7 +129,7 @@ fi
 # an existing local path that happens to look like owner/repo is not expanded
 mkdir -p "$TEST_DIR/me/dotfiles-local"
 git -C "$TEST_DIR/me/dotfiles-local" init -q
-(cd "$TEST_DIR" && dotfiles_run local init "me/dotfiles-local" > /dev/null) || true
+(cd "$TEST_DIR" && dotfiles_run local init "me/dotfiles-local" >/dev/null) || true
 remote=$(git -C "$TEST_HOME/.dotfiles-local" remote get-url origin 2>/dev/null || echo none)
 if [[ "$remote" == "me/dotfiles-local" ]]; then
     pass "existing local path shaped like owner/repo passes through unexpanded"
@@ -151,7 +151,7 @@ seed_gitconfig
 src="$TEST_DIR/src"
 mkdir -p "$src"
 git -C "$src" init -q
-printf 'export CLONED=1\n' > "$src/zshrc"
+printf 'export CLONED=1\n' >"$src/zshrc"
 git -C "$src" add -A
 git -C "$src" commit -q -m "seed"
 git clone -q --bare "$src" "$TEST_DIR/remote.git"
@@ -195,7 +195,7 @@ setup_cli_sandbox
 seed_preset
 seed_gitconfig
 seed_local_files
-dotfiles_run local init > /dev/null
+dotfiles_run local init >/dev/null
 
 out=$(dotfiles_run export) && rc=0 || rc=$?
 repo="$TEST_HOME/.dotfiles-local"
@@ -230,8 +230,8 @@ fi
 
 # hard exclusion: secrets never land in the repo
 mkdir -p "$TEST_HOME/.config/zsh"
-printf 'export API_KEY=nope\n' > "$TEST_HOME/.config/zsh/secrets.zsh"
-dotfiles_run export > /dev/null
+printf 'export API_KEY=nope\n' >"$TEST_HOME/.config/zsh/secrets.zsh"
+dotfiles_run export >/dev/null
 if [[ -z "$(find "$repo" -name 'secrets.zsh' -not -path '*/.git/*')" ]]; then
     pass "secrets.zsh is never exported"
 else
@@ -241,7 +241,7 @@ fi
 # --push to a bare remote
 git clone -q --bare "$repo" "$TEST_DIR/remote.git"
 git -C "$repo" remote add origin "$TEST_DIR/remote.git"
-printf 'set -g mouse on\n' >> "$TEST_HOME/.config/tmux/local.conf"
+printf 'set -g mouse on\n' >>"$TEST_HOME/.config/tmux/local.conf"
 out=$(dotfiles_run export --push) && rc=0 || rc=$?
 local_head=$(git -C "$repo" rev-parse HEAD)
 remote_head=$(git -C "$TEST_DIR/remote.git" rev-parse HEAD 2>/dev/null || echo none)
@@ -262,10 +262,10 @@ seed_preset core
 seed_gitconfig
 seed_local_files
 mkdir -p "$TEST_HOME/.config/dotfiles/launchers"
-printf '#!/usr/bin/env bash\necho hi\n' > "$TEST_HOME/.config/dotfiles/launchers/foo"
+printf '#!/usr/bin/env bash\necho hi\n' >"$TEST_HOME/.config/dotfiles/launchers/foo"
 touch "$TEST_HOME/.config/dotfiles/launchers/.DS_Store"
-dotfiles_run local init > /dev/null
-dotfiles_run export > /dev/null
+dotfiles_run local init >/dev/null
+dotfiles_run export >/dev/null
 
 repo="$TEST_HOME/.dotfiles-local"
 if [[ -f "$repo/config/dotfiles/launchers/foo" ]]; then
@@ -281,7 +281,7 @@ else
 fi
 
 rm "$TEST_HOME/.config/dotfiles/launchers/foo"
-dotfiles_run export > /dev/null
+dotfiles_run export >/dev/null
 if git -C "$repo" ls-files | grep -q "launchers/foo"; then
     fail "deleted launcher should be removed from the repo"
 else
@@ -299,10 +299,10 @@ seed_preset core
 seed_gitconfig
 seed_local_files
 mkdir -p "$TEST_HOME/.config/dotfiles/launchers"
-printf '#!/usr/bin/env bash\necho keep\n' > "$TEST_HOME/.config/dotfiles/launchers/keep"
-printf '#!/usr/bin/env bash\necho gone\n' > "$TEST_HOME/.config/dotfiles/launchers/gone"
-dotfiles_run local init > /dev/null
-dotfiles_run export > /dev/null
+printf '#!/usr/bin/env bash\necho keep\n' >"$TEST_HOME/.config/dotfiles/launchers/keep"
+printf '#!/usr/bin/env bash\necho gone\n' >"$TEST_HOME/.config/dotfiles/launchers/gone"
+dotfiles_run local init >/dev/null
+dotfiles_run export >/dev/null
 
 repo="$TEST_HOME/.dotfiles-local"
 # upstream drops one launcher
@@ -327,8 +327,8 @@ else
 fi
 
 out=$(dotfiles_run import --prune) && rc=0 || rc=$?
-if [[ $rc -eq 0 && ! -e "$TEST_HOME/.config/dotfiles/launchers/gone" \
-    && -f "$TEST_HOME/.config/dotfiles/launchers/keep" ]]; then
+if [[ $rc -eq 0 && ! -e "$TEST_HOME/.config/dotfiles/launchers/gone" &&
+    -f "$TEST_HOME/.config/dotfiles/launchers/keep" ]]; then
     pass "import --prune prunes upstream-removed launchers, keeps tracked ones"
 else
     fail "import --prune should delete gone but keep keep (rc=$rc)"
@@ -337,7 +337,7 @@ fi
 # a system symlink with no repo counterpart survives prune (export never
 # captures symlinks, so they are not orphans)
 ln -s "$TEST_HOME/.config/dotfiles/launchers/keep" "$TEST_HOME/.config/dotfiles/launchers/linked"
-dotfiles_run import --prune > /dev/null
+dotfiles_run import --prune >/dev/null
 if [[ -L "$TEST_HOME/.config/dotfiles/launchers/linked" ]]; then
     pass "import --prune leaves symlinked launchers untouched"
 else
@@ -355,9 +355,9 @@ seed_preset core
 seed_gitconfig
 seed_local_files
 mkdir -p "$TEST_HOME/.config/dotfiles/launchers"
-printf '#!/usr/bin/env bash\necho acme\n' > "$TEST_HOME/.config/dotfiles/launchers/acme"
-printf '#!/usr/bin/env bash\necho beta\n' > "$TEST_HOME/.config/dotfiles/launchers/beta"
-dotfiles_run local init > /dev/null
+printf '#!/usr/bin/env bash\necho acme\n' >"$TEST_HOME/.config/dotfiles/launchers/acme"
+printf '#!/usr/bin/env bash\necho beta\n' >"$TEST_HOME/.config/dotfiles/launchers/beta"
+dotfiles_run local init >/dev/null
 
 # targeted export captures only the selected file
 out=$(dotfiles_run export zshrc) && rc=0 || rc=$?
@@ -370,8 +370,8 @@ fi
 
 # targeted export of a single launcher does not pull in the others
 out=$(dotfiles_run export launchers/acme) && rc=0 || rc=$?
-if [[ $rc -eq 0 && -f "$repo/config/dotfiles/launchers/acme" \
-    && ! -e "$repo/config/dotfiles/launchers/beta" ]]; then
+if [[ $rc -eq 0 && -f "$repo/config/dotfiles/launchers/acme" &&
+    ! -e "$repo/config/dotfiles/launchers/beta" ]]; then
     pass "export launchers/<name> captures a single launcher"
 else
     fail "targeted launcher export should capture only acme (rc=$rc)"
@@ -386,14 +386,14 @@ else
 fi
 
 # now capture everything, then diverge system files and import selectively
-dotfiles_run export > /dev/null
-printf 'export SANDBOX=2\n' > "$TEST_HOME/.zshrc"
-printf 'set -g status on\n' > "$TEST_HOME/.config/tmux/local.conf"
+dotfiles_run export >/dev/null
+printf 'export SANDBOX=2\n' >"$TEST_HOME/.zshrc"
+printf 'set -g status on\n' >"$TEST_HOME/.config/tmux/local.conf"
 
 # targeted import --force applies only the selected file, leaves the other differing
 out=$(dotfiles_run import zshrc --force) && rc=0 || rc=$?
-if [[ $rc -eq 0 ]] && grep -q "SANDBOX=1" "$TEST_HOME/.zshrc" \
-    && grep -q "status on" "$TEST_HOME/.config/tmux/local.conf"; then
+if [[ $rc -eq 0 ]] && grep -q "SANDBOX=1" "$TEST_HOME/.zshrc" &&
+    grep -q "status on" "$TEST_HOME/.config/tmux/local.conf"; then
     pass "import <selector> --force applies only the matched entry"
 else
     fail "targeted import should overwrite zshrc but not tmux (rc=$rc)"
@@ -419,8 +419,8 @@ setup_cli_sandbox
 seed_preset
 seed_gitconfig
 seed_local_files
-dotfiles_run local init > /dev/null
-dotfiles_run export > /dev/null
+dotfiles_run local init >/dev/null
+dotfiles_run export >/dev/null
 
 # create-if-absent
 rm "$TEST_HOME/.config/tmux/local.conf"
@@ -432,7 +432,7 @@ else
 fi
 
 # differing file: skipped without --force, exit 0
-printf 'set -g status on\n' > "$TEST_HOME/.config/tmux/local.conf"
+printf 'set -g status on\n' >"$TEST_HOME/.config/tmux/local.conf"
 out=$(dotfiles_run import) && rc=0 || rc=$?
 if [[ $rc -eq 0 && "$out" == *"differs"* ]] && grep -q "status on" "$TEST_HOME/.config/tmux/local.conf"; then
     pass "import leaves differing files alone by default"
@@ -449,11 +449,11 @@ fi
 
 # symlinked destination: refused even with --force
 rm "$TEST_HOME/.zshrc"
-printf 'elsewhere\n' > "$TEST_HOME/other-zshrc"
+printf 'elsewhere\n' >"$TEST_HOME/other-zshrc"
 ln -s "$TEST_HOME/other-zshrc" "$TEST_HOME/.zshrc"
 out=$(dotfiles_run import --force) && rc=0 || rc=$?
-if [[ $rc -eq 0 && "$out" == *"symlink"* && -L "$TEST_HOME/.zshrc" ]] \
-    && grep -q "elsewhere" "$TEST_HOME/other-zshrc"; then
+if [[ $rc -eq 0 && "$out" == *"symlink"* && -L "$TEST_HOME/.zshrc" ]] &&
+    grep -q "elsewhere" "$TEST_HOME/other-zshrc"; then
     pass "import refuses symlinked destinations"
 else
     fail "import must not touch symlinked destinations (rc=$rc)"
@@ -474,25 +474,25 @@ src="$TEST_DIR/machine-a"
 mkdir -p "$src"
 git -C "$src" init -q -b main 2>/dev/null || git -C "$src" init -q
 mkdir -p "$src/config/tmux"
-printf 'set -g history-limit 5000\n' > "$src/config/tmux/local.conf"
+printf 'set -g history-limit 5000\n' >"$src/config/tmux/local.conf"
 git -C "$src" add -A
 git -C "$src" commit -q -m "from machine a"
 git clone -q --bare "$src" "$TEST_DIR/remote.git"
 
 # clone auto-imports, so the system file exists with machine A's old content
-dotfiles_run local clone "$TEST_DIR/remote.git" > /dev/null
+dotfiles_run local clone "$TEST_DIR/remote.git" >/dev/null
 
 git -C "$src" remote add origin "$TEST_DIR/remote.git"
-printf 'set -g history-limit 9999\n' > "$src/config/tmux/local.conf"
+printf 'set -g history-limit 9999\n' >"$src/config/tmux/local.conf"
 git -C "$src" add -A
 git -C "$src" commit -q -m "update from machine a"
 git -C "$src" push -q origin HEAD
 
 # plain import pulls the new commit but must not clobber the existing file
 out=$(dotfiles_run import) && rc=0 || rc=$?
-if [[ $rc -eq 0 && "$out" == *"differs"* ]] \
-    && grep -q "5000" "$TEST_HOME/.config/tmux/local.conf" 2>/dev/null \
-    && grep -q "9999" "$TEST_HOME/.dotfiles-local/config/tmux/local.conf" 2>/dev/null; then
+if [[ $rc -eq 0 && "$out" == *"differs"* ]] &&
+    grep -q "5000" "$TEST_HOME/.config/tmux/local.conf" 2>/dev/null &&
+    grep -q "9999" "$TEST_HOME/.dotfiles-local/config/tmux/local.conf" 2>/dev/null; then
     pass "import pulls new commits and reports drift without clobbering"
 else
     fail "import should pull from origin and leave the differing file (rc=$rc)"
@@ -513,7 +513,7 @@ section "DOTFILES_LOCAL_DIR override"
 
 setup_cli_sandbox
 seed_preset
-dotfiles_run local init > /dev/null   # pointer -> ~/.dotfiles-local
+dotfiles_run local init >/dev/null # pointer -> ~/.dotfiles-local
 
 alt="$TEST_DIR/alt-local"
 mkdir -p "$alt"
@@ -537,9 +537,9 @@ seed_preset minimal
 seed_gitconfig
 seed_local_files
 mkdir -p "$TEST_HOME/.hammerspoon"
-printf 'print("local")\n' > "$TEST_HOME/.hammerspoon/local.lua"
-dotfiles_run local init > /dev/null
-dotfiles_run export > /dev/null
+printf 'print("local")\n' >"$TEST_HOME/.hammerspoon/local.lua"
+dotfiles_run local init >/dev/null
+dotfiles_run export >/dev/null
 
 if [[ ! -e "$TEST_HOME/.dotfiles-local/hammerspoon/local.lua" ]]; then
     pass "minimal preset does not export full-preset files"
@@ -548,7 +548,7 @@ else
 fi
 
 seed_preset full
-dotfiles_run export > /dev/null
+dotfiles_run export >/dev/null
 if [[ -f "$TEST_HOME/.dotfiles-local/hammerspoon/local.lua" ]]; then
     pass "full preset exports hammerspoon local.lua"
 else
@@ -565,8 +565,8 @@ setup_cli_sandbox
 seed_preset
 seed_gitconfig
 seed_local_files
-dotfiles_run local init > /dev/null
-dotfiles_run export > /dev/null
+dotfiles_run local init >/dev/null
+dotfiles_run export >/dev/null
 
 out=$(dotfiles_run local diff) && rc=0 || rc=$?
 if [[ $rc -eq 0 && "$out" == *"matches"* ]]; then
@@ -575,7 +575,7 @@ else
     fail "local diff should report match (rc=$rc)"
 fi
 
-printf 'set -g status on\n' > "$TEST_HOME/.config/tmux/local.conf"
+printf 'set -g status on\n' >"$TEST_HOME/.config/tmux/local.conf"
 out=$(dotfiles_run local diff) && rc=0 || rc=$?
 if [[ "$out" == *"config/tmux/local.conf"* && "$out" == *"+set -g status on"* ]]; then
     pass "local diff shows unified diff for drift"
@@ -592,10 +592,10 @@ setup_cli_sandbox
 seed_preset
 seed_gitconfig
 seed_local_files
-dotfiles_run local init > /dev/null
-dotfiles_run export > /dev/null
+dotfiles_run local init >/dev/null
+dotfiles_run export >/dev/null
 
-printf '\nexport HAND_EDIT=1\n' >> "$TEST_HOME/.dotfiles-local/zshrc"
+printf '\nexport HAND_EDIT=1\n' >>"$TEST_HOME/.dotfiles-local/zshrc"
 out=$(dotfiles_run local diff) && rc=0 || rc=$?
 if [[ "$out" == *"uncommitted in the local repo"* && "$out" == *"HAND_EDIT"* ]]; then
     pass "local diff flags hand-edited uncommitted repo files"
@@ -629,9 +629,9 @@ manifest=$(bash -c '
 ')
 
 installer_sources=$(grep -E '^[[:space:]]*(install_local|copy_config) ' \
-    "$DOTFILES_DIR/scripts/install/create-symlinks.sh" \
-    | sed -E 's/^[[:space:]]*(install_local|copy_config) "\$DOTFILES_DIR\/([^"]+)".*/\2/' \
-    | sed 's/\.template$//')
+    "$DOTFILES_DIR/scripts/install/create-symlinks.sh" |
+    sed -E 's/^[[:space:]]*(install_local|copy_config) "\$DOTFILES_DIR\/([^"]+)".*/\2/' |
+    sed 's/\.template$//')
 
 drift_ok=1
 while IFS= read -r src_rel; do
@@ -646,7 +646,7 @@ while IFS= read -r src_rel; do
         fail "manifest drift: '$src_rel' installed by create-symlinks.sh but missing from _local_pairs"
         drift_ok=0
     fi
-done <<< "$installer_sources"
+done <<<"$installer_sources"
 
 if [[ $drift_ok -eq 1 ]]; then
     pass "all installer local files are covered by _local_pairs"

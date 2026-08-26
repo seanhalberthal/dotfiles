@@ -209,8 +209,8 @@ PANE_UNDO_OUTPUT=$("$SCRIPTS_DIR/panes/undo.sh" 2>&1) || true
 pass "Pane undo with no state exits gracefully"
 
 # test undo with corrupt/empty state file
-echo "" > "$(get_window_undo_file)"
-echo "" > "$(get_window_undo_state)"
+echo "" >"$(get_window_undo_file)"
+echo "" >"$(get_window_undo_state)"
 "$SCRIPTS_DIR/windows/undo.sh" 2>/dev/null || true
 pass "Window undo with empty state does not crash"
 

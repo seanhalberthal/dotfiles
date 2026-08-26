@@ -17,7 +17,7 @@ RESULTS_FILE="$(mktemp)"
 # create a temporary .zshrc that sources the framework
 # ─────────────────────────────────────────
 TEMP_ZSHRC="$(mktemp)"
-cat > "$TEMP_ZSHRC" << EOF
+cat >"$TEMP_ZSHRC" <<EOF
 # CI benchmark, sources the dotfiles framework
 # Suppress powerlevel10k instant prompt (not installed in CI)
 typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet 2>/dev/null
@@ -85,8 +85,8 @@ echo ""
 
 # export for downstream steps (e.g. badge update)
 if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
-    echo "min_ms=${MIN_MS}" >> "$GITHUB_OUTPUT"
-    echo "median_ms=${MEDIAN_MS}" >> "$GITHUB_OUTPUT"
+    echo "min_ms=${MIN_MS}" >>"$GITHUB_OUTPUT"
+    echo "median_ms=${MEDIAN_MS}" >>"$GITHUB_OUTPUT"
 fi
 
 # ─────────────────────────────────────────
@@ -104,7 +104,7 @@ if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
         echo "| Std Dev | ${STDDEV_MS}ms |"
         echo "| Threshold | ${THRESHOLD}ms |"
         echo ""
-    } >> "$GITHUB_STEP_SUMMARY"
+    } >>"$GITHUB_STEP_SUMMARY"
 fi
 
 # ─────────────────────────────────────────

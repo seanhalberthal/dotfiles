@@ -42,7 +42,7 @@ get_file_mtime() {
 
 # get the actual save file (resolve symlink)
 if [[ ! -L "${LAST_FILE}" ]] && [[ ! -f "${LAST_FILE}" ]]; then
-    exit 0  # no save file yet, nothing to do
+    exit 0 # no save file yet, nothing to do
 fi
 
 if [[ -L "${LAST_FILE}" ]]; then
@@ -90,7 +90,7 @@ for session in ${SESSIONS}; do
         /^pane/ && $2 == sess { print }
         /^window/ && $2 == sess { print }
         /^grouped_session/ && $2 == sess { print }
-    ' "${SAVE_FILE}" > "${SESSION_FILE}"
+    ' "${SAVE_FILE}" >"${SESSION_FILE}"
 done
 
 # ─────────────────────────────────────────

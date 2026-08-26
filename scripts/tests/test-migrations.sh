@@ -68,7 +68,7 @@ section "Migration version range filtering"
 # range: (old_version, new_version], exclusive start, inclusive end
 _in_migration_range() {
     local migration_version="$1" old_version="$2" new_version="$3"
-    _version_gt "$migration_version" "$old_version" && \
+    _version_gt "$migration_version" "$old_version" &&
         ! _version_gt "$migration_version" "$new_version"
 }
 
@@ -116,7 +116,7 @@ applied_file="$state_dir/migrations"
 touch "$applied_file"
 
 # record a migration as applied
-echo "0.2.57-unlink-p10k.sh" >> "$applied_file"
+echo "0.2.57-unlink-p10k.sh" >>"$applied_file"
 
 if grep -qxF "0.2.57-unlink-p10k.sh" "$applied_file"; then
     pass "Applied migration is recorded in state file"
@@ -139,10 +139,10 @@ else
 fi
 
 # record multiple migrations and verify order
-echo "0.2.59-remove-cronboard.sh" >> "$applied_file"
-echo "0.2.60-remove-csharpier.sh" >> "$applied_file"
+echo "0.2.59-remove-cronboard.sh" >>"$applied_file"
+echo "0.2.60-remove-csharpier.sh" >>"$applied_file"
 
-line_count=$(wc -l < "$applied_file" | tr -d ' ')
+line_count=$(wc -l <"$applied_file" | tr -d ' ')
 assert_equals "State file has 3 entries" "3" "$line_count"
 
 cleanup_sandbox
@@ -158,9 +158,9 @@ migrations_dir="$TEST_HOME/migrations"
 mkdir -p "$migrations_dir"
 
 # create test migration scripts
-echo '#!/bin/bash' > "$migrations_dir/0.2.57-first.sh"
-echo '#!/bin/bash' > "$migrations_dir/0.2.59-second.sh"
-echo '#!/bin/bash' > "$migrations_dir/0.2.60-third.sh"
+echo '#!/bin/bash' >"$migrations_dir/0.2.57-first.sh"
+echo '#!/bin/bash' >"$migrations_dir/0.2.59-second.sh"
+echo '#!/bin/bash' >"$migrations_dir/0.2.60-third.sh"
 chmod +x "$migrations_dir"/*.sh
 
 # verify glob ordering (same logic as _run_pending_migrations)
@@ -201,7 +201,7 @@ touch "$applied_file"
 # create a migration that creates a file
 migrations_dir="$TEST_HOME/migrations"
 mkdir -p "$migrations_dir"
-cat > "$migrations_dir/0.2.57-test.sh" << 'MIGRATION'
+cat >"$migrations_dir/0.2.57-test.sh" <<'MIGRATION'
 #!/bin/bash
 set -euo pipefail
 touch "$HOME/migration-ran"
@@ -210,7 +210,7 @@ chmod +x "$migrations_dir/0.2.57-test.sh"
 
 # run it
 bash "$migrations_dir/0.2.57-test.sh"
-echo "0.2.57-test.sh" >> "$applied_file"
+echo "0.2.57-test.sh" >>"$applied_file"
 
 if [[ -f "$TEST_HOME/migration-ran" ]]; then
     pass "Migration creates marker file on first run"

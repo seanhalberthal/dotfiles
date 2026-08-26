@@ -91,7 +91,7 @@ else
 fi
 
 # test 8: removal skips non-symlink files
-echo "real config" > "$TEST_HOME/.test-real-file"
+echo "real config" >"$TEST_HOME/.test-real-file"
 # uninstall should skip this since it's not a symlink
 if [[ -f "$TEST_HOME/.test-real-file" && ! -L "$TEST_HOME/.test-real-file" ]]; then
     pass "non-symlink file preserved during removal"
@@ -130,14 +130,14 @@ resolve_dest() {
 
 # destinations the installer creates
 installer_exprs=$(grep -E '^[[:space:]]*create_link ' \
-    "$DOTFILES_DIR/scripts/install/create-symlinks.sh" \
-    | sed -E 's/^[[:space:]]*create_link "[^"]+" "([^"]+)".*/\1/')
+    "$DOTFILES_DIR/scripts/install/create-symlinks.sh" |
+    sed -E 's/^[[:space:]]*create_link "[^"]+" "([^"]+)".*/\1/')
 
 # destinations uninstall knows about: the array body plus any += appends
-uninstall_exprs=$( {
+uninstall_exprs=$({
     sed -n '/^SYMLINKS=(/,/^)/p' "$UNINSTALL_SCRIPT"
     grep -E 'SYMLINKS\+=\(' "$UNINSTALL_SCRIPT"
-} | grep -oE '"[^"]+"' | tr -d '"' )
+} | grep -oE '"[^"]+"' | tr -d '"')
 
 # resolve the uninstall side once, under both lazydocker layouts
 uninstall_resolved=""
@@ -146,7 +146,7 @@ while IFS= read -r expr; do
     for ld in "$LAZYDOCKER_MAC" "$LAZYDOCKER_LINUX"; do
         uninstall_resolved+="$(resolve_dest "$expr" "$ld")"$'\n'
     done
-done <<< "$uninstall_exprs"
+done <<<"$uninstall_exprs"
 
 symlink_drift_ok=1
 while IFS= read -r expr; do
@@ -164,7 +164,7 @@ while IFS= read -r expr; do
             break
         fi
     done
-done <<< "$installer_exprs"
+done <<<"$installer_exprs"
 
 if [[ $symlink_drift_ok -eq 1 ]]; then
     pass "every create_link destination is covered by uninstall.sh"

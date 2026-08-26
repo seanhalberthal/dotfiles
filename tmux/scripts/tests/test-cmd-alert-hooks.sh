@@ -68,13 +68,13 @@ fi
 
 section "Exit Code Display Functions"
 
-assert_equals "Exit 0 icon is ✓"      "✓"        "$(get_exit_code_icon 0)"
-assert_equals "Exit 1 icon is ✗"      "✗"        "$(get_exit_code_icon 1)"
-assert_equals "Exit 127 icon is ✗"    "✗"        "$(get_exit_code_icon 127)"
-assert_equals "Exit 0 colour is green" "#7aab88"  "$(get_exit_code_colour 0)"
-assert_equals "Exit 1 colour is red"   "#c07878"  "$(get_exit_code_colour 1)"
-assert_equals "Exit 0 display"        "✓|#7aab88" "$(get_exit_code_display 0)"
-assert_equals "Exit 1 display"        "✗|#c07878" "$(get_exit_code_display 1)"
+assert_equals "Exit 0 icon is ✓" "✓" "$(get_exit_code_icon 0)"
+assert_equals "Exit 1 icon is ✗" "✗" "$(get_exit_code_icon 1)"
+assert_equals "Exit 127 icon is ✗" "✗" "$(get_exit_code_icon 127)"
+assert_equals "Exit 0 colour is green" "#7aab88" "$(get_exit_code_colour 0)"
+assert_equals "Exit 1 colour is red" "#c07878" "$(get_exit_code_colour 1)"
+assert_equals "Exit 0 display" "✓|#7aab88" "$(get_exit_code_display 0)"
+assert_equals "Exit 1 display" "✗|#c07878" "$(get_exit_code_display 1)"
 
 # ═══════════════════════════════════════════════════════════════
 # alert file format
@@ -83,7 +83,7 @@ assert_equals "Exit 1 display"        "✗|#c07878" "$(get_exit_code_display 1)"
 section "Alert File Format"
 
 # 6-field format: session:window:exit:window_id:code:label
-echo "$TEST_SESSION:testwin:exit:@5:0:make test" > "$ALERTS_FILE"
+echo "$TEST_SESSION:testwin:exit:@5:0:make test" >"$ALERTS_FILE"
 if grep -q "exit:@5:0:make test" "$ALERTS_FILE"; then
     pass "Exit alert with window_id and label written to alerts file"
 else
@@ -103,8 +103,8 @@ else
 fi
 
 # agent and exit alerts coexist correctly
-echo "other-session:main:claude" > "$ALERTS_FILE"
-echo "$TEST_SESSION:testwin:exit:@6:1:npm run lint" >> "$ALERTS_FILE"
+echo "other-session:main:claude" >"$ALERTS_FILE"
+echo "$TEST_SESSION:testwin:exit:@6:1:npm run lint" >>"$ALERTS_FILE"
 clear_window_alerts "$TEST_SESSION" "testwin" 2>/dev/null || true
 if [[ -f "$ALERTS_FILE" ]] && grep -q "other-session:main:claude" "$ALERTS_FILE"; then
     pass "clear_window_alerts preserves agent alerts from other sessions"
@@ -115,8 +115,8 @@ fi
 # exit alerts are keyed on window_id, not the (auto-rename-volatile) name:
 # clear_window_exit_alert drops the line by id even when the stored name differs
 # from the live window name
-echo "other-session:main:claude" > "$ALERTS_FILE"
-echo "$TEST_SESSION:staleoldname:exit:@42:0:make test" >> "$ALERTS_FILE"
+echo "other-session:main:claude" >"$ALERTS_FILE"
+echo "$TEST_SESSION:staleoldname:exit:@42:0:make test" >>"$ALERTS_FILE"
 clear_window_exit_alert "@42" 2>/dev/null || true
 if grep -q ":exit:@42:" "$ALERTS_FILE" 2>/dev/null; then
     fail "clear_window_exit_alert should drop the exit line by window_id"
@@ -130,7 +130,7 @@ else
 fi
 
 # a non-matching id is a no-op
-echo "$TEST_SESSION:w:exit:@7:0:cmd" > "$ALERTS_FILE"
+echo "$TEST_SESSION:w:exit:@7:0:cmd" >"$ALERTS_FILE"
 clear_window_exit_alert "@8" 2>/dev/null || true
 if grep -q ":exit:@7:" "$ALERTS_FILE" 2>/dev/null; then
     pass "clear_window_exit_alert leaves non-matching exit lines alone"
@@ -150,7 +150,7 @@ TAB=$(printf '\t')
 printf '%s\n' \
     "1000${TAB}0${TAB}$TEST_SESSION${TAB}@5${TAB}testwin${TAB}make test" \
     "1001${TAB}1${TAB}$TEST_SESSION${TAB}@6${TAB}other${TAB}npm run lint" \
-    > "$FINISHED_FILE"
+    >"$FINISHED_FILE"
 
 clear_window_finished "@5" 2>/dev/null || true
 if grep -q "$TAB@5$TAB" "$FINISHED_FILE"; then
@@ -165,7 +165,7 @@ else
 fi
 
 # empty window_id is a no-op (the only reliable key); nothing removed
-printf '%s\n' "1002${TAB}0${TAB}$TEST_SESSION${TAB}@7${TAB}w${TAB}cmd" > "$FINISHED_FILE"
+printf '%s\n' "1002${TAB}0${TAB}$TEST_SESSION${TAB}@7${TAB}w${TAB}cmd" >"$FINISHED_FILE"
 clear_window_finished "" 2>/dev/null || true
 if grep -q "$TAB@7$TAB" "$FINISHED_FILE"; then
     pass "clear_window_finished no-ops on empty window_id"
@@ -174,7 +174,7 @@ else
 fi
 
 # clear_window_alerts also clears finished rows for the same window on select
-printf '%s\n' "1003${TAB}0${TAB}$TEST_SESSION${TAB}@8${TAB}testwin${TAB}cmd" > "$FINISHED_FILE"
+printf '%s\n' "1003${TAB}0${TAB}$TEST_SESSION${TAB}@8${TAB}testwin${TAB}cmd" >"$FINISHED_FILE"
 clear_window_alerts "$TEST_SESSION" "testwin" "@8" 2>/dev/null || true
 if grep -q "$TAB@8$TAB" "$FINISHED_FILE"; then
     fail "clear_window_alerts should clear finished rows for the selected window"
@@ -188,7 +188,7 @@ printf '%s\n' \
     "1004${TAB}0${TAB}$TEST_SESSION${TAB}@9${TAB}win-a${TAB}cmd-a" \
     "1005${TAB}1${TAB}$TEST_SESSION${TAB}@10${TAB}win-b${TAB}cmd-b" \
     "1006${TAB}0${TAB}other-session${TAB}@11${TAB}win-c${TAB}cmd-c" \
-    > "$FINISHED_FILE"
+    >"$FINISHED_FILE"
 clear_session_finished "$TEST_SESSION" 2>/dev/null || true
 if grep -q "$TAB$TEST_SESSION$TAB" "$FINISHED_FILE"; then
     fail "clear_session_finished should drop all rows for the session"
@@ -202,7 +202,7 @@ else
 fi
 
 # empty session is a no-op
-printf '%s\n' "1007${TAB}0${TAB}$TEST_SESSION${TAB}@12${TAB}w${TAB}cmd" > "$FINISHED_FILE"
+printf '%s\n' "1007${TAB}0${TAB}$TEST_SESSION${TAB}@12${TAB}w${TAB}cmd" >"$FINISHED_FILE"
 clear_session_finished "" 2>/dev/null || true
 if grep -q "$TAB@12$TAB" "$FINISHED_FILE"; then
     pass "clear_session_finished no-ops on empty session"
@@ -211,7 +211,7 @@ else
 fi
 
 # clear_session_alerts also clears the session's finished rows
-printf '%s\n' "1008${TAB}0${TAB}$TEST_SESSION${TAB}@13${TAB}win${TAB}cmd" > "$FINISHED_FILE"
+printf '%s\n' "1008${TAB}0${TAB}$TEST_SESSION${TAB}@13${TAB}win${TAB}cmd" >"$FINISHED_FILE"
 clear_session_alerts "$TEST_SESSION" 2>/dev/null || true
 if grep -q "$TAB@13$TAB" "$FINISHED_FILE"; then
     fail "clear_session_alerts should clear finished rows for the session"
@@ -252,13 +252,13 @@ fi
 # proclist-rerun.sh pastes the right row's command into its window's pane,
 # matched by epoch+window_id; an unrelated row must not be pasted
 test_tmux new-window -t "$TEST_SESSION" -n "rerunwin" -c /tmp 2>/dev/null || true
-RW_ID=$(test_tmux list-windows -t "$TEST_SESSION" -F '#{window_name} #{window_id}' 2>/dev/null \
-    | awk '$1=="rerunwin"{print $2; exit}')
+RW_ID=$(test_tmux list-windows -t "$TEST_SESSION" -F '#{window_name} #{window_id}' 2>/dev/null |
+    awk '$1=="rerunwin"{print $2; exit}')
 if [[ -n "$RW_ID" ]]; then
     printf '%s\n' \
         "2000${TAB}1${TAB}$TEST_SESSION${TAB}@99999${TAB}gone${TAB}decoy${TAB}echo DECOYCMD" \
         "2001${TAB}1${TAB}$TEST_SESSION${TAB}$RW_ID${TAB}rerunwin${TAB}grep needle${TAB}grep -r RERUNNEEDLE src/" \
-        > "$FINISHED_FILE"
+        >"$FINISHED_FILE"
     bash "$SCRIPTS_DIR/alerts/proclist-rerun.sh" 2001 "$RW_ID" 2>/dev/null || true
     sleep 0.4
     pasted=$(test_tmux capture-pane -t "$RW_ID" -p 2>/dev/null | tr -d '\000')
@@ -280,14 +280,14 @@ fi
 # via a side effect (a touched file) on a fresh window so leftover prompt text
 # from the stage test above can't interfere
 test_tmux new-window -t "$TEST_SESSION" -n "execwin" -c /tmp 2>/dev/null || true
-EW_ID=$(test_tmux list-windows -t "$TEST_SESSION" -F '#{window_name} #{window_id}' 2>/dev/null \
-    | awk '$1=="execwin"{print $2; exit}')
+EW_ID=$(test_tmux list-windows -t "$TEST_SESSION" -F '#{window_name} #{window_id}' 2>/dev/null |
+    awk '$1=="execwin"{print $2; exit}')
 if [[ -n "$EW_ID" ]]; then
     EXEC_MARK="$ALERT_TEST_DIR/exec_ran"
 
     rm -f "$EXEC_MARK"
     printf '%s\n' "3001${TAB}0${TAB}$TEST_SESSION${TAB}$EW_ID${TAB}execwin${TAB}touch${TAB}touch $EXEC_MARK" \
-        > "$FINISHED_FILE"
+        >"$FINISHED_FILE"
     bash "$SCRIPTS_DIR/alerts/proclist-rerun.sh" 3001 "$EW_ID" exec 2>/dev/null || true
     sleep 0.6
     if [[ -f "$EXEC_MARK" ]]; then
@@ -298,7 +298,7 @@ if [[ -n "$EW_ID" ]]; then
 
     rm -f "$EXEC_MARK"
     printf '%s\n' "3002${TAB}0${TAB}$TEST_SESSION${TAB}$EW_ID${TAB}execwin${TAB}touch${TAB}touch $EXEC_MARK" \
-        > "$FINISHED_FILE"
+        >"$FINISHED_FILE"
     bash "$SCRIPTS_DIR/alerts/proclist-rerun.sh" 3002 "$EW_ID" 2>/dev/null || true
     sleep 0.6
     if [[ ! -f "$EXEC_MARK" ]]; then
@@ -316,7 +316,7 @@ if [[ -n "$RW_ID" ]]; then
     printf '%s\n' \
         "100${TAB}0${TAB}$TEST_SESSION${TAB}@5${TAB}old${TAB}old${TAB}echo STALECMD" \
         "${NOW}${TAB}0${TAB}$TEST_SESSION${TAB}$RW_ID${TAB}rerunwin${TAB}fresh${TAB}grep -r KEEPCMD src/" \
-        > "$FINISHED_FILE"
+        >"$FINISHED_FILE"
     bash "$SCRIPTS_DIR/alerts/proclist.sh" >/dev/null 2>&1 || true
     remaining=$(cat "$FINISHED_FILE" 2>/dev/null || true)
     if [[ "$remaining" != *STALECMD* ]]; then
@@ -339,7 +339,7 @@ fi
 
 section "set_exit_alert Function"
 
-: > "$ALERTS_FILE"
+: >"$ALERTS_FILE"
 
 test_tmux set-option -wt "$TEST_SESSION:testwin" "@exit_alert" 1 2>/dev/null || true
 test_tmux set-option -wt "$TEST_SESSION:testwin" "@exit_alert_colour" "#50fa7b" 2>/dev/null || true
@@ -488,7 +488,7 @@ section "Exit Alert View Guard"
 
 if command -v zsh &>/dev/null; then
     GUARD_AF="$ALERT_TEST_DIR/alerts-guard"
-    : > "$GUARD_AF"
+    : >"$GUARD_AF"
     # route the hook's bare tmux calls to the isolated server via $TMUX, so the
     # guard sees this server's (empty) client list, not the user's real one
     G_SP=$(test_tmux display-message -p '#{socket_path}' 2>/dev/null)
@@ -530,12 +530,12 @@ if command -v zsh &>/dev/null; then
     SUP_AF="$ALERT_TEST_DIR/alerts-suppress"
     SUP_FF="$ALERT_TEST_DIR/fin-suppress"
     SUP_DIR="$ALERT_TEST_DIR/suppress-marker"
-    : > "$SUP_AF"
+    : >"$SUP_AF"
     mkdir -p "$SUP_DIR"
     S_SP=$(test_tmux display-message -p '#{socket_path}' 2>/dev/null)
     S_PID=$(test_tmux display-message -p '#{pid}' 2>/dev/null)
     S_PANE=$(test_tmux display-message -t "$TEST_SESSION:testwin" -p '#{pane_id}' 2>/dev/null)
-    : > "$SUP_DIR/${S_PANE#%}"
+    : >"$SUP_DIR/${S_PANE#%}"
     suppress_out=$(TMUX="$S_SP,$S_PID,0" TMUX_PANE="$S_PANE" \
         ALERTS_FILE="$SUP_AF" \
         _CMD_FINISHED_FILE="$SUP_FF" \
@@ -554,9 +554,9 @@ if command -v zsh &>/dev/null; then
             echo "finished:$(cat "'"$SUP_FF"'" 2>/dev/null)"
             echo "marker:$([[ -e "'"$SUP_DIR/${S_PANE#%}"'" ]] && echo present || echo gone)"
         ' 2>/dev/null)
-    if [[ "$suppress_out" == *"alerts:"$'\n'* || "$suppress_out" == *$'\n'"finished:"* ]] \
-        && [[ "$suppress_out" != *"killedjob"* ]] \
-        && [[ "$suppress_out" == *"marker:gone"* ]]; then
+    if [[ "$suppress_out" == *"alerts:"$'\n'* || "$suppress_out" == *$'\n'"finished:"* ]] &&
+        [[ "$suppress_out" != *"killedjob"* ]] &&
+        [[ "$suppress_out" == *"marker:gone"* ]]; then
         pass "suppressed kill writes no alert or finished row, and consumes the marker"
     else
         fail "suppressed kill should skip alert+finished row and remove marker (got: '$suppress_out')"

@@ -61,10 +61,10 @@ YAZI_OUTPUT="${XDG_CONFIG_HOME:-$HOME/.config}/yazi/theme.toml"
 # Theme Output Functions (different style from common.sh)
 # ══════════════════════════════════════════════════════════════
 
-theme_error()   { printf "${RED}✗${NC} %s\n" "$1" >&2; }
+theme_error() { printf "${RED}✗${NC} %s\n" "$1" >&2; }
 theme_success() { printf "${GREEN}✓${NC} %s\n" "$1"; }
-theme_info()    { printf "${CYAN}•${NC} %s\n" "$1"; }
-theme_warn()    { printf "${YELLOW}!${NC} %s\n" "$1"; }
+theme_info() { printf "${CYAN}•${NC} %s\n" "$1"; }
+theme_warn() { printf "${YELLOW}!${NC} %s\n" "$1"; }
 
 # List installed themes (hand-crafted + generated on disk)
 list_themes() {
@@ -148,7 +148,7 @@ get_current_theme() {
     if [[ -f "$CURRENT_THEME_FILE" ]]; then
         cat "$CURRENT_THEME_FILE"
     else
-        echo "dracula"  # Default
+        echo "dracula" # Default
     fi
 }
 
@@ -253,7 +253,10 @@ apply_theme() {
         )
         local -a sed_args
         _build_sed_args tmux_vars
-        sed "${sed_args[@]}" "$TMUX_TEMPLATE" > "$tmux_tmp" || { rm -f "$tmux_tmp"; return 1; }
+        sed "${sed_args[@]}" "$TMUX_TEMPLATE" >"$tmux_tmp" || {
+            rm -f "$tmux_tmp"
+            return 1
+        }
         mv "$tmux_tmp" "$TMUX_OUTPUT"
         [[ "$quiet" != "true" ]] && theme_success "Generated tmux configuration"
     else
@@ -272,13 +275,13 @@ apply_theme() {
         local mod="alt"
         if is_macos; then
             mod="opt"
-            cat > "$platform_tmp" <<PLATFORM
+            cat >"$platform_tmp" <<PLATFORM
 macos-icon = glass
 macos-icon-frame = chrome
 macos-option-as-alt = left
 PLATFORM
         else
-            printf "# Linux\n" > "$platform_tmp"
+            printf "# Linux\n" >"$platform_tmp"
         fi
 
         declare -A ghostty_vars=(
@@ -314,7 +317,10 @@ PLATFORM
                 r $platform_tmp
                 d
             }")
-        sed "${sed_args[@]}" "$GHOSTTY_TEMPLATE" > "$ghostty_tmp" || { rm -f "$ghostty_tmp" "$platform_tmp"; return 1; }
+        sed "${sed_args[@]}" "$GHOSTTY_TEMPLATE" >"$ghostty_tmp" || {
+            rm -f "$ghostty_tmp" "$platform_tmp"
+            return 1
+        }
         rm -f "$platform_tmp"
         mv "$ghostty_tmp" "$GHOSTTY_OUTPUT"
         [[ "$quiet" != "true" ]] && theme_success "Generated ghostty configuration"
@@ -342,7 +348,10 @@ PLATFORM
             -e "s|{{TMUX_ACCENT_CYAN}}|$TMUX_ACCENT_CYAN|g" \
             -e "s|{{TMUX_ACCENT_PURPLE}}|$TMUX_ACCENT_PURPLE|g" \
             -e "s|{{TMUX_ACCENT_PINK}}|$TMUX_ACCENT_PINK|g" \
-            "$GH_DASH_TEMPLATE" > "$ghdash_tmp" || { rm -f "$ghdash_tmp"; return 1; }
+            "$GH_DASH_TEMPLATE" >"$ghdash_tmp" || {
+            rm -f "$ghdash_tmp"
+            return 1
+        }
         mv "$ghdash_tmp" "$GH_DASH_OUTPUT"
 
         # Merge user local overrides on top (survives theme-switch)
@@ -377,7 +386,10 @@ PLATFORM
                 -e "s|{{TMUX_ACCENT_YELLOW}}|$TMUX_ACCENT_YELLOW|g" \
                 -e "s|{{TMUX_ACCENT_RED}}|$TMUX_ACCENT_RED|g" \
                 -e "s|{{TMUX_ACCENT_PURPLE}}|$TMUX_ACCENT_PURPLE|g" \
-                "$YAZI_TEMPLATE" > "$yazi_tmp" || { rm -f "$yazi_tmp"; return 1; }
+                "$YAZI_TEMPLATE" >"$yazi_tmp" || {
+                rm -f "$yazi_tmp"
+                return 1
+            }
             mv "$yazi_tmp" "$YAZI_OUTPUT"
             [[ "$quiet" != "true" ]] && theme_success "Generated yazi theme"
         else
@@ -387,15 +399,15 @@ PLATFORM
 
     # Save current theme preference
     mkdir -p "$CONFIG_DIR"
-    echo "$theme_name" > "$CURRENT_THEME_FILE"
+    echo "$theme_name" >"$CURRENT_THEME_FILE"
 
     # Append to theme history for MRU sorting in picker
     local theme_history="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/theme-history"
     mkdir -p "$(dirname "$theme_history")"
-    printf '%s\n' "$theme_name" >> "$theme_history"
+    printf '%s\n' "$theme_name" >>"$theme_history"
     # Trim history to last 100 entries
-    if [[ $(wc -l < "$theme_history") -gt 100 ]]; then
-        tail -100 "$theme_history" > "$theme_history.tmp" && mv "$theme_history.tmp" "$theme_history"
+    if [[ $(wc -l <"$theme_history") -gt 100 ]]; then
+        tail -100 "$theme_history" >"$theme_history.tmp" && mv "$theme_history.tmp" "$theme_history"
     fi
 
     # Reload tmux if running (unless --no-reload was specified)
@@ -451,7 +463,7 @@ main() {
     for arg in "$@"; do
         case "$arg" in
             --no-reload) no_reload=true ;;
-            --quiet|-q) quiet=true ;;
+            --quiet | -q) quiet=true ;;
         esac
     done
 
@@ -459,7 +471,7 @@ main() {
     args=()
     for arg in "$@"; do
         case "$arg" in
-            --no-reload|--quiet|-q) continue ;;
+            --no-reload | --quiet | -q) continue ;;
             *) args+=("$arg") ;;
         esac
     done
@@ -482,7 +494,7 @@ main() {
             fi
             printf "\n${CYAN}Current theme:${NC} %s (%s)\n\n" "$THEME_NAME" "$current"
             ;;
-        help|--help|-h)
+        help | --help | -h)
             usage
             ;;
         "")
