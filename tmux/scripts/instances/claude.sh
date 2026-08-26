@@ -29,7 +29,8 @@ fi
 
 # build set of PIDs that are ancestors of an active (non-suspended) claude process
 # walks up the process tree so wrapper scripts (e.g., ralph -> claude) are detected.
-# match_process_pids also catches versioned binaries pgrep -x can't see
+# match_process_pids also sees the pane's own claude, which pgrep hides as
+# an ancestor of itself
 declare -A active_claude_ppids
 while IFS= read -r cpid; do
     state=$(ps -o state= -p "$cpid" 2>/dev/null) || continue

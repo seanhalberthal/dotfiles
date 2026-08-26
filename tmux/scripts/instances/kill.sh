@@ -40,9 +40,9 @@ target_info=$(tmux display-message -t "$TARGET" -p '#{pane_pid}|#{session_name}|
 IFS='|' read -r PANE_PID SESSION WINDOW_IDX WINDOW_NAME WINDOW_ID <<<"$target_info"
 [[ -n "$WINDOW_NAME" ]] || WINDOW_NAME="$TARGET"
 
-# find the child process matching process name. match_child_pid checks the
-# kernel name via pgrep then falls back to the argv[0] basename, which catches
-# launchers that exec versioned binaries (claude)
+# find the child process matching process name. match_child_pid tries pgrep
+# first, then the executable basename, which also covers a process pgrep hides
+# as an ancestor of itself
 MATCH_FLAG="-x"
 [[ "$PROCESS" == "opencode" ]] && MATCH_FLAG="-f"
 
