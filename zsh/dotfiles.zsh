@@ -623,7 +623,7 @@ alias cp="cp -i" # cp -i (safe overwrite)
 alias mv="mv -i" # mv -i (safe overwrite)
 
 # suffix aliases
-alias -s md='-t glow' # View markdown files with syntax highlighting using glow (if installed)
+alias -s md='glow -t' # View markdown files with syntax highlighting using glow (if installed)
 
 # yazi: launch the file manager, then cd the shell to wherever you quit.
 # uses --cwd-file so a plain `q` lands you in the last-browsed directory
