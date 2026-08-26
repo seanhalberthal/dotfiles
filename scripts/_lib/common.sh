@@ -240,7 +240,9 @@ update_zshrc_export() {
         return 1
     fi
 
-    # escape sed-special characters in value (& | \ /)
+    # escape sed-special characters for the replace branch's s/// replacement.
+    # the append branches below do not use this: & is not special in a sed a\
+    # text block, and printf takes the value as an argument, not as format
     local escaped_value
     escaped_value=$(printf '%s' "$value" | sed 's/[&|\\\/]/\\&/g')
 
@@ -268,8 +270,10 @@ update_zshrc_export() {
                     break
                 fi
             done
+            # sed eats backslashes in an a\ text block, so double them
+            local appended_value="${value//\\/\\\\}"
             sed_inplace "${insert_after}a\\
-export ${var_name}=\"${value}\"
+export ${var_name}=\"${appended_value}\"
 " "$zshrc"
         else
             # no marker found, append to end

@@ -357,6 +357,18 @@ else
     fail "update_zshrc_export should handle paths with slashes"
 fi
 
+# backslashes survive the sed a\ append branch, which consumes them unescaped
+setup_sandbox
+cat >"$HOME/.zshrc" <<'EOF'
+# YOUR PERSONAL CONFIGURATION
+EOF
+update_zshrc_export "DEV_ROOT" '/home/user/a\b'
+if grep -qF 'export DEV_ROOT="/home/user/a\b"' "$HOME/.zshrc"; then
+    pass "update_zshrc_export preserves backslashes on first write"
+else
+    fail "update_zshrc_export dropped a backslash: $(grep '^export DEV_ROOT=' "$HOME/.zshrc")"
+fi
+
 # test with no marker in .zshrc
 cleanup_sandbox
 setup_sandbox
