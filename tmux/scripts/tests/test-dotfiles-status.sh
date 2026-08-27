@@ -61,7 +61,7 @@ git clone "$REMOTE_REPO" "$LOCAL_REPO" >/dev/null 2>&1
     cd "$LOCAL_REPO"
     git config user.email "test@test.com"
     git config user.name "Test"
-    echo "initial" > README.md
+    echo "initial" >README.md
     git add README.md
     git commit -m "Initial commit" >/dev/null 2>&1
     git push origin main >/dev/null 2>&1 || git push origin master >/dev/null 2>&1
@@ -74,8 +74,8 @@ BRANCH_NAME=$(cd "$LOCAL_REPO" && git rev-parse --abbrev-ref HEAD)
 # override environment for the status script
 export DOTFILES_DIR="$LOCAL_REPO"
 export XDG_CACHE_HOME="$STATUS_TEST_DIR/cache"
-export DOTFILES_SYNC_CACHE_TTL=0    # disable fetch cache
-export DOTFILES_RESULT_CACHE_TTL=0  # disable result cache
+export DOTFILES_SYNC_CACHE_TTL=0   # disable fetch cache
+export DOTFILES_RESULT_CACHE_TTL=0 # disable result cache
 mkdir -p "$XDG_CACHE_HOME/dotfiles"
 
 # ═══════════════════════════════════════════════════════════════
@@ -110,7 +110,7 @@ git clone "$REMOTE_REPO" "$SECOND_CLONE" >/dev/null 2>&1
     cd "$SECOND_CLONE"
     git config user.email "test@test.com"
     git config user.name "Test"
-    echo "remote change" > remote.txt
+    echo "remote change" >remote.txt
     git add remote.txt
     git commit -m "Remote commit" >/dev/null 2>&1
     git push >/dev/null 2>&1
@@ -140,7 +140,7 @@ section "Ahead of Remote State"
 (
     cd "$LOCAL_REPO"
     git pull origin "$BRANCH_NAME" >/dev/null 2>&1
-    echo "local change" > local.txt
+    echo "local change" >local.txt
     git add local.txt
     git commit -m "Local commit" >/dev/null 2>&1
 )
@@ -165,7 +165,7 @@ section "Diverged State"
 # add another remote commit (via second clone)
 (
     cd "$SECOND_CLONE"
-    echo "another remote change" > remote2.txt
+    echo "another remote change" >remote2.txt
     git add remote2.txt
     git commit -m "Another remote commit" >/dev/null 2>&1
     git push >/dev/null 2>&1
@@ -192,10 +192,10 @@ fi
 section "Result Caching"
 
 # set a long result TTL and verify cache is used
-export DOTFILES_RESULT_CACHE_TTL=300  # 5 minutes
+export DOTFILES_RESULT_CACHE_TTL=300 # 5 minutes
 
 # write a known value to cache (line 1 = epoch, line 2 = payload)
-printf '%s\nCACHED\n' "$(date +%s)" > "$XDG_CACHE_HOME/dotfiles/sync-status"
+printf '%s\nCACHED\n' "$(date +%s)" >"$XDG_CACHE_HOME/dotfiles/sync-status"
 
 output=$(bash "$STATUS_SCRIPT" 2>/dev/null) || output=""
 

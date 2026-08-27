@@ -49,11 +49,11 @@ get_position() {
 }
 
 set_position() {
-    printf '%s' "$1" > "$POS_FILE"
+    printf '%s' "$1" >"$POS_FILE"
 }
 
 history_count() {
-    [[ -f "$HISTORY_FILE" ]] && wc -l < "$HISTORY_FILE" | tr -d ' ' || echo 0
+    [[ -f "$HISTORY_FILE" ]] && wc -l <"$HISTORY_FILE" | tr -d ' ' || echo 0
 }
 
 # check if a window ID still exists
@@ -78,7 +78,7 @@ record() {
     local skip
     skip=$(tmux show-option -gqv @nav-skip 2>/dev/null || true)
     if [[ -n "$skip" && "$skip" == "$current" ]]; then
-        printf '%s' "$current" > "$LAST_FILE"
+        printf '%s' "$current" >"$LAST_FILE"
         return
     fi
     # clear any stale skip flag that doesn't match current
@@ -91,17 +91,17 @@ record() {
         count=$(history_count)
         local keep=$((count - pos))
         if [[ "$keep" -gt 0 ]]; then
-            head -n "$keep" "$HISTORY_FILE" > "${HISTORY_FILE}.tmp"
+            head -n "$keep" "$HISTORY_FILE" >"${HISTORY_FILE}.tmp"
             mv "${HISTORY_FILE}.tmp" "$HISTORY_FILE"
         else
-            : > "$HISTORY_FILE"
+            : >"$HISTORY_FILE"
         fi
         set_position 0
         # reset LAST_FILE to match truncated state (prevents stale departure push)
         local new_last
         new_last=$([[ -f "$HISTORY_FILE" ]] && tail -n1 "$HISTORY_FILE" || echo "")
         if [[ -n "$new_last" ]]; then
-            printf '%s' "$new_last" > "$LAST_FILE"
+            printf '%s' "$new_last" >"$LAST_FILE"
         else
             rm -f "$LAST_FILE"
         fi
@@ -114,7 +114,7 @@ record() {
         prev=$(cat "$LAST_FILE")
         last_entry=$([[ -f "$HISTORY_FILE" ]] && tail -n1 "$HISTORY_FILE" || echo "")
         if [[ -n "$prev" && "$prev" != "$last_entry" && "$prev" != "$current" ]]; then
-            printf '%s\n' "$prev" >> "$HISTORY_FILE"
+            printf '%s\n' "$prev" >>"$HISTORY_FILE"
         fi
     fi
 
@@ -122,15 +122,15 @@ record() {
     local last_entry
     last_entry=$([[ -f "$HISTORY_FILE" ]] && tail -n1 "$HISTORY_FILE" || echo "")
     if [[ "$last_entry" != "$current" ]]; then
-        printf '%s\n' "$current" >> "$HISTORY_FILE"
+        printf '%s\n' "$current" >>"$HISTORY_FILE"
     fi
 
-    printf '%s' "$current" > "$LAST_FILE"
+    printf '%s' "$current" >"$LAST_FILE"
 
     # trim history if over limit
     count=$(history_count)
     if [[ "$count" -gt "$MAX_HISTORY" ]]; then
-        tail -n "$MAX_HISTORY" "$HISTORY_FILE" > "${HISTORY_FILE}.tmp"
+        tail -n "$MAX_HISTORY" "$HISTORY_FILE" >"${HISTORY_FILE}.tmp"
         mv "${HISTORY_FILE}.tmp" "$HISTORY_FILE"
     fi
 }
@@ -149,7 +149,7 @@ back() {
         local last_entry
         last_entry=$([[ -f "$HISTORY_FILE" ]] && tail -n1 "$HISTORY_FILE" || echo "")
         if [[ "$last_entry" != "$current" ]]; then
-            printf '%s\n' "$current" >> "$HISTORY_FILE"
+            printf '%s\n' "$current" >>"$HISTORY_FILE"
             count=$((count + 1))
         fi
     fi
@@ -168,7 +168,7 @@ back() {
 
     # remove stale entries and retry
     if ! window_exists "$target"; then
-        sed "${target_line}d" "$HISTORY_FILE" > "${HISTORY_FILE}.tmp"
+        sed "${target_line}d" "$HISTORY_FILE" >"${HISTORY_FILE}.tmp"
         mv "${HISTORY_FILE}.tmp" "$HISTORY_FILE"
         back
         return
@@ -180,8 +180,14 @@ back() {
 
     # navigate: use switch-client for cross-session, select-window for same-session
     local target_session current_session
-    target_session=$(get_session_id "$target") || { tmux select-window -t "$target" 2>/dev/null || true; return; }
-    current_session=$(get_session_id "$current") || { tmux select-window -t "$target" 2>/dev/null || true; return; }
+    target_session=$(get_session_id "$target") || {
+        tmux select-window -t "$target" 2>/dev/null || true
+        return
+    }
+    current_session=$(get_session_id "$current") || {
+        tmux select-window -t "$target" 2>/dev/null || true
+        return
+    }
 
     if [[ "$target_session" != "$current_session" ]]; then
         tmux switch-client -t "$target" 2>/dev/null || tmux select-window -t "$target" 2>/dev/null || true
@@ -210,7 +216,7 @@ forward() {
 
     # remove stale entries and retry
     if ! window_exists "$target"; then
-        sed "${target_line}d" "$HISTORY_FILE" > "${HISTORY_FILE}.tmp"
+        sed "${target_line}d" "$HISTORY_FILE" >"${HISTORY_FILE}.tmp"
         mv "${HISTORY_FILE}.tmp" "$HISTORY_FILE"
         forward
         return
@@ -220,9 +226,18 @@ forward() {
     set_position "$new_pos"
 
     local current target_session current_session
-    current=$(get_current_window) || { tmux select-window -t "$target" 2>/dev/null; return; }
-    target_session=$(get_session_id "$target") || { tmux select-window -t "$target" 2>/dev/null || true; return; }
-    current_session=$(get_session_id "$current") || { tmux select-window -t "$target" 2>/dev/null || true; return; }
+    current=$(get_current_window) || {
+        tmux select-window -t "$target" 2>/dev/null
+        return
+    }
+    target_session=$(get_session_id "$target") || {
+        tmux select-window -t "$target" 2>/dev/null || true
+        return
+    }
+    current_session=$(get_session_id "$current") || {
+        tmux select-window -t "$target" 2>/dev/null || true
+        return
+    }
 
     if [[ "$target_session" != "$current_session" ]]; then
         tmux switch-client -t "$target" 2>/dev/null || tmux select-window -t "$target" 2>/dev/null || true
@@ -232,8 +247,11 @@ forward() {
 }
 
 case "${1:-}" in
-    record)  record "${2:-}" ;;
-    back)    back ;;
+    record) record "${2:-}" ;;
+    back) back ;;
     forward) forward ;;
-    *)       echo "Usage: nav.sh {record <window_id>|back|forward}" >&2; exit 1 ;;
+    *)
+        echo "Usage: nav.sh {record <window_id>|back|forward}" >&2
+        exit 1
+        ;;
 esac

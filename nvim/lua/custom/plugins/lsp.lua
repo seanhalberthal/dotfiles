@@ -3,7 +3,6 @@
 local lsp_nav = require 'custom.features.lsp-navigation'
 local lsp_fix_all = require 'custom.features.lsp-fix-all'
 local lsp_patches = require 'custom.features.lsp-patches'
-local roslyn_diagnostics = require 'custom.features.roslyn-diagnostics'
 
 --- true only for ordinary on-disk file buffers. differ/fugitive views and
 --- other plugin buffers carry a `scheme://` name and/or a non-empty `buftype`;
@@ -242,7 +241,6 @@ return {
 
       lsp_patches.patch_lsp_start()
       lsp_patches.patch_show_document()
-      roslyn_diagnostics.patch_pull_diagnostics_bufstate()
 
       vim.lsp.config('cssls', {
         settings = {
@@ -352,9 +350,41 @@ return {
         vim.lsp.enable 'sourcekit'
       end
 
+      -- basedpyright defaults to `recommended`, which reports the inferred-Any
+      -- rules (reportAny, reportUnknownParameterType) as warnings on ordinary
+      -- untyped code. `standard` is the mode pyright ran in. the rest of the
+      -- settings table (autoSearchPaths, diagnosticMode, disableTaggedHints)
+      -- comes from lspconfig and deep-merges with this
+      vim.lsp.config('basedpyright', {
+        settings = {
+          basedpyright = {
+            analysis = {
+              typeCheckingMode = 'standard',
+            },
+          },
+        },
+      })
+
+      -- ruff's F821 (undefined name) is the same finding basedpyright reports
+      -- as reportUndefinedVariable, so every undefined name was drawn twice.
+      -- the ruff server is not in the table below: mason-lspconfig enables it
+      -- off the installed `ruff` package, whose name matches the lspconfig
+      -- server, so it is configured here instead. client settings win over a
+      -- project's pyproject.toml under ruff's default `editorFirst`
+      vim.lsp.config('ruff', {
+        init_options = {
+          settings = {
+            lint = {
+              ignore = { 'F821' },
+            },
+          },
+        },
+      })
+
       -- server configurations
       local servers = {
         astro = {},
+        basedpyright = {},
         bashls = {},
         clangd = {},
         cssls = {},
@@ -362,7 +392,6 @@ return {
         gopls = {},
         html = {},
         lua_ls = {},
-        pyright = {},
         tailwindcss = {},
         ts_ls = {},
         yamlls = {},
@@ -393,6 +422,7 @@ return {
           ensure_installed = mason_auto_install and {
             -- LSP servers
             'astro',
+            'basedpyright',
             'bashls',
             'clangd',
             'cssls',
@@ -400,10 +430,16 @@ return {
             'gopls',
             'html',
             'lua_ls',
-            'pyright',
             'tailwindcss',
             'ts_ls',
             'yamlls',
+            -- zls tracks zig's minor series and refuses to attach across one
+            -- ("ZLS '0.16.0' does not support Zig '0.15.2'"). the registry only
+            -- carries the latest, so the version is pinned here rather than
+            -- listed with the servers above, whose ensure_installed takes no
+            -- version and would install the newest on a fresh machine. it is
+            -- still enabled by mason-lspconfig off the installed package
+            { 'zls', version = '0.15.1' },
             -- Roslyn (C# LSP, from Crashdummyy/mason-registry)
             'roslyn',
             -- SonarLint LSP (analyzers + bundled omnisharp for C#); driven by sonarlint.lua
@@ -414,6 +450,7 @@ return {
             'gofumpt',
             'goimports',
             'prettier',
+            'shfmt',
             'stylua',
             -- linters
             'golangci-lint-langserver',
@@ -493,11 +530,21 @@ return {
         json = { 'prettier' },
         lua = { 'stylua' },
         python = { 'ruff_organize_imports', 'ruff_format' },
+        sh = { 'shfmt' },
+        bash = { 'shfmt' },
+        zsh = { 'shfmt' },
         typescript = { 'prettier' },
         typescriptreact = { 'prettier' },
         yaml = { 'prettier' },
       },
       formatters = {
+        -- `-ci` keeps case bodies indented, which is how the scripts here are
+        -- written; without it shfmt pulls every case arm back a level
+        shfmt = {
+          -- shfmt indents with tabs unless told otherwise;
+          -- explicitly set all shfmt runs to 4-space
+          args = { '-i', '4', '-ci', '-filename', '$FILENAME' },
+        },
         goimports = {
           command = vim.fn.stdpath 'data' .. '/mason/bin/goimports',
         },

@@ -21,9 +21,12 @@ now="${EPOCHSECONDS:-$(date +%s)}"
 
 # hot path: serve the cached segment with bash builtins only, no forks
 if [[ -f "$CACHE_FILE" ]]; then
-    { IFS= read -r cache_ts && IFS= read -r cache_payload; } < "$CACHE_FILE" 2>/dev/null \
-        || { cache_ts=0; cache_payload=""; }
-    if [[ "$cache_ts" =~ ^[0-9]+$ ]] && (( now - cache_ts < TTL )); then
+    { IFS= read -r cache_ts && IFS= read -r cache_payload; } <"$CACHE_FILE" 2>/dev/null ||
+        {
+            cache_ts=0
+            cache_payload=""
+        }
+    if [[ "$cache_ts" =~ ^[0-9]+$ ]] && ((now - cache_ts < TTL)); then
         printf '%s' "$cache_payload"
         exit 0
     fi
@@ -45,14 +48,17 @@ done
 fg="" cpu_icon="" ram_icon=""
 while IFS= read -r opt; do
     case "$opt" in
-        '@sysinfo_fg '*)       fg="${opt#'@sysinfo_fg '}" ;;
+        '@sysinfo_fg '*) fg="${opt#'@sysinfo_fg '}" ;;
         '@sysinfo_cpu_icon '*) cpu_icon="${opt#'@sysinfo_cpu_icon '}" ;;
         '@sysinfo_ram_icon '*) ram_icon="${opt#'@sysinfo_ram_icon '}" ;;
     esac
 done < <(tmux show-options -g 2>/dev/null)
-fg="${fg%\"}";             fg="${fg#\"}"
-cpu_icon="${cpu_icon%\"}"; cpu_icon="${cpu_icon#\"}"
-ram_icon="${ram_icon%\"}"; ram_icon="${ram_icon#\"}"
+fg="${fg%\"}"
+fg="${fg#\"}"
+cpu_icon="${cpu_icon%\"}"
+cpu_icon="${cpu_icon#\"}"
+ram_icon="${ram_icon%\"}"
+ram_icon="${ram_icon#\"}"
 
 battery_scripts="$plugin_root/tmux-battery/scripts"
 cpu_scripts="$plugin_root/tmux-cpu/scripts"
@@ -88,5 +94,5 @@ ram_pct=$("$cpu_scripts/ram_percentage.sh" 2>/dev/null) || ram_pct=""
 payload="${battery_segment}${cpu_bg}#[fg=${fg}] ${cpu_icon} ${cpu_pct} ${ram_bg}#[fg=${fg}] ${ram_icon} ${ram_pct} "
 
 mkdir -p "$CACHE_DIR"
-printf '%s\n%s\n' "$now" "$payload" > "$CACHE_FILE"
+printf '%s\n%s\n' "$now" "$payload" >"$CACHE_FILE"
 printf '%s' "$payload"

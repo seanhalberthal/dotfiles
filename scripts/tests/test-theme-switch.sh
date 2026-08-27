@@ -28,7 +28,7 @@ setup_test_env() {
     mkdir -p "$TEST_THEMES_DIR"
 
     # create test templates with placeholders
-    cat > "$TEST_TMUX_TEMPLATE" <<'EOF'
+    cat >"$TEST_TMUX_TEMPLATE" <<'EOF'
 # Theme: {{THEME_NAME}}
 # Tmux configuration
 set -g status-style "bg={{TMUX_STATUS_BG}},fg={{TMUX_STATUS_FG}}"
@@ -38,7 +38,7 @@ set -g pane-active-border-style "fg={{TMUX_PANE_BORDER_ACTIVE}}"
 set -g message-style "bg={{TMUX_MESSAGE_BG}},fg={{TMUX_MESSAGE_FG}}"
 EOF
 
-    cat > "$TEST_GHOSTTY_TEMPLATE" <<'EOF'
+    cat >"$TEST_GHOSTTY_TEMPLATE" <<'EOF'
 # Theme: {{THEME_NAME}}
 # Ghostty configuration
 background={{GHOSTTY_BACKGROUND}}
@@ -51,7 +51,7 @@ keybind={{PLATFORM_MOD}}+c=text:\x1bc
 EOF
 
     # create test theme (using new base variable format)
-    cat > "$TEST_THEMES_DIR/test-theme.theme" <<'EOF'
+    cat >"$TEST_THEMES_DIR/test-theme.theme" <<'EOF'
 THEME_NAME="Test Theme"
 THEME_ACTIVE_ACCENT="purple"
 TMUX_BG_PRIMARY="#ff0000"
@@ -98,7 +98,7 @@ NVIM_COLORSCHEME="test-theme"
 EOF
 
     # create minimal theme for testing (using new base variable format)
-    cat > "$TEST_THEMES_DIR/minimal.theme" <<'EOF'
+    cat >"$TEST_THEMES_DIR/minimal.theme" <<'EOF'
 THEME_NAME="Minimal Theme"
 THEME_ACTIVE_ACCENT="cyan"
 TMUX_BG_PRIMARY="#000000"
@@ -295,7 +295,7 @@ setup_test_env
 
 # create a wrapper script that uses test paths
 TEST_WRAPPER="$TEST_DIR/theme-switch-test"
-cat > "$TEST_WRAPPER" <<EOF
+cat >"$TEST_WRAPPER" <<EOF
 #!/bin/bash
 set -euo pipefail
 
@@ -533,7 +533,7 @@ fi
 section "File Overwrite Safety"
 
 # create existing config
-echo "# Existing config" > "$TEST_TMUX_OUTPUT"
+echo "# Existing config" >"$TEST_TMUX_OUTPUT"
 original_content=$(cat "$TEST_TMUX_OUTPUT")
 
 # apply theme
@@ -556,7 +556,7 @@ fi
 section "Theme File Validation"
 
 # test with empty theme file
-echo "" > "$TEST_THEMES_DIR/empty.theme"
+echo "" >"$TEST_THEMES_DIR/empty.theme"
 
 empty_output=$("$TEST_WRAPPER" empty 2>&1) && exit_code=0 || exit_code=$?
 
@@ -645,12 +645,6 @@ else
     fail "theme-switch should reference reload-ghostty.sh for reloading"
 fi
 
-# check that script calls reload-ghostty.sh (which handles detection internally)
-if grep -q 'reload-ghostty.sh' "$THEME_SWITCH"; then
-    pass "theme-switch calls reload-ghostty.sh"
-else
-    fail "theme-switch should call reload-ghostty.sh"
-fi
 
 # check that reload-ghostty.sh handles platform detection internally
 GHOSTTY_RELOAD_SCRIPT="$DOTFILES_ROOT/tmux/scripts/themes/reload-ghostty.sh"

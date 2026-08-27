@@ -34,7 +34,7 @@ _load_entries() {
     while IFS= read -r line; do
         [[ -z "$line" ]] && continue
 
-        IFS=':' read -r session window field3 field4 field5 field6 <<< "$line"
+        IFS=':' read -r session window field3 field4 field5 field6 <<<"$line"
         [[ -z "$session" || -z "$window" || -z "$field3" ]] && continue
 
         # window names are stored percent-encoded; decode for display, the
@@ -63,7 +63,7 @@ _load_entries() {
         entries+=("$(printf '\033[38;2;%d;%d;%dm%s  %s  %s\033[0m' \
             "0x${colour:1:2}" "0x${colour:3:2}" "0x${colour:5:2}" \
             "$icon" "$target" "$label")")
-    done < "$ALERTS_FILE"
+    done <"$ALERTS_FILE"
 
     printf '%s\n' "${entries[@]}"
 }
@@ -79,8 +79,8 @@ _extract_target() {
 _resolve_window_id() {
     local session="$1" name="$2" tab
     printf -v tab '\t'
-    tmux list-windows -t "$session" -F "#{window_id}${tab}#{window_name}" 2>/dev/null \
-        | awk -F'\t' -v n="$name" '$2 == n { print $1; exit }'
+    tmux list-windows -t "$session" -F "#{window_id}${tab}#{window_name}" 2>/dev/null |
+        awk -F'\t' -v n="$name" '$2 == n { print $1; exit }'
 }
 
 # navigate the client to an alert target given as "session:window-name".

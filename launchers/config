@@ -8,7 +8,7 @@ PROJECT_DIR="${XDG_CONFIG_HOME:-$HOME/.config}"
 
 # Help flag handling
 if [[ "${1:-}" == "--help" ]] || [[ "${1:-}" == "-h" ]]; then
-    cat << EOF
+    cat <<EOF
 $SESSION - Config editing session
 
 USAGE:

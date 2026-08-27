@@ -229,7 +229,7 @@ fi
 
 # test with saved theme preference
 mkdir -p "$TEST_CONFIG_DIR"
-echo "nord" > "$TEST_CURRENT_THEME"
+echo "nord" >"$TEST_CURRENT_THEME"
 
 test_output=$("$THEME_PICKER" 2>&1) || true
 
@@ -357,7 +357,7 @@ fi
 
 # test with a known theme set via XDG
 mkdir -p "$TEST_CONFIG_DIR"
-echo "nord" > "$TEST_CURRENT_THEME"
+echo "nord" >"$TEST_CURRENT_THEME"
 pos_nord=$(XDG_CONFIG_HOME="$TEST_XDG_BASE" "$THEME_PICKER" --pos 2>&1) || true
 
 # should be different from default if nord isn't the first theme

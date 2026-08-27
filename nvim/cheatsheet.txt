@@ -281,6 +281,7 @@ Toggle file viewed | <Tab>
 
 ## debug @debug
 Start/Continue | F5
+Pause (cancels an interrupted step) | F6
 Step into | F1
 Step over | F2
 Step out | F3
@@ -392,7 +393,9 @@ Yank file path | <leader>by
 ## bracketed @bracketed
 Next/prev buffer | ]b / [b
 Next/prev diagnostic | ]d / [d
-Next/prev file | ]F / [F
+Next/prev file | ]f / [f
+First/last file in dir | ]F / [F
+Next/prev dated note | ]f / [f (in DD-MM-YYYY dirs, by date)
 Next/prev indent | ]i / [i
 Next/prev jump | ]j / [j
 Next/prev location | ]l / [l

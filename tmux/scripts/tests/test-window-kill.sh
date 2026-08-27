@@ -134,7 +134,7 @@ WINDOW_ID=$(test_tmux display-message -t "${TEST_SESSION}:1" -p '#{window_id}')
 test_tmux set-option -wt "$WINDOW_ID" "@claude_alert" 1 2>/dev/null || true
 
 # write alert to the test alerts file
-echo "${TEST_SESSION}:alerted:claude" > "$ALERTS_FILE"
+echo "${TEST_SESSION}:alerted:claude" >"$ALERTS_FILE"
 
 # kill the window, the kill script should clear alerts
 "$KILL_SCRIPT" "${TEST_SESSION}:1" --no-confirm 2>/dev/null || true

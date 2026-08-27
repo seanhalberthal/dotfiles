@@ -99,7 +99,7 @@ create_filtered_brewfile() {
     filtered_file=$(mktemp)
 
     # filter and write to temp file
-    if ! filter_brewfile "$preset" "$brewfile" > "$filtered_file"; then
+    if ! filter_brewfile "$preset" "$brewfile" >"$filtered_file"; then
         rm -f "$filtered_file"
         return 1
     fi

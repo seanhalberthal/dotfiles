@@ -29,7 +29,8 @@ fi
 
 # build set of PIDs that are ancestors of an active (non-suspended) claude process
 # walks up the process tree so wrapper scripts (e.g., ralph -> claude) are detected.
-# match_process_pids also catches versioned binaries pgrep -x can't see
+# match_process_pids also sees the pane's own claude, which pgrep hides as
+# an ancestor of itself
 declare -A active_claude_ppids
 while IFS= read -r cpid; do
     state=$(ps -o state= -p "$cpid" 2>/dev/null) || continue
@@ -100,14 +101,14 @@ while IFS="$TAB" read -r _viewed session window_idx pane_idx pane_id pane_pid ti
     state_file="$AGENT_STATE_DIR/$pane_id"
     if [[ -f "$state_file" ]]; then
         s_agent="" s_state="" s_epoch=""
-        IFS="$TAB" read -r s_agent s_state s_epoch _ < "$state_file" || true
+        IFS="$TAB" read -r s_agent s_state s_epoch _ <"$state_file" || true
         if [[ "$s_agent" == "claude" && -n "$s_state" && "$s_epoch" =~ ^[0-9]+$ ]]; then
             state="$s_state"
-            age=$(( now - s_epoch ))
-            (( age < 0 )) && age=0
+            age=$((now - s_epoch))
+            ((age < 0)) && age=0
             # stuck: nominally working, no hook event for a while, and the
             # pane title no longer shows the spinner
-            if [[ "$state" == "working" ]] && (( age > STUCK_SECS )) && ! _title_has_spinner "$title"; then
+            if [[ "$state" == "working" ]] && ((age > STUCK_SECS)) && ! _title_has_spinner "$title"; then
                 state="stuck"
             fi
             # the reverse: no hook fires when a permission prompt is
@@ -141,7 +142,7 @@ if [[ -d "$AGENT_STATE_DIR" ]]; then
             rm -f "$f"
         elif [[ -z "${pane_has_claude[$fname]:-}" ]]; then
             f_agent=""
-            IFS="$TAB" read -r f_agent _ < "$f" || true
+            IFS="$TAB" read -r f_agent _ <"$f" || true
             [[ "$f_agent" == "claude" ]] && rm -f "$f"
         fi
     done

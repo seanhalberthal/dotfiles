@@ -8,7 +8,7 @@ PROJECT_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 
 # Help flag handling
 if [[ "${1:-}" == "--help" ]] || [[ "${1:-}" == "-h" ]]; then
-    cat << EOF
+    cat <<EOF
 $SESSION - Dotfiles editing session
 
 USAGE:

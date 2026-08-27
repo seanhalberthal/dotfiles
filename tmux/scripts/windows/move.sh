@@ -38,8 +38,8 @@ if [[ -z "$WINDOW_NAME" ]]; then
 fi
 
 # get list of sessions excluding the source session
-TARGET_SESSION=$(tmux list-sessions -F '#{session_name}' | \
-    grep -v "^${SOURCE_SESSION}$" | \
+TARGET_SESSION=$(tmux list-sessions -F '#{session_name}' |
+    grep -v "^${SOURCE_SESSION}$" |
     fzf --height=100% --layout=reverse --exact --cycle --disabled \
         --prompt ': ' \
         --border=rounded \
@@ -54,7 +54,7 @@ TARGET_SESSION=$(tmux list-sessions -F '#{session_name}' | \
         --bind 'esc:transform:[[ $FZF_PROMPT == "> " ]] && echo "disable-search+clear-query+change-prompt(: )+rebind(j,k,g,G,q,space)" || echo "abort"')
 
 if [[ -z "$TARGET_SESSION" ]]; then
-    exit 0  # user cancelled
+    exit 0 # user cancelled
 fi
 
 # move the window to the target session
@@ -71,7 +71,7 @@ ENC_WINDOW_NAME=$(alerts_encode_window "$WINDOW_NAME")
 if [[ -f "$ALERTS_FILE" ]] && grep -qF "${SOURCE_SESSION}:${ENC_WINDOW_NAME}:" "$ALERTS_FILE" 2>/dev/null; then
     if _acquire_alerts_lock; then
         tmp_file=$(mktemp "${ALERTS_FILE}.tmp.XXXXXX")
-        if sed "s|^${SOURCE_SESSION}:${ENC_WINDOW_NAME}:|${TARGET_SESSION}:${ENC_WINDOW_NAME}:|" "$ALERTS_FILE" > "$tmp_file" 2>/dev/null; then
+        if sed "s|^${SOURCE_SESSION}:${ENC_WINDOW_NAME}:|${TARGET_SESSION}:${ENC_WINDOW_NAME}:|" "$ALERTS_FILE" >"$tmp_file" 2>/dev/null; then
             mv "$tmp_file" "$ALERTS_FILE" 2>/dev/null || rm -f "$tmp_file" 2>/dev/null
         else
             rm -f "$tmp_file" 2>/dev/null

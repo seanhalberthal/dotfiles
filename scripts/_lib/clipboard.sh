@@ -39,13 +39,13 @@ clipboard_backend() {
 # `set-clipboard on` already emits OSC 52 for copy-pipe, so it would double up
 clipboard_copy_cmd() {
     case "$(clipboard_backend)" in
-        pb)      printf 'pbcopy' ;;
+        pb) printf 'pbcopy' ;;
         wayland) printf 'wl-copy' ;;
-        xclip)   printf 'xclip -selection clipboard' ;;
-        xsel)    printf 'xsel --clipboard --input' ;;
-        wsl)     printf 'clip.exe' ;;
-        termux)  printf 'termux-clipboard-set' ;;
-        *)       printf 'cat >/dev/null' ;;
+        xclip) printf 'xclip -selection clipboard' ;;
+        xsel) printf 'xsel --clipboard --input' ;;
+        wsl) printf 'clip.exe' ;;
+        termux) printf 'termux-clipboard-set' ;;
+        *) printf 'cat >/dev/null' ;;
     esac
 }
 
@@ -60,25 +60,25 @@ clipboard_osc52() {
         printf 'clipboard: no tty available for OSC 52\n' >&2
         return 1
     fi
-    if (( ${#b64} > 74994 )); then
+    if ((${#b64} > 74994)); then
         printf 'clipboard: input too large for OSC 52 (%d encoded bytes)\n' "${#b64}" >&2
         return 1
     fi
 
-    printf '\033]52;c;%s\a' "$b64" > /dev/tty
+    printf '\033]52;c;%s\a' "$b64" >/dev/tty
 }
 
 # copy stdin to the system clipboard. falls back to OSC 52 so it still works
 # headless and over ssh; tmux forwards that onward via `set-clipboard on`
 clipboard_copy() {
     case "$(clipboard_backend)" in
-        pb)      pbcopy ;;
+        pb) pbcopy ;;
         wayland) wl-copy ;;
-        xclip)   xclip -selection clipboard ;;
-        xsel)    xsel --clipboard --input ;;
-        wsl)     clip.exe ;;
-        termux)  termux-clipboard-set ;;
-        osc52)   clipboard_osc52 ;;
+        xclip) xclip -selection clipboard ;;
+        xsel) xsel --clipboard --input ;;
+        wsl) clip.exe ;;
+        termux) termux-clipboard-set ;;
+        osc52) clipboard_osc52 ;;
         *)
             if [[ -n "${WAYLAND_DISPLAY:-}" ]]; then
                 printf 'clipboard: no tool for this wayland session; install wl-clipboard\n' >&2

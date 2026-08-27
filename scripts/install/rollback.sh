@@ -57,7 +57,7 @@ if [[ -n "$symlinks" ]]; then
     echo "Symlinks to remove:"
     while IFS='|' read -r link_path _target_path; do
         echo "  - $link_path"
-    done <<< "$symlinks"
+    done <<<"$symlinks"
     echo ""
 fi
 

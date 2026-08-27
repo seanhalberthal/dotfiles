@@ -226,8 +226,8 @@ section "cmd_diff — copy-on-install coverage (sandboxed)"
 setup_cli_sandbox
 
 mkdir -p "$TEST_DOTFILES_DIR/zed" "$HOME/.config/zed"
-printf '{ "a": 1 }\n' > "$TEST_DOTFILES_DIR/zed/settings.json"
-printf '{ "a": 2 }\n' > "$HOME/.config/zed/settings.json"
+printf '{ "a": 1 }\n' >"$TEST_DOTFILES_DIR/zed/settings.json"
+printf '{ "a": 2 }\n' >"$HOME/.config/zed/settings.json"
 
 diff_out=$(dotfiles_run diff)
 if [[ "$diff_out" == *"zed/settings.json"* ]]; then
@@ -334,7 +334,7 @@ section "cmd_set side effects (sandboxed)"
 
 setup_cli_sandbox
 
-cat > "$HOME/.zshrc" << 'EOF'
+cat >"$HOME/.zshrc" <<'EOF'
 # YOUR PERSONAL CONFIGURATION
 EOF
 
@@ -373,8 +373,8 @@ fi
 # shellcheck disable=SC2016
 custom_line='export PROJECT_DIRS="$DEV_ROOT:$PROJECTS_ROOT:$HOME/work"'
 # use awk to replace the auto-generated line with the customised one
-awk -v new="$custom_line" '/^export PROJECT_DIRS=/ {print new; next} {print}' "$HOME/.zshrc" > "$HOME/.zshrc.tmp" \
-    && mv "$HOME/.zshrc.tmp" "$HOME/.zshrc"
+awk -v new="$custom_line" '/^export PROJECT_DIRS=/ {print new; next} {print}' "$HOME/.zshrc" >"$HOME/.zshrc.tmp" &&
+    mv "$HOME/.zshrc.tmp" "$HOME/.zshrc"
 
 mkdir -p "$TEST_HOME/code"
 "$TEST_DOTFILES_DIR/scripts/dotfiles" set dev "$TEST_HOME/code" >/dev/null
@@ -386,7 +386,7 @@ else
 fi
 
 # a stale PROJECT_DIRS that doesn't reference both vars should still be rewritten
-cat > "$HOME/.zshrc" << 'EOF'
+cat >"$HOME/.zshrc" <<'EOF'
 # YOUR PERSONAL CONFIGURATION
 export DEV_ROOT="$HOME/src"
 export PROJECTS_ROOT="$HOME/playground"
@@ -521,7 +521,7 @@ section "Cheatsheet — parser behaviour (synthetic source)"
 setup_cli_sandbox
 
 # synthesise a minimal dotfiles.zsh that exercises every parse rule
-cat > "$TEST_DOTFILES_DIR/zsh/dotfiles.zsh" << 'EOF'
+cat >"$TEST_DOTFILES_DIR/zsh/dotfiles.zsh" <<'EOF'
 # @section: Navigation
 alias c="clear"                          # clear screen
 alias cl="printf '\033[2J'"              # clear + scrollback
@@ -608,14 +608,14 @@ section "Cheatsheet — intentional omissions stay omitted"
 # if you remove an entry, ensure the alias gains a description so it renders.
 # if you add one, leave a brief note explaining why it's hidden
 omitted_aliases=(
-    "demo-rec"      # asciinema recording (developer-only)
-    "pbcopy"        # Linux only; macOS has it natively
-    "pbpaste"       # Linux only; macOS has it natively
-    "alerts-clear"  # implementation behind the user-facing 'ac'
-    "oc"            # opencode shorthand; opencode is already listed
-    "ralph"         # cl && ralph wrapper
-    "ralf"          # cl && ralf wrapper
-    "btop"          # cl && btop wrapper
+    "demo-rec"     # asciinema recording (developer-only)
+    "pbcopy"       # Linux only; macOS has it natively
+    "pbpaste"      # Linux only; macOS has it natively
+    "alerts-clear" # implementation behind the user-facing 'ac'
+    "oc"           # opencode shorthand; opencode is already listed
+    "ralph"        # cl && ralph wrapper
+    "ralf"         # cl && ralf wrapper
+    "btop"         # cl && btop wrapper
 )
 
 # run with an empty HOME so the user's real ~/.zshrc can't leak aliases

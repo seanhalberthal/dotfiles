@@ -147,14 +147,16 @@ function M.reload(force)
   -- use theme_map for hand-crafted themes, fall through to raw name for generated
   local scheme = theme_map[theme] or theme or default_scheme
 
+  local previous = current_theme
+
   if apply_colourscheme(scheme) then
     current_theme = theme
     -- clear backgrounds when Ghostty transparency is active
     if ghostty_transparent() then
       apply_transparency()
     end
-    -- subtle notification (only on manual reload or actual change)
-    if force or current_theme ~= nil then
+    -- notify on a forced reload or a real change, but not the startup apply
+    if force or previous ~= nil then
       vim.notify(string.format('Theme: %s', theme or 'default'), vim.log.levels.INFO)
     end
   end

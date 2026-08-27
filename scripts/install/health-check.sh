@@ -6,7 +6,7 @@ set -euo pipefail
 
 # help flag handling
 if [[ "${1:-}" == "--help" ]] || [[ "${1:-}" == "-h" ]]; then
-    cat << 'EOF'
+    cat <<'EOF'
 health-check.sh - Dotfiles installation health check
 
 USAGE:

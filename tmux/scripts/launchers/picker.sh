@@ -39,16 +39,16 @@ for arg in "$@"; do
     esac
 done
 
-if (( ! NO_LOGO )); then
+if ((!NO_LOGO)); then
     popup_height=24
     popup_width=80
     read -r popup_height popup_width < <(stty size 2>/dev/null) || true
-    if (( popup_width < 80 )) || (( popup_height < 20 )); then
+    if ((popup_width < 80)) || ((popup_height < 20)); then
         NO_LOGO=1
     fi
 fi
 
-if (( NO_LOGO )); then
+if ((NO_LOGO)); then
     LIST_ARGS+=(--no-logo)
     HEADER_LINES=0
 fi
@@ -78,16 +78,16 @@ main() {
             --bind "D:become(printf 'ACTION:dup:%s' \$($SCRIPT_DIR/duplicate.sh {1}))" \
             --bind 'enter:become(printf "ACTION:run:%s" {1})' \
             --bind 'space:become(printf "ACTION:run:%s" {1})' \
-            2>/dev/null) || break  # q/esc from main list closes popup
+            2>/dev/null) || break # q/esc from main list closes popup
 
         case "$action" in
             ACTION:new)
                 "$SCRIPT_DIR/prompt.sh" && break
-                continue  # cancelled, back to picker
+                continue # cancelled, back to picker
                 ;;
             ACTION:set)
                 "$SCRIPT_DIR/settings.sh" || true
-                continue  # always return to picker
+                continue # always return to picker
                 ;;
             ACTION:edit:*)
                 local edit_name="${action#ACTION:edit:}"

@@ -189,8 +189,8 @@ fi
 
 section "Command Detection"
 
-# script should batch-detect Claude processes (kernel name + argv[0] basename;
-# plain pgrep -x misses claude's versioned binary whose kernel name is "2.1.x")
+# script should batch-detect Claude processes (pgrep plus an executable-basename
+# pass, which covers the pane's own claude that pgrep hides as its ancestor)
 if [[ "$script_content" == *'match_process_pids claude'* ]]; then
     pass "Uses match_process_pids to find Claude processes"
 else

@@ -148,10 +148,10 @@ list_bright_themes() {
 
 # List ALL Ghostty themes (kebab-case names), raw output
 _list_all_raw() {
-    printf '%s\n' "$GHOSTTY_THEMES"/* \
-        | awk -F'/' '{ print $NF }' \
-        | _to_kebab \
-        | sort
+    printf '%s\n' "$GHOSTTY_THEMES"/* |
+        awk -F'/' '{ print $NF }' |
+        _to_kebab |
+        sort
 }
 
 # List Ghostty themes (pretty when terminal, raw when piped)
@@ -210,11 +210,11 @@ main() {
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --quiet|-q)
+            --quiet | -q)
                 quiet=true
                 shift
                 ;;
-            list|list-all|list-available|--list-all|--list-available)
+            list | list-all | list-available | --list-all | --list-available)
                 list_themes
                 exit 0
                 ;;
@@ -222,8 +222,8 @@ main() {
                 list_bright_themes
                 exit 0
                 ;;
-            help|-h|--help)
-                cat << EOF
+            help | -h | --help)
+                cat <<EOF
 Usage: $invoked_as <ghostty-theme-name> [--quiet]
        $invoked_as list
        $invoked_as help

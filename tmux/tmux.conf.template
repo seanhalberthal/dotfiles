@@ -33,9 +33,6 @@ set -su terminal-overrides
 # (xterm-ghostty under Ghostty, xterm-256color under other emulators, etc.)
 set -g default-terminal "tmux-256color"
 set -sa terminal-features "*:RGB"
-# remap Home/End to CSI sequences so cmd+left/right work in all pane apps
-# (caps in one entry are colon-separated; a comma splits them into separate entries)
-set -sa terminal-overrides "xterm-256color:khome=\E[H:kend=\E[F"
 # Claude Code (>=2.1.77) clamps chalk to 256-colour whenever $TMUX is set,
 # regardless of true terminal capability. opt out via this env var so the
 # TUI emits real 24-bit RGB. see anthropics/claude-code#36785, #46146.
@@ -509,8 +506,9 @@ bind -T copy-mode-vi M send-keys -X end-of-line        # M = end of line (like $
 bind -T copy-mode-vi q send-keys -X cancel            # q = quit scroll mode
 bind -T copy-mode-vi Escape send-keys -X cancel       # Esc = quit scroll mode
 
-# r = clear selection + enable live-follow; refresh-on is idempotent (no toggle-off), so every press refreshes
-bind -T copy-mode-vi r send-keys -X clear-selection \; send-keys -X refresh-on
+# r = clear selection, then re-sync the view with the pane's live content,
+# picking up anything the pane has printed since copy-mode was entered
+bind -T copy-mode-vi r send-keys -X clear-selection \; send-keys -X refresh-from-pane
 
 # ─────────────────────────────────────────
 # Help

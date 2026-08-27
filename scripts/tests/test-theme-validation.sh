@@ -291,7 +291,7 @@ for theme_file in "$THEMES_DIR"/*.theme; do
         missing_from_current=()
         current_vars_str=$(printf '%s\n' "${current_vars[@]}")
         for var in "${first_theme_vars[@]}"; do
-            if ! grep -qx "$var" <<< "$current_vars_str"; then
+            if ! grep -qx "$var" <<<"$current_vars_str"; then
                 missing_from_current+=("$var")
             fi
         done
@@ -299,7 +299,7 @@ for theme_file in "$THEMES_DIR"/*.theme; do
         extra_in_current=()
         first_theme_vars_str=$(printf '%s\n' "${first_theme_vars[@]}")
         for var in "${current_vars[@]}"; do
-            if ! grep -qx "$var" <<< "$first_theme_vars_str"; then
+            if ! grep -qx "$var" <<<"$first_theme_vars_str"; then
                 extra_in_current+=("$var")
             fi
         done
@@ -412,14 +412,17 @@ for theme_file in "$THEMES_DIR"/*.theme; do
             fail "$theme_name: should have descriptive comment header"
         fi
 
-        # check THEME_NAME matches filename
+        # THEME_NAME is the filename with hyphens as spaces, title-cased
         defined_name=$(grep "^THEME_NAME=" "$theme_file" | sed 's/THEME_NAME="\([^"]*\)"/\1/')
+        expected_name=$(printf '%s' "${theme_name//-/ }" |
+            awk '{ for (i = 1; i <= NF; i++) $i = toupper(substr($i, 1, 1)) substr($i, 2); print }')
 
-        # theme name should be title-cased version of filename (roughly)
-        if [[ -n "$defined_name" ]]; then
+        if [[ -z "$defined_name" ]]; then
+            fail "$theme_name: THEME_NAME not defined"
+        elif [[ "$defined_name" == "$expected_name" ]]; then
             pass "$theme_name: THEME_NAME is '$defined_name'"
         else
-            fail "$theme_name: THEME_NAME not properly defined"
+            fail "$theme_name: THEME_NAME is '$defined_name', expected '$expected_name'"
         fi
     fi
 done

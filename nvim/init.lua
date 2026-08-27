@@ -37,7 +37,7 @@ require('lazy').setup({
   -- custom plugins
   { import = 'custom.plugins' },
 
-  -- kickstart plugins (neo-tree, autopairs, gitsigns, indent guides)
+  -- kickstart plugins (indent guides, lint)
   { import = 'kickstart.plugins' },
 }, {
   ui = {

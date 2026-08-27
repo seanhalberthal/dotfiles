@@ -82,8 +82,8 @@ test_tmux kill-session -t "$NEW_SESSION" 2>/dev/null || true
 section "Drift guard"
 
 BARE_TARGETS=$(grep -rn 'new-window[^|]*-t "\$\(SESSION\|session\|CURRENT_SESSION\)"' \
-    "$DOTFILES_DIR/tmux/scripts" "$DOTFILES_DIR/launchers" 2>/dev/null \
-    | grep -v '/tests/' | grep -v '/_lib/test-' || true)
+    "$DOTFILES_DIR/tmux/scripts" "$DOTFILES_DIR/launchers" 2>/dev/null |
+    grep -v '/tests/' | grep -v '/_lib/test-' || true)
 
 if [[ -z "$BARE_TARGETS" ]]; then
     pass "No bare-session new-window targets in scripts or launchers"

@@ -8,7 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PASS=0
 FAIL=0
 # shellcheck disable=SC2034
-VERBOSE="${1:-}"  # reserved for future verbose output
+VERBOSE="${1:-}" # reserved for future verbose output
 
 # source test helpers for isolated tmux server support
 # shellcheck source=tmux/scripts/tests/_test-helpers.sh
@@ -410,7 +410,7 @@ source "$SCRIPT_DIR/alerts.sh"
 echo "  (using isolated test server)"
 
 # clear the isolated alerts file for a clean slate
-: > "$ALERTS_FILE"
+: >"$ALERTS_FILE"
 
 # use the bootstrap session created on the isolated server
 CURRENT_SESSION="lib-test-main"
@@ -460,16 +460,16 @@ echo ""
 echo "  clear_window_alerts locking:"
 
 # create test alerts
-echo "${CURRENT_SESSION}:${CURRENT_WINDOW}:claude" > "$ALERTS_FILE"
-echo "${CURRENT_SESSION}:test-window-1:claude" >> "$ALERTS_FILE"
-echo "${CURRENT_SESSION}:test-window-2:claude" >> "$ALERTS_FILE"
+echo "${CURRENT_SESSION}:${CURRENT_WINDOW}:claude" >"$ALERTS_FILE"
+echo "${CURRENT_SESSION}:test-window-1:claude" >>"$ALERTS_FILE"
+echo "${CURRENT_SESSION}:test-window-2:claude" >>"$ALERTS_FILE"
 
 # simulate concurrent clears (file operations only, no tmux ops since windows don't exist)
 (
     LOCK_DIR="${ALERTS_FILE}.lock"
     for _ in {1..10}; do
         if mkdir "$LOCK_DIR" 2>/dev/null; then
-            grep -v "^${CURRENT_SESSION}:test-window-1:" "$ALERTS_FILE" > "${ALERTS_FILE}.tmp.$$" 2>/dev/null || true
+            grep -v "^${CURRENT_SESSION}:test-window-1:" "$ALERTS_FILE" >"${ALERTS_FILE}.tmp.$$" 2>/dev/null || true
             mv "${ALERTS_FILE}.tmp.$$" "$ALERTS_FILE" 2>/dev/null || rm -f "${ALERTS_FILE}.tmp.$$"
             rmdir "$LOCK_DIR" 2>/dev/null || true
             break
@@ -483,7 +483,7 @@ PID1=$!
     LOCK_DIR="${ALERTS_FILE}.lock"
     for _ in {1..10}; do
         if mkdir "$LOCK_DIR" 2>/dev/null; then
-            grep -v "^${CURRENT_SESSION}:test-window-2:" "$ALERTS_FILE" > "${ALERTS_FILE}.tmp.$$" 2>/dev/null || true
+            grep -v "^${CURRENT_SESSION}:test-window-2:" "$ALERTS_FILE" >"${ALERTS_FILE}.tmp.$$" 2>/dev/null || true
             mv "${ALERTS_FILE}.tmp.$$" "$ALERTS_FILE" 2>/dev/null || rm -f "${ALERTS_FILE}.tmp.$$"
             rmdir "$LOCK_DIR" 2>/dev/null || true
             break
@@ -496,7 +496,7 @@ PID2=$!
 wait $PID1 $PID2
 
 # check that file is in consistent state (only current window alert should remain)
-REMAINING=$(wc -l < "$ALERTS_FILE" 2>/dev/null | tr -d ' ' || echo "0")
+REMAINING=$(wc -l <"$ALERTS_FILE" 2>/dev/null | tr -d ' ' || echo "0")
 if [[ "$REMAINING" == "1" ]]; then
     pass "    handles concurrent clears without corruption"
 else
@@ -508,13 +508,13 @@ echo ""
 echo "  cleanup_stale_alerts:"
 
 # create alerts with mix of valid and invalid sessions/windows
-echo "${CURRENT_SESSION}:${CURRENT_WINDOW}:claude" > "$ALERTS_FILE"
-echo "nonexistent-session:window:claude" >> "$ALERTS_FILE"
-echo "${CURRENT_SESSION}:nonexistent-window:claude" >> "$ALERTS_FILE"
+echo "${CURRENT_SESSION}:${CURRENT_WINDOW}:claude" >"$ALERTS_FILE"
+echo "nonexistent-session:window:claude" >>"$ALERTS_FILE"
+echo "${CURRENT_SESSION}:nonexistent-window:claude" >>"$ALERTS_FILE"
 
-BEFORE_COUNT=$(wc -l < "$ALERTS_FILE")
+BEFORE_COUNT=$(wc -l <"$ALERTS_FILE")
 cleanup_stale_alerts
-AFTER_COUNT=$(wc -l < "$ALERTS_FILE" 2>/dev/null || echo "0")
+AFTER_COUNT=$(wc -l <"$ALERTS_FILE" 2>/dev/null || echo "0")
 
 if [[ "$AFTER_COUNT" -lt "$BEFORE_COUNT" ]]; then
     pass "    removes stale alerts ($BEFORE_COUNT -> $AFTER_COUNT)"
@@ -571,7 +571,7 @@ fi
 # to '_' under automatic-rename, so a colon-named window can't be materialised
 # on those builds; skip the end-to-end checks there rather than aborting the
 # suite (the encode/decode round-trip above already covers the core logic)
-: > "$ALERTS_FILE"
+: >"$ALERTS_FILE"
 tmux new-window -t "$CURRENT_SESSION" -n "$COLON_WIN" 2>/dev/null || true
 COLON_WIN_ID=$(tmux list-windows -t "$CURRENT_SESSION" -F '#{window_name}|#{window_id}' 2>/dev/null | grep -F "${COLON_WIN}|" | head -1 | cut -d'|' -f2) || COLON_WIN_ID=""
 
@@ -727,7 +727,7 @@ section "Testing state file parsing"
 
 # create a test state file
 TEST_STATE_FILE=$(mktemp)
-cat > "$TEST_STATE_FILE" << 'EOF'
+cat >"$TEST_STATE_FILE" <<'EOF'
 dir=/Users/test/projects
 layout=main-vertical,200x50,0,0[200x25,0,0,1,200x24,0,26,2]
 SESSION=mytest
@@ -753,7 +753,7 @@ while IFS='=' read -r key value; do
         PANE) TEST_PANE="$value" ;;
         PANE_COUNT) TEST_PANE_COUNT="$value" ;;
     esac
-done < "$TEST_STATE_FILE"
+done <"$TEST_STATE_FILE"
 
 assert_equals "  parses dir correctly" "/Users/test/projects" "$TEST_DIR"
 assert_equals "  parses SESSION correctly" "mytest" "$TEST_SESSION"
@@ -778,7 +778,7 @@ touch "$TEST_STATE_FILE"
 EMPTY_TEST=""
 while IFS='=' read -r key value; do
     EMPTY_TEST="found"
-done < "$TEST_STATE_FILE"
+done <"$TEST_STATE_FILE"
 if [[ -z "$EMPTY_TEST" ]]; then
     pass "  handles empty state file"
 else
@@ -788,25 +788,25 @@ rm -f "$TEST_STATE_FILE"
 
 # state file with special characters in path
 TEST_STATE_FILE=$(mktemp)
-echo "dir=/Users/test/path with spaces/project" > "$TEST_STATE_FILE"
+echo "dir=/Users/test/path with spaces/project" >"$TEST_STATE_FILE"
 SPECIAL_DIR=""
 while IFS='=' read -r key value; do
     case "$key" in
         dir) SPECIAL_DIR="$value" ;;
     esac
-done < "$TEST_STATE_FILE"
+done <"$TEST_STATE_FILE"
 assert_equals "  handles paths with spaces" "/Users/test/path with spaces/project" "$SPECIAL_DIR"
 rm -f "$TEST_STATE_FILE"
 
 # state file with equals in value
 TEST_STATE_FILE=$(mktemp)
-echo "layout=abc=def=ghi" > "$TEST_STATE_FILE"
+echo "layout=abc=def=ghi" >"$TEST_STATE_FILE"
 EQUALS_VALUE=""
 while IFS='=' read -r key value; do
     case "$key" in
         layout) EQUALS_VALUE="$value" ;;
     esac
-done < "$TEST_STATE_FILE"
+done <"$TEST_STATE_FILE"
 # note: IFS='=' splits on first = only when using read -r
 # this may or may not work as expected depending on shell
 if [[ "$EQUALS_VALUE" == "abc=def=ghi" || "$EQUALS_VALUE" == "abc" ]]; then

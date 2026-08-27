@@ -3,6 +3,23 @@
 -- Debug Adapter Protocol client with UI and inline variable display.
 -- Go debugging via Delve, extensible to other languages
 
+-- stepping while the top frame is runtime.goexit ends the goroutine mid-step.
+-- delve conditions its stepping breakpoints on that goroutine id, so they can
+-- never fire again, and every later step fails with "next while nexting" until
+-- a halt cancels it. refuse the step and leave continue as the way out
+local function step(cmd)
+  return function()
+    local dap = require 'dap'
+    local session = dap.session()
+    local frame = session and session.current_frame
+    if frame and frame.name == 'runtime.goexit' then
+      vim.notify('dap: goroutine has finished, continue (F5) instead of stepping', vim.log.levels.WARN)
+      return
+    end
+    dap[cmd]()
+  end
+end
+
 return {
   'mfussenegger/nvim-dap',
   dependencies = {
@@ -21,24 +38,25 @@ return {
       desc = 'Debug: Start/Continue',
     },
     {
-      '<F1>',
+      '<F6>',
       function()
-        require('dap').step_into()
+        require('dap').pause()
       end,
+      desc = 'Debug: Pause (cancels an interrupted step)',
+    },
+    {
+      '<F1>',
+      step 'step_into',
       desc = 'Debug: Step Into',
     },
     {
       '<F2>',
-      function()
-        require('dap').step_over()
-      end,
+      step 'step_over',
       desc = 'Debug: Step Over',
     },
     {
       '<F3>',
-      function()
-        require('dap').step_out()
-      end,
+      step 'step_out',
       desc = 'Debug: Step Out',
     },
     {

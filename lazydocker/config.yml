@@ -1,5 +1,6 @@
 # LazyDocker configuration
-# Managed by dotfiles — changes here will be overwritten on update
+# copy-on-install: this file is yours after the first install, so repo
+# changes never overwrite it. see CHANGELOG.md for updates worth applying
 
 gui:
   returnImmediately: true

@@ -82,10 +82,12 @@ fi
 
 section "Error Handling"
 
-# check if output is suppressed via redirects or --quiet flag
-if [[ "$create_symlinks_content" == *">/dev/null 2>&1"* ]] || \
-   [[ "$create_symlinks_content" == *"2>/dev/null"* ]] || \
-   [[ "$create_symlinks_content" == *"--quiet"* ]]; then
+# the theme-switch invocations themselves must be quiet, so anchor to those
+# lines rather than searching the whole file for a redirect used elsewhere
+theme_switch_calls=$(printf '%s\n' "$create_symlinks_content" |
+    grep -E '^[[:space:]]*"\$DOTFILES_DIR/scripts/theme-switch"' || true)
+if [[ -n "$theme_switch_calls" ]] &&
+    ! printf '%s\n' "$theme_switch_calls" | grep -qvE -- '--quiet|>/dev/null|2>/dev/null'; then
     pass "create-symlinks suppresses theme-switch output"
 else
     fail "create-symlinks should suppress theme-switch output"
@@ -269,9 +271,9 @@ for theme_file in "$themes_dir"/*.theme; do
                 apply_theme_defaults
 
                 # check generated variables exist
-                [[ -n "${TMUX_STATUS_BG:-}" ]] && \
-                [[ -n "${TMUX_STATUS_FG:-}" ]] && \
-                [[ -n "${TMUX_PANE_BORDER_ACTIVE:-}" ]]
+                [[ -n "${TMUX_STATUS_BG:-}" ]] &&
+                    [[ -n "${TMUX_STATUS_FG:-}" ]] &&
+                    [[ -n "${TMUX_PANE_BORDER_ACTIVE:-}" ]]
             ) && pass "$theme_name defines all required variables" || fail "$theme_name should define all required variables"
         else
             fail "$theme_name should define all required variables"

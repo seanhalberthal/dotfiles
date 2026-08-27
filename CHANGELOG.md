@@ -4,6 +4,52 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.2.140] - 2026-08-27
+
+### Added
+
+- `zls` and `shfmt` added to Mason's install lists. Both were installed here but declared nowhere, so a fresh install picked up neither; zls attached to zig buffers anyway, through mason-lspconfig enabling every installed package whose name matches an lspconfig server. `nvim/lua/custom/plugins/lsp.lua`
+- `zls` pinned to `0.15.1`, with the tool installer rather than the servers table, whose `ensure_installed` takes no version. zls tracks zig's minor series and refuses to attach across one, and the registry carries only the latest, which is a series ahead of the zig installed here. `nvim/lua/custom/plugins/lsp.lua`
+- shfmt formats `sh`, `bash` and `zsh` at `-i 4 -ci`; `-ci` keeps case bodies indented, which is how the scripts here are written. Every tracked shell file is normalised in one pass, so later edits don't carry formatting churn into unrelated commits. `nvim/lua/custom/plugins/lsp.lua`
+- The space-carrying associative-array keys in `scripts/dotfiles` are quoted. shfmt reads an unquoted `[...]` subscript as arithmetic, so `[Zsh config]` was two identifiers with no operator between them and the whole file failed to parse. `scripts/dotfiles`
+- Note directories with a `DD-MM-YYYY` stamp in the filename list newest-first in oil, and `]f`/`[f` walk them by date rather than alphabetically, which had sorted every 3rd above every 22nd. Undated siblings stay above the dated stream, keeping a directory's index and topic notes at the top, and only dated files get the shadowed mapping. `nvim/lua/custom/features/dated-notes.lua`, `nvim/lua/custom/plugins/navigation.lua`, `nvim/lua/custom/plugins/mini.lua`, `nvim/cheatsheet.txt`
+- `F6` pauses the debugger, the only way to clear a step a breakpoint interrupted without restarting the session, since delve cancels an in-flight step when it takes a manual halt. `nvim/lua/custom/plugins/debug.lua`, `nvim/cheatsheet.txt`
+- A drift guard on the uninstaller's `SYMLINKS` array, which had fallen three entries behind `create-symlinks.sh` despite a comment requiring them to match. Both sides are resolved with the same variables rather than compared as text, and both lazydocker layouts are checked so the macOS path is covered on a Linux run. `scripts/tests/test-uninstall.sh`
+
+### Changed
+
+- pyright switched for basedpyright, which has the add-import quick fix pyright lacks entirely: pyright offers imports only as completion items, and only for a module already opened in the session. `typeCheckingMode` is pinned to `standard`, the mode pyright ran in, and pyright must be `:MasonUninstall`ed rather than dropped from the list or both attach and every undefined name is reported twice. `nvim/lua/custom/plugins/lsp.lua`, `nvim/lua/custom/features/scan-runner.lua`, `docs/TROUBLESHOOTING.md`, `zsh/dotfiles.zsh`
+- ruff's `F821` ignored; basedpyright reports the same undefined names, so each was drawn twice. The ignore goes on the ruff server directly, since mason-lspconfig enables it off the installed package rather than the servers table. `nvim/lua/custom/plugins/lsp.lua`
+- Go format verbs take `@string.escape`'s colour through a new `@string.special.format` group, so `%d` matches the `\n` beside it in every theme; seven of the fifteen colourschemes here painted it the same as the escapes and the rest drifted to an unrelated accent. The link is `default = true` so a theme can override it, and is re-applied on `ColorScheme`. `nvim/lua/custom/features/go-format-verbs.lua`
+
+### Fixed
+
+- Swift buffers are linted. nvim-lint's swiftlint is a factory rather than a spec table, since it varies its args on whether a `.swiftlint.yml` is in play, so the `type(linter) == 'table'` executable guard dropped it and `try_lint` was never called. Python leaves `linters_by_ft` in the same change, since the ruff server already publishes the same diagnostics on every keystroke. `nvim/lua/kickstart/plugins/lint.lua`
+- Cheatsheet: `]f`/`[f` is next/prev file, `]F`/`[F` is first/last. `nvim/cheatsheet.txt`
+- The cursor trail no longer antialiases on axis-aligned moves. The exemption declared a second `effectiveBlur` inside the guard block, shadowing the one the shape mask reads and discarding it at the closing brace, so the documented fix had never run. `ghostty/shaders/cursor-warp.glsl`
+- `dotfiles theme <name>` runs the contrast check on a theme it auto-generates. `apply_theme` passed the flag as `${quiet:+--quiet}`, which expands on a non-empty variable rather than a true one, so `--quiet` was sent on every call and only a hand-run `generate-theme` reached the check. `scripts/theme-switch`
+- `dotfiles set dev|projects` stores a path outside `$HOME` as written. The unconditional `${dir#"$HOME"}` strip is a no-op when the pattern doesn't match, so `/opt/work` was written into `~/.zshrc` as `$HOME/opt/work` while the command reported the real path back. `scripts/dotfiles`
+- A successful install clears `.install-state/`, which `cleanup_rollback_state` did only under `--check-only`. `rollback.sh` branches on that state existing: it unlinks every recorded symlink, then finds no backup path and reports nothing to restore, so stale state turned a recoverable rollback into a destructive one. `install.sh`
+- `--check-only` no longer runs Homebrew setup and `brew bundle install --upgrade` before its early exit, which made `make check` upgrade every package on the machine while the help text, Makefile and installation guide all described a dry run. `install.sh`
+- Uninstall removes the ImageMagick font map, the lazydocker log formatter and the statusline theme resolver, each of which survived as a link into a `~/dotfiles` it had just detached from. The macOS-only paths sit under a `Darwin` test beside the legacy Ghostty entry. `scripts/install/uninstall.sh`
+- `F1`/`F2`/`F3` refuse to step when the top frame is `runtime.goexit`. Stepping off the end of a `t.Run` closure ends the goroutine mid-step, and delve conditions its stepping breakpoints on that goroutine id, so every later step fails with "next while nexting" and continue doesn't clear it; `F6` is the escape hatch for the other routes in. `nvim/lua/custom/plugins/debug.lua`
+- `r` in copy-mode sends `refresh-from-pane` rather than the non-existent `refresh-on`, which fell through to `WINDOW_COPY_CMD_NOTHING` without an error, so the key cleared the selection and did nothing else. `tmux/tmux.conf.template`
+- nvim no longer prints `Theme: <name>` on every start, which reached stderr on any headless or scripted invocation. The guard read `current_theme` after assigning it, so it could never be false; the previous value is captured first now. `nvim/lua/custom/core/theme.lua`
+- The lazydocker config header no longer claims dotfiles will overwrite it. It is installed with `copy_config`, which writes only when the destination is absent, so it has been user-owned since the first install; existing installs keep the old header. `lazydocker/config.yml`
+- The `md` suffix alias is `glow -t`, not `-t glow`: a suffix alias prepends its value, so a bare `notes.md` died with `command not found: -t`. `zsh/dotfiles.zsh`
+- `update_zshrc_export` doubles backslashes in its append branch. The escaped copy of the value was computed for the `s///` branch only, and sed consumes a backslash inside an `a\` text block, so a first write of `a\b` landed as `ab`. `scripts/_lib/common.sh`, `scripts/tests/test-linux-compat.sh`
+- Cmd+Backspace deletes to the line start again. Ghostty emits `\e[127;5u` rather than `\x15`, which is plain `^U` and bound to `kill-whole-line` by zsh's emacs default, leaving the bindkey and the nvim `<C-BS>` mappings unreachable. A distinct sequence keeps `^U` itself as `kill-whole-line` at the prompt. `ghostty/config.template`
+- The local-layer drift guard matches installer destinations against the manifest rather than source paths. It substring-matched against whole `repo_path|destination` lines, so a hit on the repo-path half satisfied it and corrupting a destination left the guard green. `scripts/tests/test-dotfiles-local.sh`
+- Three tests that could not fail now call what they name. `test-create-symlinks-functional.sh` wrote a string and asserted the same string rather than calling `install_local`; `test-uninstall.sh`'s non-symlink check never reached the removal loop; `test-theme-validation.sh` asserted `THEME_NAME` was non-empty rather than checking it against the filename. `scripts/tests/test-create-symlinks-functional.sh`, `scripts/tests/test-uninstall.sh`, `scripts/tests/test-theme-validation.sh`
+- `restore_from_backup` is tested by calling it, rather than grepping `rollback.sh` for the literals `../*` and `/../`. It now restores a real backup in the sandboxed `$HOME` and checks a top-level file, a nested one, and that a symlink at the destination is replaced rather than written through. `scripts/tests/test-rollback-lib.sh`
+- Three loose assertions tightened: the quiet-`theme-switch` check searched the whole of `create-symlinks.sh` and now anchors to the invocation lines, a `grep` duplicated under two messages is gone, and `test-fzf-theming.sh` stops naming a `pick-theme.sh` that does not exist. `scripts/tests/test-theme-installation.sh`, `scripts/tests/test-theme-switch.sh`, `scripts/tests/test-fzf-theming.sh`
+
+### Removed
+
+- The roslyn.nvim#371 pull-diagnostics shim, which wrapped `vim.lsp.diagnostic.on_diagnostic` globally to guard one nil bufnr. The issue closed upstream and the pinned plugin passes an explicit bufnr, which also orphaned the module's `require` in `lsp.lua`. `nvim/lua/custom/features/roslyn-diagnostics.lua`, `nvim/lua/custom/plugins/lsp.lua`, `nvim/lua/custom/features/lsp-patches.lua`
+- The `terminal-overrides` Home/End remap. It targeted `xterm-256color`, never matching the `xterm-ghostty` the client reports, and tmux's unconditional key table already maps what Ghostty sends for cmd+left/right. `tmux/tmux.conf.template`
+- The `setreg('+')` call in the yank autocmd, which rewrote what `clipboard=unnamedplus` had already put in the register. The comments around it described a decoupled clipboard that stopped being true when `unnamedplus` was reinstated; `<leader>v` (`"0p`) remains the way back to the last yank after a delete. `nvim/lua/custom/core/autocmds.lua`, `nvim/lua/custom/core/keymaps.lua`
+
 ## [0.2.139] - 2026-08-21
 
 ### Added

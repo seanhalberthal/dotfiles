@@ -11,7 +11,7 @@ set -euo pipefail
 target="${1:-}"
 [[ -n "$target" ]] || exit 0
 
-tmux capture-pane -ep -t "$target" 2>/dev/null \
-    | awk '{ a[NR] = $0; if ($0 ~ /[^[:space:]]/) last = NR }
-           END { for (i = 1; i <= last; i++) print a[i] }' \
-    | tail -n "${FZF_PREVIEW_LINES:-40}"
+tmux capture-pane -ep -t "$target" 2>/dev/null |
+    awk '{ a[NR] = $0; if ($0 ~ /[^[:space:]]/) last = NR }
+           END { for (i = 1; i <= last; i++) print a[i] }' |
+    tail -n "${FZF_PREVIEW_LINES:-40}"

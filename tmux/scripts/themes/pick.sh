@@ -57,22 +57,22 @@ list_themes_for_fzf() {
                 basename "$theme_file" .theme
             fi
         done
-    } | sort -u > "$all_themes"
+    } | sort -u >"$all_themes"
 
     # build MRU list from history (most recent first, deduplicated)
     local mru_file="$tmpdir/mru"
     touch "$mru_file"
     if [[ -f "$THEME_HISTORY" ]]; then
-        awk '{ lines[NR] = $0; count = NR } END { for (i = count; i >= 1; i--) print lines[i] }' "$THEME_HISTORY" \
-            | awk '!seen[$0]++' > "$mru_file"
+        awk '{ lines[NR] = $0; count = NR } END { for (i = count; i >= 1; i--) print lines[i] }' "$THEME_HISTORY" |
+            awk '!seen[$0]++' >"$mru_file"
     fi
 
     # build lookup sets using associative arrays (O(1) vs per-line grep)
     declare -A valid_set fav_set custom_set bright_set emitted
 
-    while IFS= read -r t; do valid_set["$t"]=1; done < "$all_themes"
+    while IFS= read -r t; do valid_set["$t"]=1; done <"$all_themes"
     if [[ -f "$THEME_FAVOURITES" ]]; then
-        while IFS= read -r t; do [[ -n "$t" ]] && fav_set["$t"]=1; done < "$THEME_FAVOURITES"
+        while IFS= read -r t; do [[ -n "$t" ]] && fav_set["$t"]=1; done <"$THEME_FAVOURITES"
     fi
     for theme_file in "$THEMES_DIR"/*.theme; do
         [[ -f "$theme_file" ]] && custom_set["$(basename "$theme_file" .theme)"]=1
@@ -81,7 +81,7 @@ list_themes_for_fzf() {
         < <("$DOTFILES_ROOT/scripts/generate-theme" bright-list 2>/dev/null)
 
     local -a mru_list=()
-    while IFS= read -r t; do [[ -n "$t" ]] && mru_list+=("$t"); done < "$mru_file"
+    while IFS= read -r t; do [[ -n "$t" ]] && mru_list+=("$t"); done <"$mru_file"
 
     # format a single theme line for fzf
     _format_line() {
@@ -104,23 +104,27 @@ list_themes_for_fzf() {
     # pass 1: fav MRU
     for t in "${mru_list[@]}"; do
         [[ -n "${valid_set[$t]:-}" && -n "${fav_set[$t]:-}" && -z "${emitted[$t]:-}" ]] || continue
-        emitted["$t"]=1; _format_line "$t"
+        emitted["$t"]=1
+        _format_line "$t"
     done
     # pass 2: fav non-MRU (alpha; all_themes is pre-sorted)
     while IFS= read -r t; do
         [[ -n "${fav_set[$t]:-}" && -z "${emitted[$t]:-}" ]] || continue
-        emitted["$t"]=1; _format_line "$t"
-    done < "$all_themes"
+        emitted["$t"]=1
+        _format_line "$t"
+    done <"$all_themes"
     # pass 3: non-fav MRU
     for t in "${mru_list[@]}"; do
         [[ -n "${valid_set[$t]:-}" && -z "${emitted[$t]:-}" ]] || continue
-        emitted["$t"]=1; _format_line "$t"
+        emitted["$t"]=1
+        _format_line "$t"
     done
     # pass 4: remaining alpha
     while IFS= read -r t; do
         [[ -z "${emitted[$t]:-}" ]] || continue
-        emitted["$t"]=1; _format_line "$t"
-    done < "$all_themes"
+        emitted["$t"]=1
+        _format_line "$t"
+    done <"$all_themes"
 
 }
 
@@ -133,11 +137,11 @@ toggle_favourite() {
 
     if [[ -f "$THEME_FAVOURITES" ]] && grep -qxF "$theme_id" "$THEME_FAVOURITES" 2>/dev/null; then
         # remove from favourites
-        grep -vxF "$theme_id" "$THEME_FAVOURITES" > "$THEME_FAVOURITES.tmp" || true
+        grep -vxF "$theme_id" "$THEME_FAVOURITES" >"$THEME_FAVOURITES.tmp" || true
         mv "$THEME_FAVOURITES.tmp" "$THEME_FAVOURITES"
     else
         # add to favourites
-        printf '%s\n' "$theme_id" >> "$THEME_FAVOURITES"
+        printf '%s\n' "$theme_id" >>"$THEME_FAVOURITES"
     fi
 }
 
@@ -150,9 +154,9 @@ random_theme() {
     # filter out bright themes and current theme, pick one at random
     local current_theme pick
     current_theme=$(cat "${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/current-theme" 2>/dev/null || true)
-    pick=$(comm -23 <(echo "$all_themes" | sort) <(echo "$bright_themes" | sort) \
-        | grep -vxF "$current_theme" \
-        | awk -v seed="$RANDOM" 'BEGIN{srand(seed)} {a[NR]=$0} END{print a[int(rand()*NR)+1]}')
+    pick=$(comm -23 <(echo "$all_themes" | sort) <(echo "$bright_themes" | sort) |
+        grep -vxF "$current_theme" |
+        awk -v seed="$RANDOM" 'BEGIN{srand(seed)} {a[NR]=$0} END{print a[int(rand()*NR)+1]}')
 
     if [[ -n "$pick" ]]; then
         echo "$pick"
@@ -180,7 +184,7 @@ reload_with_position() {
     output=$(list_themes_for_fzf)
     local pos
     pos=$(printf '%s\n' "$output" | tail -n +6 | grep -n "^${target} " | head -1 | cut -d: -f1)
-    printf 'pos(%s)\n' "${pos:-1}" > "$pos_file"
+    printf 'pos(%s)\n' "${pos:-1}" >"$pos_file"
     printf '%s\n' "$output"
 }
 

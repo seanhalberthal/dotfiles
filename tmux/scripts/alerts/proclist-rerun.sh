@@ -12,7 +12,7 @@ source "$SCRIPT_DIR/../_lib/alerts.sh"
 
 EPOCH="${1:-}"
 WID="${2:-}"
-MODE="${3:-stage}"   # stage (default, no run) or exec (run it)
+MODE="${3:-stage}" # stage (default, no run) or exec (run it)
 
 # need a history key and tmux; no-op for running rows (their key never matches)
 [[ -n "$EPOCH" && -n "$WID" && -f "$FINISHED_FILE" ]] || exit 0

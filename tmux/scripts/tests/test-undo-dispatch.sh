@@ -47,19 +47,19 @@ assert_equals "Returns empty when no state files exist" "" "$result"
 section "Undo Type Detection - Single Type"
 
 # only pane undo state exists
-echo "test:0.0" > "$(get_pane_undo_file)"
+echo "test:0.0" >"$(get_pane_undo_file)"
 result=$(get_most_recent_undo_type)
 assert_equals "Returns 'pane' when only pane state exists" "pane" "$result"
 rm -f "$(get_pane_undo_file)"
 
 # only window undo state exists
-echo "test:0" > "$(get_window_undo_file)"
+echo "test:0" >"$(get_window_undo_file)"
 result=$(get_most_recent_undo_type)
 assert_equals "Returns 'window' when only window state exists" "window" "$result"
 rm -f "$(get_window_undo_file)"
 
 # only session undo state exists
-echo "test" > "$(get_session_undo_file)"
+echo "test" >"$(get_session_undo_file)"
 result=$(get_most_recent_undo_type)
 assert_equals "Returns 'session' when only session state exists" "session" "$result"
 rm -f "$(get_session_undo_file)"
@@ -69,9 +69,9 @@ section "Undo Type Detection - Priority by Timestamp"
 # create all three types with controlled timestamps
 UNDO_BASE="$XDG_CACHE_HOME/tmux/undo"
 
-echo "test:0.0" > "$UNDO_BASE/pane"
-echo "test:0" > "$UNDO_BASE/window"
-echo "test" > "$UNDO_BASE/session"
+echo "test:0.0" >"$UNDO_BASE/pane"
+echo "test:0" >"$UNDO_BASE/window"
+echo "test" >"$UNDO_BASE/session"
 
 # make pane the oldest, window middle, session newest
 touch -t 202601010000 "$UNDO_BASE/pane"

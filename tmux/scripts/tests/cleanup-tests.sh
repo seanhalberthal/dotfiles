@@ -41,23 +41,23 @@ if [[ -d "$SOCKET_DIR" ]]; then
         printf "${CYAN}Test servers:${NC}\n"
         while IFS= read -r socket; do
             [[ -z "$socket" ]] && continue
-            
+
             SOCKET_NAME=$(basename "$socket")
-            
+
             if [[ "$DRY_RUN" == "true" ]]; then
                 printf "${YELLOW}Would kill:${NC} %s\n" "$SOCKET_NAME"
             else
                 # try to kill the server gracefully
                 tmux -L "$SOCKET_NAME" kill-server 2>/dev/null || true
-                
+
                 # remove socket file if it still exists
                 rm -f "$socket" 2>/dev/null || true
-                
+
                 printf "${GREEN}✓${NC} Cleaned up: %s\n" "$SOCKET_NAME"
             fi
-            
+
             SOCKET_COUNT=$((SOCKET_COUNT + 1))
-        done <<< "$TEST_SOCKETS"
+        done <<<"$TEST_SOCKETS"
     fi
 fi
 
@@ -75,18 +75,18 @@ if [[ -d "$SESSIONS_DIR" ]]; then
         printf "${CYAN}Test session backups:${NC}\n"
         while IFS= read -r backup; do
             [[ -z "$backup" ]] && continue
-            
+
             BACKUP_NAME=$(basename "$backup" .txt)
-            
+
             if [[ "$DRY_RUN" == "true" ]]; then
                 printf "${YELLOW}Would remove:${NC} %s\n" "$BACKUP_NAME"
             else
                 rm -f "$backup" 2>/dev/null || true
                 printf "${GREEN}✓${NC} Cleaned up: %s\n" "$BACKUP_NAME"
             fi
-            
+
             BACKUP_COUNT=$((BACKUP_COUNT + 1))
-        done <<< "$TEST_BACKUPS"
+        done <<<"$TEST_BACKUPS"
     fi
 fi
 

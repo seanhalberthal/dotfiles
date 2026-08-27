@@ -43,7 +43,7 @@ SUITE_SKIPPED=0
 # parse arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
-        --verbose|-v)
+        --verbose | -v)
             VERBOSE=true
             shift
             ;;
@@ -93,25 +93,25 @@ print_suite_summary() {
     printf "${BOLD}%s Summary:${NC} " "$suite_name"
     printf "%d total, " "$SUITE_TOTAL"
     printf "${GREEN}%d passed${NC}" "$SUITE_PASSED"
-    
+
     if [[ $SUITE_FAILED -gt 0 ]]; then
         printf ", ${RED}%d failed${NC}" "$SUITE_FAILED"
     fi
-    
+
     if [[ $SUITE_SKIPPED -gt 0 ]]; then
         printf ", ${YELLOW}%d skipped${NC}" "$SUITE_SKIPPED"
     fi
-    
+
     printf "\n\n"
 }
 
 # increment counters for test result
 increment_counters() {
-    local result="$1"  # "passed", "failed", or "skipped"
-    
+    local result="$1" # "passed", "failed", or "skipped"
+
     SUITE_TOTAL=$((SUITE_TOTAL + 1))
     GLOBAL_TOTAL=$((GLOBAL_TOTAL + 1))
-    
+
     case "$result" in
         passed)
             SUITE_PASSED=$((SUITE_PASSED + 1))
@@ -132,7 +132,7 @@ increment_counters() {
 skip_test() {
     local test_name="$1"
     local reason="$2"
-    
+
     printf "${YELLOW}⊘${NC} %-50s ${YELLOW}SKIP${NC} (%s)\n" "$test_name" "$reason"
     increment_counters "skipped"
 }
@@ -142,24 +142,24 @@ run_test() {
     local test_file="$1"
     local test_name
     test_name=$(basename "$test_file")
-    
+
     # check if test requires tmux
     local needs_tmux=false
     if requires_tmux "$test_file"; then
         needs_tmux=true
     fi
-    
+
     # handle skip conditions
     if [[ "$needs_tmux" = true && "$NO_TMUX" = true ]]; then
         skip_test "$test_name" "tmux required"
         return 0
     fi
-    
+
     if [[ "$needs_tmux" = false && "$TMUX_ONLY" = true ]]; then
         skip_test "$test_name" "not tmux test"
         return 0
     fi
-    
+
     if [[ "$needs_tmux" = true ]] && ! command -v tmux &>/dev/null; then
         skip_test "$test_name" "tmux not installed"
         return 0
@@ -168,11 +168,11 @@ run_test() {
     # run the test
     local output
     local exit_code
-    
+
     if [[ "$VERBOSE" = true ]]; then
         printf "${CYAN}▶${NC} Running: %s\n" "$test_name"
     fi
-    
+
     if output=$("$test_file" 2>&1); then
         printf "${GREEN}✓${NC} %-50s ${GREEN}PASS${NC}\n" "$test_name"
         if [[ "$VERBOSE" = true && -n "$output" ]]; then
@@ -213,29 +213,29 @@ INTEGRATION_TESTS=$(find scripts/tests -name "test-*.sh" -type f 2>/dev/null | s
 # run a test suite (bash 3.2+ compatible, using temp file for test list)
 run_suite() {
     local suite_name="$1"
-    local tests="$2"  # newline-delimited test file paths
-    
+    local tests="$2" # newline-delimited test file paths
+
     # skip if no tests
     if [[ -z "$tests" ]]; then
         return
     fi
-    
+
     reset_suite_counters
     printf "${BOLD}%s${NC}\n" "$suite_name"
-    
+
     # save IFS and set to newline only for iteration
     local old_IFS="$IFS"
     IFS=$'\n'
-    
+
     # process each test (newline-delimited)
     for test in $tests; do
         [[ -z "$test" ]] && continue
         run_test "$test"
     done
-    
+
     # restore IFS
     IFS="$old_IFS"
-    
+
     print_suite_summary "$suite_name"
 }
 

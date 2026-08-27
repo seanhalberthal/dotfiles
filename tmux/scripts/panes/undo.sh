@@ -14,7 +14,10 @@ UNDO_CONTENT=$(get_pane_undo_content)
 
 # check if there's something to undo
 [[ ! -f "$UNDO_FILE" ]] && exit 0
-[[ ! -f "$UNDO_STATE" ]] && { rm -f "$UNDO_FILE"; exit 0; }
+[[ ! -f "$UNDO_STATE" ]] && {
+    rm -f "$UNDO_FILE"
+    exit 0
+}
 
 # parse pane target from undo file (format: session:window.pane)
 PANE_TARGET=$(cat "$UNDO_FILE")
@@ -31,7 +34,7 @@ while IFS='=' read -r key value; do
         dir) DIR="$value" ;;
         layout) LAYOUT="$value" ;;
     esac
-done < "$UNDO_STATE"
+done <"$UNDO_STATE"
 
 # check if session still exists
 if ! tmux has-session -t "$SESSION" 2>/dev/null; then

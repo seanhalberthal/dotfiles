@@ -734,7 +734,7 @@ nvim
 
 ```vim
 " Install missing language servers
-:MasonInstall pyright typescript-language-server lua-language-server gopls
+:MasonInstall basedpyright typescript-language-server lua-language-server gopls
 ```
 
 ### Copilot Not Activating

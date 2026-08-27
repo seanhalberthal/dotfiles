@@ -1,8 +1,6 @@
 -- monkeypatches to vim.lsp internals. extracted from plugins/lsp.lua.
 -- patch_lsp_start blocks LSP attach to non-file:// scheme buffers;
 -- patch_show_document recovers from servers reporting invalid cursor ranges.
--- (the roslyn.nvim#371 pull-diagnostics bufstate shim lives with the other
--- roslyn code in features/roslyn-diagnostics)
 
 local M = {}
 

@@ -7,9 +7,9 @@ function M.setup()
   -- clear search highlight
   vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
-  -- registers: only yanks sync to the system clipboard (see autocmds.lua), so
-  -- d/c/x never clobber it. "0 (the yank register) is never touched by deletes,
-  -- so <leader>v pastes the last yank no matter what was deleted since
+  -- `unnamedplus` routes every register op through +, deletes included, so a
+  -- d/c/x clobbers the clipboard. "0 only ever holds the last yank, so
+  -- <leader>v pastes it back whatever has been deleted since
   vim.keymap.set({ 'n', 'x' }, '<leader>v', '"0p', { desc = 'Paste last yank' })
   vim.keymap.set({ 'n', 'x' }, '<leader>V', '"0P', { desc = 'Paste last yank (above)' })
 

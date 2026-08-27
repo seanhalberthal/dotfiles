@@ -100,8 +100,8 @@ _last_update_datetime() {
 # latest non-Unreleased version from CHANGELOG.md at a given git ref
 _changelog_version_at_ref() {
     local ref="$1"
-    git -C "$DOTFILES_DIR" show "$ref:CHANGELOG.md" 2>/dev/null \
-        | sed -n 's/^## \[\([0-9][^]]*\)\].*/\1/p' | head -1
+    git -C "$DOTFILES_DIR" show "$ref:CHANGELOG.md" 2>/dev/null |
+        sed -n 's/^## \[\([0-9][^]]*\)\].*/\1/p' | head -1
 }
 
 # append "-dev" to a version if the matching git tag doesn't exist yet

@@ -15,7 +15,7 @@ LIB_DIR="$(dirname "$SCRIPT_DIR")/_lib"
 # shellcheck disable=SC2329  # Mock function called indirectly via export -f
 tmux() {
     case "$1" in
-        list-sessions) 
+        list-sessions)
             # return predetermined output based on TEST_CASE variable
             echo "$TMUX_LIST_OUTPUT"
             ;;
@@ -57,7 +57,6 @@ if [[ $exit_code -eq 0 ]]; then
 else
     fail "Single session: Function exited with code $exit_code (crashed?)"
 fi
-
 
 # test 2: multiple sessions exist
 # ---------------------------------------------------------

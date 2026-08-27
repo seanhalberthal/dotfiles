@@ -17,7 +17,7 @@ DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles"
 CACHE_FILE="$CACHE_DIR/sync-status"
 FETCH_CACHE_FILE="$CACHE_DIR/last-fetch"
-CACHE_TTL_SECONDS="${DOTFILES_SYNC_CACHE_TTL:-300}"  # 5 minutes default
+CACHE_TTL_SECONDS="${DOTFILES_SYNC_CACHE_TTL:-300}"   # 5 minutes default
 RESULT_TTL_SECONDS="${DOTFILES_RESULT_CACHE_TTL:-30}" # 30 seconds default
 
 # silent exit helper (no output on failure)
@@ -30,9 +30,12 @@ bail() {
 # cache format: line 1 = epoch written, line 2 = payload
 now="${EPOCHSECONDS:-$(date +%s)}"
 if [[ -f "$CACHE_FILE" ]]; then
-    { IFS= read -r cache_ts && IFS= read -r cache_payload; } < "$CACHE_FILE" 2>/dev/null \
-        || { cache_ts=0; cache_payload=""; }
-    if [[ "$cache_ts" =~ ^[0-9]+$ ]] && (( now - cache_ts < RESULT_TTL_SECONDS )); then
+    { IFS= read -r cache_ts && IFS= read -r cache_payload; } <"$CACHE_FILE" 2>/dev/null ||
+        {
+            cache_ts=0
+            cache_payload=""
+        }
+    if [[ "$cache_ts" =~ ^[0-9]+$ ]] && ((now - cache_ts < RESULT_TTL_SECONDS)); then
         printf '%s' "$cache_payload"
         exit 0
     fi
@@ -81,13 +84,13 @@ maybe_fetch() {
         age=$((now - last_fetch))
 
         if [[ $age -lt $CACHE_TTL_SECONDS ]]; then
-            return 0  # cache still fresh
+            return 0 # cache still fresh
         fi
     fi
 
     # fetch in background to avoid blocking tmux
     git fetch origin --quiet 2>/dev/null &
-    echo "$now" > "$FETCH_CACHE_FILE"
+    echo "$now" >"$FETCH_CACHE_FILE"
 }
 
 # main logic
@@ -114,7 +117,7 @@ main() {
 
     # cache the result (line 1 = epoch, line 2 = payload; read by the
     # builtin-only hot path above)
-    printf '%s\n%s\n' "$now" "$output" > "$CACHE_FILE"
+    printf '%s\n%s\n' "$now" "$output" >"$CACHE_FILE"
 
     # output for tmux
     printf "%s" "$output"

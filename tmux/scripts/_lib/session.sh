@@ -12,10 +12,10 @@ _TMUX_SESSION_SH_LOADED=1
 find_other_session() {
     local exclude_session="$1"
 
-    tmux list-sessions -F '#{session_activity} #{session_name}' 2>/dev/null | \
-        sort -rn | \
-        cut -d' ' -f2- | \
-        grep -v "^${exclude_session}$" | \
+    tmux list-sessions -F '#{session_activity} #{session_name}' 2>/dev/null |
+        sort -rn |
+        cut -d' ' -f2- |
+        grep -v "^${exclude_session}$" |
         head -n1 || true
 }
 

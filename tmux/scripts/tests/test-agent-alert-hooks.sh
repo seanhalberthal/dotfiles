@@ -112,8 +112,8 @@ done
 section "Alert Library - set_window_alert"
 
 # test set_window_alert with TMUX_PANE pointing at test server
-export TMUX_PANE=""  # clear to test graceful handling
-export TMUX=""       # already cleared by setup_test_server
+export TMUX_PANE="" # clear to test graceful handling
+export TMUX=""      # already cleared by setup_test_server
 
 # set alert using direct library function with explicit tmux context
 test_tmux set-option -wt "$TEST_SESSION:testwin" "@claude_alert" 1 2>/dev/null || true
@@ -129,7 +129,7 @@ fi
 section "Alert Library - clear_window_alerts"
 
 # first, add an entry to the alerts file
-echo "$TEST_SESSION:testwin:claude" > "$ALERTS_FILE"
+echo "$TEST_SESSION:testwin:claude" >"$ALERTS_FILE"
 
 # run clear
 clear_window_alerts "$TEST_SESSION" "testwin" 2>/dev/null || true
@@ -173,8 +173,8 @@ fi
 section "Alert File Locking"
 
 # test that concurrent operations don't corrupt the alerts file
-echo "sess1:win1:claude" > "$ALERTS_FILE"
-echo "sess2:win2:opencode" >> "$ALERTS_FILE"
+echo "sess1:win1:claude" >"$ALERTS_FILE"
+echo "sess2:win2:opencode" >>"$ALERTS_FILE"
 
 # clear one entry
 clear_window_alerts "sess1" "win1" 2>/dev/null || true

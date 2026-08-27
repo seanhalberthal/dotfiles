@@ -31,10 +31,10 @@ _CMD_SUPPRESS_DIR="${_CMD_SUPPRESS_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/tmux-a
 # $EPOCHSECONDS gives a wall-clock start the proclist reader can age
 zmodload zsh/datetime 2>/dev/null || true
 
-_cmd_alert_start=-1       # -1 = no command in flight (0 is a valid SECONDS value)
+_cmd_alert_start=-1 # -1 = no command in flight (0 is a valid SECONDS value)
 _cmd_alert_exit=0
 _cmd_alert_label=""
-_cmd_alert_cmd=""         # full command as typed, for proclist rerun (R)
+_cmd_alert_cmd="" # full command as typed, for proclist rerun (R)
 _cmd_alert_pane=""
 
 # commands that should never trigger alerts (interactive pagers, editors, etc.)
@@ -42,7 +42,7 @@ _cmd_alert_pane=""
 # multi-word entries match as a command prefix ("docker compose" → docker compose up).
 # override before sourcing:  _CMD_ALERT_EXCLUDE=(gdn less man git)
 # append after sourcing:     _CMD_ALERT_EXCLUDE+=(mytool)
-if (( ! ${+_CMD_ALERT_EXCLUDE} )); then
+if ((!${+_CMD_ALERT_EXCLUDE})); then
     _CMD_ALERT_EXCLUDE=(
         git gdn gh
         claude opencode oc codex
@@ -93,9 +93,9 @@ _cmd_alert_preexec() {
     local w
     for w in "${ewords[@]}"; do
         case "$w" in
-            ';'|'&&'|'||') last_op_at=$(( i + 1 )) ;;
+            ';' | '&&' | '||') last_op_at=$((i + 1)) ;;
         esac
-        i=$(( i + 1 ))
+        i=$((i + 1))
     done
     local efirst
     efirst="${${ewords[$last_op_at]:-cmd}:t}"
@@ -107,8 +107,8 @@ _cmd_alert_preexec() {
     local _exclude
     for _exclude in "${_CMD_ALERT_EXCLUDE[@]}"; do
         if [[ "$_exclude" == *" "* ]]; then
-            if [[ "$cmd" == "$_exclude" || "$cmd" == "$_exclude "* \
-               || "$exp" == "$_exclude" || "$exp" == "$_exclude "* ]]; then
+            if [[ "$cmd" == "$_exclude" || "$cmd" == "$_exclude "* ||
+                "$exp" == "$_exclude" || "$exp" == "$_exclude "* ]]; then
                 _cmd_alert_start=-1
                 _cmd_alert_label=""
                 return
@@ -122,7 +122,7 @@ _cmd_alert_preexec() {
 
     _cmd_alert_start=$SECONDS
     local nwords=${#words[@]}
-    if (( nwords <= 3 )); then
+    if ((nwords <= 3)); then
         _cmd_alert_label="${first}${words[2]:+ ${words[2]}}${words[3]:+ ${words[3]}}"
     else
         _cmd_alert_label="${first} ${words[2]}…"
@@ -154,7 +154,7 @@ _cmd_alert_preexec() {
         [[ -d "$_CMD_RUNNING_DIR" ]] || mkdir -p "$_CMD_RUNNING_DIR" 2>/dev/null
         printf '%s\t%s\t%s\t%s\n' \
             "$_cmd_alert_pane" "${EPOCHSECONDS:-0}" "$$" "$_cmd_alert_label" \
-            > "$_CMD_RUNNING_DIR/${_cmd_alert_pane#%}" 2>/dev/null
+            >"$_CMD_RUNNING_DIR/${_cmd_alert_pane#%}" 2>/dev/null
     fi
 }
 
@@ -163,12 +163,12 @@ _cmd_alert_precmd() {
     local exit_code=$?
 
     # no command in flight
-    if (( _cmd_alert_start < 0 )) || [[ -z "$_cmd_alert_label" ]]; then
+    if ((_cmd_alert_start < 0)) || [[ -z "$_cmd_alert_label" ]]; then
         return
     fi
 
     _cmd_alert_exit=$exit_code
-    local elapsed=$(( SECONDS - _cmd_alert_start ))
+    local elapsed=$((SECONDS - _cmd_alert_start))
     _cmd_alert_start=-1
 
     # command finished: drop its in-flight registry entry (origin pane). runs
@@ -193,7 +193,7 @@ _cmd_alert_precmd() {
     fi
 
     # only alert if we're in tmux and command ran long enough to be worth noticing
-    if [[ -z "${TMUX:-}" ]] || (( elapsed < _CMD_ALERT_MIN_SECONDS )); then
+    if [[ -z "${TMUX:-}" ]] || ((elapsed < _CMD_ALERT_MIN_SECONDS)); then
         _cmd_alert_label=""
         _cmd_alert_cmd=""
         _cmd_alert_pane=""
@@ -213,11 +213,11 @@ _cmd_alert_precmd() {
     fi
     if [[ -n "$_meta" ]]; then
         local _sess _wid _wname
-        IFS=$'\t' read -r _sess _wid _wname <<< "$_meta"
+        IFS=$'\t' read -r _sess _wid _wname <<<"$_meta"
         [[ -d "${_CMD_FINISHED_FILE:h}" ]] || mkdir -p "${_CMD_FINISHED_FILE:h}" 2>/dev/null
         printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
             "${EPOCHSECONDS:-0}" "$_cmd_alert_exit" "$_sess" "$_wid" "$_wname" "$_cmd_alert_label" "$_cmd_alert_cmd" \
-            >> "$_CMD_FINISHED_FILE" 2>/dev/null
+            >>"$_CMD_FINISHED_FILE" 2>/dev/null
     fi
 
     # view guard: only alert if no attached client is currently viewing the
@@ -229,9 +229,12 @@ _cmd_alert_precmd() {
     if [[ -n "$_cmd_alert_pane" ]]; then
         local _cp _watching=0
         while IFS= read -r _cp; do
-            [[ "$_cp" == "$_cmd_alert_pane" ]] && { _watching=1; break; }
+            [[ "$_cp" == "$_cmd_alert_pane" ]] && {
+                _watching=1
+                break
+            }
         done < <(tmux list-clients -F '#{pane_id}' 2>/dev/null)
-        if (( _watching )); then
+        if ((_watching)); then
             _cmd_alert_label=""
             _cmd_alert_cmd=""
             _cmd_alert_pane=""

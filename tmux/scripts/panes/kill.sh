@@ -40,7 +40,7 @@ else
         2>/dev/null) || exit 1
 fi
 
-IFS='|' read -r CURRENT_SESSION CURRENT_WINDOW CURRENT_PANE PANE_DIR WINDOW_LAYOUT WINDOW_NAME WINDOW_ID PANE_COUNT WINDOW_COUNT <<< "$pane_info"
+IFS='|' read -r CURRENT_SESSION CURRENT_WINDOW CURRENT_PANE PANE_DIR WINDOW_LAYOUT WINDOW_NAME WINDOW_ID PANE_COUNT WINDOW_COUNT <<<"$pane_info"
 PANE_TARGET="${CURRENT_SESSION}:${CURRENT_WINDOW}.${CURRENT_PANE}"
 
 IS_LAST_PANE="no"
@@ -76,18 +76,18 @@ UNDO_CONTENT=$(get_pane_undo_content)
 cleanup_undo_files "pane"
 
 # save current state for undo
-echo "$PANE_TARGET" > "$UNDO_FILE"
+echo "$PANE_TARGET" >"$UNDO_FILE"
 chmod 600 "$UNDO_FILE"
 
 # save pane metadata
 {
     echo "dir=$PANE_DIR"
     echo "layout=$WINDOW_LAYOUT"
-} > "$UNDO_STATE"
+} >"$UNDO_STATE"
 chmod 600 "$UNDO_STATE"
 
 # capture pane contents
-tmux capture-pane -t "$PANE_TARGET" -p -S -32768 > "$UNDO_CONTENT" 2>/dev/null || true
+tmux capture-pane -t "$PANE_TARGET" -p -S -32768 >"$UNDO_CONTENT" 2>/dev/null || true
 chmod 600 "$UNDO_CONTENT"
 
 # gracefully terminate running processes before killing the pane

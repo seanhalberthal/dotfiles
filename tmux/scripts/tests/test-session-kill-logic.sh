@@ -19,10 +19,9 @@ trap 'rm -rf "$KILL_TEST_DIR"; cleanup_test_server' EXIT INT TERM
 # ---------------------------------------------------------
 # create a mock UI library
 MOCK_UI_LIB="/tmp/mock_ui_lib_$$.sh"
-echo 'show_visual_confirm() { return 0; }' > "$MOCK_UI_LIB"
-echo 'show_centered_confirm() { return 0; }' >> "$MOCK_UI_LIB"
-echo 'show_centered_message() { :; }' >> "$MOCK_UI_LIB"
-
+echo 'show_visual_confirm() { return 0; }' >"$MOCK_UI_LIB"
+echo 'show_centered_confirm() { return 0; }' >>"$MOCK_UI_LIB"
+echo 'show_centered_message() { :; }' >>"$MOCK_UI_LIB"
 
 # setup
 # ---------------------------------------------------------
@@ -66,7 +65,6 @@ else
     fail "Inactive session still exists"
 fi
 
-
 # test 2: kill remaining session with --no-confirm
 # note: testing the "active session + switch" path requires an actual attached
 # client, which isn't possible in an isolated test server; instead we verify
@@ -100,7 +98,7 @@ mkdir -p "$(dirname "$ALERTS_FILE")"
     echo "${TEST_SESSION_A}:main:claude"
     echo "${TEST_SESSION_A}:main:exit:@1:1:error"
     echo "${TEST_SESSION_B}:work:claude"
-} > "$ALERTS_FILE"
+} >"$ALERTS_FILE"
 
 # kill session A; alerts for A should be cleared, B should remain
 "$TEST_SCRIPTS_DIR/sessions/kill.sh" "$TEST_SESSION_A" --no-confirm >/dev/null 2>&1 || true
@@ -151,7 +149,7 @@ TEST_SESSION_F="test_alert_f_$$"
 test_tmux new-session -d -s "$TEST_SESSION_E" -c /tmp
 test_tmux new-session -d -s "$TEST_SESSION_F" -c /tmp
 
-: > "$ALERTS_FILE"
+: >"$ALERTS_FILE"
 
 "$TEST_SCRIPTS_DIR/sessions/kill.sh" "$TEST_SESSION_E" --no-confirm >/dev/null 2>&1 || true
 

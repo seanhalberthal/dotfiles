@@ -42,8 +42,8 @@ so `gd` on a cross-file symbol reports "No definitions found" while same-file lo
 work. Any entry triggers it, including a lone `${3rd}` one. To add hover for another plugin,
 add a `{ path = '<plugin>', words = { '<Global>' } }` entry in `lazydev.lua` — not a library
 path here; third-party libraries (`${3rd}/busted`, `${3rd}/luassert`) go there for the same
-reason. `words` are matched with a bare substring find, so a trigger has to be long enough
-not to fire inside ordinary identifiers. Partial plugin-opts tables that trip `missing-fields` (e.g. `Snacks.dashboard.open`)
+reason. `words` are lua patterns matched with `line:find` and no plain flag, so a trigger has to
+be specific enough not to match inside ordinary identifiers. Partial plugin-opts tables that trip `missing-fields` (e.g. `Snacks.dashboard.open`)
 get an inline `---@diagnostic disable-next-line: missing-fields` at the call site rather
 than a blanket disable, so the check still catches real omissions elsewhere.
 

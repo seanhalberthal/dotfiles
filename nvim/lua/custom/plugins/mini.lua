@@ -82,11 +82,14 @@ return {
       -- extended ]/[ navigation; disable suffixes that conflict with other plugins
       require('mini.bracketed').setup {
         comment = { suffix = '' }, -- ]c/[c reserved for gitsigns (git changes)
-        file = { suffix = 'f' }, -- differ overrides ]f/[f when open
+        file = { suffix = 'f' }, -- differ overrides ]f/[f when open; features/dated-notes shadows it on dated notes
         treesitter = { suffix = '' }, -- ]t/[t reserved for neotest (failed tests)
         quickfix = { suffix = '' }, -- ]q/[q wrapped in custom.features.lists (empty-list notify + cursor-relative idx)
         location = { suffix = '' }, -- ]l/[l wrapped in custom.features.lists (empty-list notify + cursor-relative idx)
       }
+
+      -- ]f/[f walk DD-MM-YYYY note directories by date rather than lexically
+      require('custom.features.dated-notes').setup_bracketed()
 
       -- redirect ]f/[f from neo-tree to the first normal editing window
       vim.api.nvim_create_autocmd('FileType', {

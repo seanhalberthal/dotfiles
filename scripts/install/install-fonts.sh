@@ -62,7 +62,7 @@ install_font() {
     local dest="$NF_DIR/$name"
 
     # idempotent: skip if we already populated this font's directory
-    if [[ "$FORCE" != "--force" ]] && compgen -G "$dest/*.ttf" > /dev/null 2>&1; then
+    if [[ "$FORCE" != "--force" ]] && compgen -G "$dest/*.ttf" >/dev/null 2>&1; then
         echo "$name Nerd Font already installed."
         return 0
     fi
@@ -118,16 +118,16 @@ install_monaspace() {
     local dest="$NF_DIR/Monaspace"
 
     # idempotent: skip if we already populated the directory with OTFs
-    if [[ "$FORCE" != "--force" ]] && compgen -G "$dest/*.otf" > /dev/null 2>&1; then
+    if [[ "$FORCE" != "--force" ]] && compgen -G "$dest/*.otf" >/dev/null 2>&1; then
         echo "Monaspace Nerd Font already installed."
         return 0
     fi
 
     local api="https://api.github.com/repos/githubnext/monaspace/releases/latest"
     local url
-    url="$(curl -fsSL --retry 2 "$api" 2>/dev/null \
-        | grep -oE '"browser_download_url":[[:space:]]*"[^"]*monaspace-nerdfonts-[^"]*\.zip"' \
-        | sed -E 's/.*"(https[^"]*)"/\1/' | head -1)"
+    url="$(curl -fsSL --retry 2 "$api" 2>/dev/null |
+        grep -oE '"browser_download_url":[[:space:]]*"[^"]*monaspace-nerdfonts-[^"]*\.zip"' |
+        sed -E 's/.*"(https[^"]*)"/\1/' | head -1)"
     if [[ -z "$url" ]]; then
         warn "Could not resolve latest Monaspace release (API/network issue?). Skipping."
         return 0
@@ -187,6 +187,6 @@ install_monaspace
 # refresh the fontconfig cache once, only if we added anything
 if [[ "$installed_any" -eq 1 ]]; then
     echo "Rebuilding font cache..."
-    fc-cache -f "$FONT_DIR" > /dev/null 2>&1 || warn "fc-cache reported an issue."
+    fc-cache -f "$FONT_DIR" >/dev/null 2>&1 || warn "fc-cache reported an issue."
     success "Nerd Fonts ready. Set your terminal font to 'JetBrainsMono Nerd Font', 'MesloLGS Nerd Font', or 'Monaspace Neon NF'."
 fi

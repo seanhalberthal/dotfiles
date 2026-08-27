@@ -20,7 +20,7 @@ case "$TYPE" in
         # written before the interrupt to avoid a race with a fast exit
         if [[ -n "$A" ]]; then
             mkdir -p "$SUPPRESS_DIR" 2>/dev/null
-            : > "$SUPPRESS_DIR/${A#%}" 2>/dev/null || true
+            : >"$SUPPRESS_DIR/${A#%}" 2>/dev/null || true
         fi
         # interrupt the pane's foreground command; the shell's precmd then
         # clears the registry. remove the file too so the list updates at once
@@ -32,7 +32,7 @@ case "$TYPE" in
         if [[ -n "$A" && -f "$FINISHED_FILE" ]]; then
             tmpf=$(mktemp "${FINISHED_FILE}.XXXXXX") || exit 0
             if awk -F'\t' -v e="$A" -v w="$B" '!($1 == e && $4 == w)' \
-                "$FINISHED_FILE" > "$tmpf" 2>/dev/null; then
+                "$FINISHED_FILE" >"$tmpf" 2>/dev/null; then
                 mv "$tmpf" "$FINISHED_FILE" 2>/dev/null || rm -f "$tmpf"
             else
                 rm -f "$tmpf"

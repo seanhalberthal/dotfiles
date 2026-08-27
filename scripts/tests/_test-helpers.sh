@@ -121,14 +121,14 @@ setup_dotfiles_sandbox() {
 setup_cli_sandbox() {
     setup_dotfiles_sandbox
 
-    ln -s "$DOTFILES_ROOT/scripts"   "$TEST_DOTFILES_DIR/scripts"
-    ln -s "$DOTFILES_ROOT/themes"    "$TEST_DOTFILES_DIR/themes"
+    ln -s "$DOTFILES_ROOT/scripts" "$TEST_DOTFILES_DIR/scripts"
+    ln -s "$DOTFILES_ROOT/themes" "$TEST_DOTFILES_DIR/themes"
     ln -s "$DOTFILES_ROOT/launchers" "$TEST_DOTFILES_DIR/launchers"
     # zsh/ holds the cheatsheet source; tests typically replace it with
     # a synthesised file, so create the directory but leave it empty
     mkdir -p "$TEST_DOTFILES_DIR/zsh"
 
-    cat > "$TEST_DOTFILES_DIR/CHANGELOG.md" << 'EOF'
+    cat >"$TEST_DOTFILES_DIR/CHANGELOG.md" <<'EOF'
 # Changelog
 
 ## [Unreleased]

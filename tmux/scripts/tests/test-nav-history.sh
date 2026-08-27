@@ -47,8 +47,8 @@ LAST_FILE="$NAV_CACHE/last"
 
 # helper: get the active window in the test session (works without a client)
 get_active_window() {
-    test_tmux list-windows -t "$TEST_SESSION" -F '#{window_active} #{window_id}' \
-        | awk '/^1 /{print $2}'
+    test_tmux list-windows -t "$TEST_SESSION" -F '#{window_active} #{window_id}' |
+        awk '/^1 /{print $2}'
 }
 
 # helper: get position
@@ -58,7 +58,7 @@ get_pos() {
 
 # helper: count history lines
 count_history() {
-    [[ -f "$HISTORY_FILE" ]] && wc -l < "$HISTORY_FILE" | tr -d ' ' || echo "0"
+    [[ -f "$HISTORY_FILE" ]] && wc -l <"$HISTORY_FILE" | tr -d ' ' || echo "0"
 }
 
 # helper: reset nav state for clean test sections
@@ -243,9 +243,9 @@ reset_nav
 # we'll write directly to the history file to test trimming
 mkdir -p "$NAV_CACHE"
 for i in $(seq 1 105); do
-    printf '@%d\n' "$i" >> "$HISTORY_FILE"
+    printf '@%d\n' "$i" >>"$HISTORY_FILE"
 done
-printf '%s' "$WIN1" > "$LAST_FILE"
+printf '%s' "$WIN1" >"$LAST_FILE"
 
 # record a new entry, should trigger trim to MAX_HISTORY
 "$NAV_SCRIPT" record "$WIN1"

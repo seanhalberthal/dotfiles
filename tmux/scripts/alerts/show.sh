@@ -35,7 +35,7 @@ sess_exit=()
 # find index of session, or echo -1
 _find_idx() {
     local target="$1" i
-    for (( i=0; i<${#sessions[@]}; i++ )); do
+    for ((i = 0; i < ${#sessions[@]}; i++)); do
         [[ "${sessions[$i]}" == "$target" ]] && echo "$i" && return
     done
     echo "-1"
@@ -45,7 +45,7 @@ while IFS= read -r line; do
     [[ -z "$line" ]] && continue
 
     # split on ':'; exit alerts have 6 fields, agent alerts have 3
-    IFS=':' read -r session _window field3 _wid field5 field6 <<< "$line"
+    IFS=':' read -r session _window field3 _wid field5 field6 <<<"$line"
 
     # skip current session and malformed entries
     [[ "$session" == "$CURRENT_SESSION" ]] && continue
@@ -78,20 +78,20 @@ while IFS= read -r line; do
             esac
         fi
     fi
-done < "$ALERTS_FILE"
+done <"$ALERTS_FILE"
 
 session_count=${#sessions[@]}
 [[ $session_count -eq 0 ]] && exit 0
 
 output=""
 
-for (( i=0; i<session_count && i<3; i++ )); do
+for ((i = 0; i < session_count && i < 3; i++)); do
     session="${sessions[$i]}"
 
     # agent icons first; also shows the session name
     if [[ -n "${sess_agents[$i]}" ]]; then
         icons=""
-        IFS=',' read -ra agent_list <<< "${sess_agents[$i]}"
+        IFS=',' read -ra agent_list <<<"${sess_agents[$i]}"
         for agent in "${agent_list[@]}"; do
             display=$(get_agent_display "$agent")
             icon="${display%%|*}"
@@ -118,7 +118,7 @@ done
 
 # show overflow count if more than 3 sessions
 if [[ $session_count -gt 3 ]]; then
-    echo "${output}+ $((session_count-3)) "
+    echo "${output}+ $((session_count - 3)) "
 else
     echo "$output"
 fi

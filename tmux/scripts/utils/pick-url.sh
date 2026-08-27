@@ -38,25 +38,26 @@ if [[ -z "$urls" ]]; then
     exit 0
 fi
 
-selected=$(echo "$urls" | fzf \
-    --reverse \
-    --exact \
-    --no-sort \
-    --disabled \
-    --cycle \
-    --prompt ': ' \
-    --border=rounded \
-    --border-label=' j/k · g/G · f/b · d/u · o/spc/⏎ open · y yank · / search · q/esc quit ' \
-    --border-label-pos=bottom \
-    --bind 'j:down,k:up,g:first,G:last,q:abort,space:accept,o:accept' \
-    --bind 'f:page-down,b:page-up' \
-    --bind 'enter:accept' \
-    --bind 'd:half-page-down,u:half-page-up' \
-    --bind 'change:transform:[[ $FZF_PROMPT == ": " ]] && echo "clear-query"' \
-    --bind '/:enable-search+change-prompt(> )+unbind(j,k,g,G,f,b,d,u,q,space,y,o)' \
-    --bind 'esc:transform:[[ $FZF_PROMPT == "> " ]] && echo "disable-search+clear-query+change-prompt(: )+rebind(j,k,g,G,f,b,d,u,q,space,y,o)" || echo "abort"' \
-    --bind 'ctrl-k:up,ctrl-l:clear-query' \
-    --bind "y:execute-silent(echo -n {} | $CLIPBOARD_CMD)+abort" \
+selected=$(
+    echo "$urls" | fzf \
+        --reverse \
+        --exact \
+        --no-sort \
+        --disabled \
+        --cycle \
+        --prompt ': ' \
+        --border=rounded \
+        --border-label=' j/k · g/G · f/b · d/u · o/spc/⏎ open · y yank · / search · q/esc quit ' \
+        --border-label-pos=bottom \
+        --bind 'j:down,k:up,g:first,G:last,q:abort,space:accept,o:accept' \
+        --bind 'f:page-down,b:page-up' \
+        --bind 'enter:accept' \
+        --bind 'd:half-page-down,u:half-page-up' \
+        --bind 'change:transform:[[ $FZF_PROMPT == ": " ]] && echo "clear-query"' \
+        --bind '/:enable-search+change-prompt(> )+unbind(j,k,g,G,f,b,d,u,q,space,y,o)' \
+        --bind 'esc:transform:[[ $FZF_PROMPT == "> " ]] && echo "disable-search+clear-query+change-prompt(: )+rebind(j,k,g,G,f,b,d,u,q,space,y,o)" || echo "abort"' \
+        --bind 'ctrl-k:up,ctrl-l:clear-query' \
+        --bind "y:execute-silent(echo -n {} | $CLIPBOARD_CMD)+abort"
 ) || true
 
 if [[ -n "$selected" ]]; then

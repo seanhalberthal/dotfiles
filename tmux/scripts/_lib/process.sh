@@ -4,10 +4,11 @@
 #
 # pattern: SIGTERM, wait (2s), SIGKILL (matches instances/kill.sh)
 
-# list pids whose process name matches exactly, checking both the kernel name
-# (pgrep -x) and the argv[0] basename. launchers that exec a versioned binary
-# are invisible to pgrep -x (claude's shim execs e.g. "2.1.201" so the kernel
-# name is the version string) but keep their invoked name in argv[0]
+# list pids whose process name matches exactly, from two sources because
+# neither alone is complete. pgrep excludes itself and all of its ancestors
+# (see -a in man pgrep), so a script running inside the pane it inspects never
+# sees that pane's own process through pgrep. the ps pass has no exclusion.
+# both match the executable basename, not argv[0]
 # usage: match_process_pids <name>
 match_process_pids() {
     local name="$1"
@@ -23,7 +24,7 @@ match_process_pids() {
     } | sort -un
 }
 
-# first direct child of a pid matching name, by pgrep flag then argv[0] basename
+# first direct child of a pid matching name, by pgrep then executable basename
 # usage: match_child_pid <parent_pid> <name> [pgrep_flag]
 match_child_pid() {
     local parent="$1" name="$2" flag="${3:--x}"
@@ -73,7 +74,7 @@ graceful_kill_pids() {
 
     # wait for graceful exit (polling at 100ms intervals)
     local i=0
-    local max_wait=$(( grace_seconds * 10 ))
+    local max_wait=$((grace_seconds * 10))
     while [ "$i" -lt "$max_wait" ]; do
         local any_alive=false
         for pid in "${pids[@]}"; do
@@ -84,7 +85,7 @@ graceful_kill_pids() {
         done
         $any_alive || return 0
         sleep 0.1
-        i=$(( i + 1 ))
+        i=$((i + 1))
     done
 
     # SIGKILL survivors

@@ -16,7 +16,6 @@ TMUX_TEMPLATE="$DOTFILES_ROOT/tmux/tmux.conf.template"
 # use XDG path where theme-switch actually writes the config
 TMUX_OUTPUT="${XDG_CONFIG_HOME:-$HOME/.config}/tmux/tmux.conf"
 
-
 # ===========================================================================
 # pre-flight checks
 # ===========================================================================
@@ -310,7 +309,7 @@ if [[ -f "$TMUX_OUTPUT" ]]; then
     fi
 
     # check for colour definitions (use here-string to avoid broken pipe with grep -q)
-    if grep -qE '#[0-9a-fA-F]{6}' <<< "$config_content"; then
+    if grep -qE '#[0-9a-fA-F]{6}' <<<"$config_content"; then
         pass "config contains hex colour codes"
     else
         fail "config should contain hex colour codes"
@@ -353,7 +352,7 @@ pass "cleaned up test sessions"
 
 # restore original config if we had one
 if [[ -n "$original_config" ]]; then
-    echo "$original_config" > "$TMUX_OUTPUT"
+    echo "$original_config" >"$TMUX_OUTPUT"
     pass "restored original tmux config"
 fi
 

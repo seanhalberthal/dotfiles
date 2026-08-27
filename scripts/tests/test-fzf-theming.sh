@@ -118,7 +118,7 @@ main() {
     export XDG_CONFIG_HOME="$_THEME_TEST_XDG"
     mkdir -p "$_THEME_TEST_XDG/dotfiles" "$_THEME_TEST_XDG/tmux" "$_THEME_TEST_XDG/ghostty"
     # seed the isolated current-theme file so fzf-theme.sh has a starting point
-    echo "$original_theme" > "$_THEME_TEST_XDG/dotfiles/current-theme"
+    echo "$original_theme" >"$_THEME_TEST_XDG/dotfiles/current-theme"
 
     # test: switching to each theme loads correct colours
     for theme_file in "$DOTFILES_ROOT/themes"/*.theme; do
@@ -219,11 +219,11 @@ main() {
         fail "tmux theme picker does not call reload-fzf.sh"
     fi
 
-    # test: pick-theme.sh loads fzf theme before displaying (directly or via common.sh)
+    # test: pick.sh loads fzf theme before displaying (directly or via common.sh)
     if grep -q "fzf-theme.sh\|load_fzf_theme" "$DOTFILES_ROOT/tmux/scripts/themes/pick.sh"; then
-        pass "pick-theme.sh loads FZF theme"
+        pass "themes/pick.sh loads FZF theme"
     else
-        fail "pick-theme.sh does not load FZF theme"
+        fail "themes/pick.sh does not load FZF theme"
     fi
 
     # ══════════════════════════════════════════════════════════════

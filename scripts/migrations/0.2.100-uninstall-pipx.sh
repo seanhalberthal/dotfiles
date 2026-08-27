@@ -38,13 +38,13 @@ if command -v pipx >/dev/null 2>&1; then
             echo "# pipx-managed apps removed by 0.2.99-uninstall-pipx.sh"
             echo "# Re-install with: uv tool install <name>"
             echo "$managed"
-        } > "$snapshot"
+        } >"$snapshot"
 
         echo "    Uninstalling pipx-managed apps:"
         while IFS= read -r app; do
             [[ -z "$app" ]] && continue
             echo "      - $app"
-        done <<< "$managed"
+        done <<<"$managed"
 
         if ! pipx uninstall-all >/dev/null 2>&1; then
             echo "    pipx uninstall-all failed — re-run manually before removing pipx"
@@ -67,12 +67,12 @@ brew uninstall --formula pipx
         while IFS= read -r app; do
             [[ -z "$app" ]] && continue
             echo "    - $app"
-        done <<< "$managed"
+        done <<<"$managed"
         echo "  Snapshot saved to: $snapshot"
     else
         echo "  No pipx-managed apps were present."
     fi
     echo ""
-} >> "$notice_file"
+} >>"$notice_file"
 
 echo "    pipx removed"

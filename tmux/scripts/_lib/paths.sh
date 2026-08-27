@@ -21,12 +21,12 @@ UNDO_BASE_DIR=$(get_undo_base_dir)
 readonly UNDO_BASE_DIR
 
 # pane undo paths
-get_pane_undo_file()    { echo "${UNDO_BASE_DIR}/pane"; }
-get_pane_undo_state()   { echo "${UNDO_BASE_DIR}/pane-state.txt"; }
+get_pane_undo_file() { echo "${UNDO_BASE_DIR}/pane"; }
+get_pane_undo_state() { echo "${UNDO_BASE_DIR}/pane-state.txt"; }
 get_pane_undo_content() { echo "${UNDO_BASE_DIR}/pane-content.txt"; }
 
 # window undo paths
-get_window_undo_file()  { echo "${UNDO_BASE_DIR}/window"; }
+get_window_undo_file() { echo "${UNDO_BASE_DIR}/window"; }
 get_window_undo_state() { echo "${UNDO_BASE_DIR}/window-state.txt"; }
 
 get_window_undo_contents_dir() {
@@ -37,7 +37,7 @@ get_window_undo_contents_dir() {
 }
 
 # session undo paths
-get_session_undo_file()  { echo "${UNDO_BASE_DIR}/session"; }
+get_session_undo_file() { echo "${UNDO_BASE_DIR}/session"; }
 get_session_undo_state() { echo "${UNDO_BASE_DIR}/session-state.txt"; }
 
 get_session_undo_backup() {

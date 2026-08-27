@@ -30,7 +30,7 @@ while IFS=$'\t' read -r pane_index pane_dir pane_id; do
     PANE_DIRS+=("$pane_dir")
     PANE_IDS+=("$pane_id")
     # capture scrollback content for each pane
-    tmux capture-pane -p -S -32768 -t "$pane_id" > "$TEMP_DIR/pane_${pane_index}.txt" 2>/dev/null || true
+    tmux capture-pane -p -S -32768 -t "$pane_id" >"$TEMP_DIR/pane_${pane_index}.txt" 2>/dev/null || true
 done < <(tmux list-panes -t "${CURRENT_SESSION}:${CURRENT_WINDOW}" -F '#{pane_index}	#{pane_current_path}	#{pane_id}')
 
 # use first pane's directory for new window

@@ -66,26 +66,35 @@ _local_select() {
     local -a fpairs=() dpairs=()
     local pair repo sys base sel rest matched
     for sel in "$@"; do
-        sel="${sel#./}"; sel="${sel%/}"
+        sel="${sel#./}"
+        sel="${sel%/}"
         matched=0
         for pair in "${LOCAL_PAIRS[@]}"; do
             repo="${pair%%|*}" sys="${pair#*|}" base="${repo##*/}"
-            if [[ "$sel" == "$repo" || "$repo" == */"$sel" || "$sel" == "$base" \
-                || "$sel" == "$sys" || "$sys" == */"$sel" ]]; then
-                fpairs+=("$pair"); matched=1
+            if [[ "$sel" == "$repo" || "$repo" == */"$sel" || "$sel" == "$base" ||
+                "$sel" == "$sys" || "$sys" == */"$sel" ]]; then
+                fpairs+=("$pair")
+                matched=1
             fi
         done
         for pair in "${LOCAL_DIR_PAIRS[@]}"; do
             repo="${pair%%|*}" sys="${pair#*|}" base="${repo##*/}"
-            if [[ "$sel" == "$repo" || "$repo" == */"$sel" || "$sel" == "$base" \
-                || "$sel" == "$sys" || "$sys" == */"$sel" ]]; then
-                dpairs+=("$pair"); matched=1
+            if [[ "$sel" == "$repo" || "$repo" == */"$sel" || "$sel" == "$base" ||
+                "$sel" == "$sys" || "$sys" == */"$sel" ]]; then
+                dpairs+=("$pair")
+                matched=1
             elif [[ "$sel" == "$repo/"* ]]; then
-                rest="${sel#"$repo"/}"; fpairs+=("$repo/$rest|$sys/$rest"); matched=1
+                rest="${sel#"$repo"/}"
+                fpairs+=("$repo/$rest|$sys/$rest")
+                matched=1
             elif [[ "$sel" == "$base/"* ]]; then
-                rest="${sel#"$base"/}"; fpairs+=("$repo/$rest|$sys/$rest"); matched=1
+                rest="${sel#"$base"/}"
+                fpairs+=("$repo/$rest|$sys/$rest")
+                matched=1
             elif [[ "$sel" == "$sys/"* ]]; then
-                rest="${sel#"$sys"/}"; fpairs+=("$repo/$rest|$sys/$rest"); matched=1
+                rest="${sel#"$sys"/}"
+                fpairs+=("$repo/$rest|$sys/$rest")
+                matched=1
             fi
         done
         if [[ $matched -eq 0 ]]; then
@@ -93,8 +102,8 @@ _local_select() {
             return 1
         fi
     done
-    LOCAL_PAIRS=( ${fpairs[@]+"${fpairs[@]}"} )
-    LOCAL_DIR_PAIRS=( ${dpairs[@]+"${dpairs[@]}"} )
+    LOCAL_PAIRS=(${fpairs[@]+"${fpairs[@]}"})
+    LOCAL_DIR_PAIRS=(${dpairs[@]+"${dpairs[@]}"})
 }
 
 # expand github "owner/repo" shorthand to a full https clone url; schemes,
@@ -135,14 +144,14 @@ _local_dir_required() {
 _local_seed_gitignore() {
     local dir="$1"
     [[ -f "$dir/.gitignore" ]] && return 0
-    printf '%s\n' ".DS_Store" "secrets.zsh" ".state/" "statusline-theme.sh" "config/dotfiles/current-theme" > "$dir/.gitignore"
+    printf '%s\n' ".DS_Store" "secrets.zsh" ".state/" "statusline-theme.sh" "config/dotfiles/current-theme" >"$dir/.gitignore"
 }
 
 # write the pointer file
 _local_write_pointer() {
     local dir="$1"
     mkdir -p "$CONFIG_DIR"
-    printf '%s\n' "$dir" > "$LOCAL_REPO_FILE"
+    printf '%s\n' "$dir" >"$LOCAL_REPO_FILE"
 }
 
 # commit with an identity fallback so fresh machines without git config work

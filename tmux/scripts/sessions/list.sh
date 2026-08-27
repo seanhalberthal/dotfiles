@@ -16,7 +16,7 @@ print_dotfiles_logo
 
 # pre-read alerts file once (avoids per-session/per-window tmux calls)
 _all_alerts=""
-[[ -f "$ALERTS_FILE" ]] && _all_alerts=$(< "$ALERTS_FILE")
+[[ -f "$ALERTS_FILE" ]] && _all_alerts=$(<"$ALERTS_FILE")
 
 # get sessions sorted by activity
 while read -r session; do

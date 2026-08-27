@@ -83,13 +83,13 @@ _preview_changed_files() {
     [[ -z "$changed_files" ]] && return 0
 
     local -A categories=(
-        [Brewfile/packages]="^Brewfile"
-        [Zsh config]="^zsh/"
-        [Tmux config]="^tmux/"
-        [Neovim config]="^nvim/"
-        [Ghostty config]="^ghostty/"
-        [Theme definitions]="^themes/"
-        [Installer/scripts]="^scripts/|^install\.sh"
+        [Brewfile / packages]="^Brewfile"
+        ["Zsh config"]="^zsh/"
+        ["Tmux config"]="^tmux/"
+        ["Neovim config"]="^nvim/"
+        ["Ghostty config"]="^ghostty/"
+        ["Theme definitions"]="^themes/"
+        [Installer / scripts]="^scripts/|^install\.sh"
         [Launchers]="^launchers/"
         [Hammerspoon]="^hammerspoon/"
         [Karabiner]="^karabiner/"
@@ -118,7 +118,10 @@ _preview_changed_files() {
 
     # Show any uncategorised files
     local other
-    other=$(printf '%s\n' "$changed_files" | grep -vE "$(IFS='|'; printf '%s' "${categories[*]}")" || true)
+    other=$(printf '%s\n' "$changed_files" | grep -vE "$(
+        IFS='|'
+        printf '%s' "${categories[*]}"
+    )" || true)
     if [[ -n "$other" ]]; then
         printf "  ${CYAN}Other:${NC}\n"
         printf '%s\n' "$other" | sed 's/^/    /'
@@ -221,7 +224,7 @@ _run_pending_migrations() {
 
         printf "    ${CYAN}•${NC} %s\n" "$basename"
         if bash "$migration"; then
-            echo "$basename" >> "$applied_file"
+            echo "$basename" >>"$applied_file"
         else
             warn "Migration $basename failed (continuing)"
         fi
@@ -260,7 +263,7 @@ _show_pending_migrations() {
         if _version_gt "$migration_version" "$old_version" && ! _version_gt "$migration_version" "$new_version"; then
             pending+=("$basename")
         fi
-    done <<< "$remote_migrations"
+    done <<<"$remote_migrations"
 
     if [[ ${#pending[@]} -gt 0 ]]; then
         echo ""
@@ -294,17 +297,17 @@ _check_link() {
     if [[ -L "$dest" ]]; then
         if [[ -e "$dest" ]]; then
             printf "  ${GREEN}OK${NC}      %s  ${GREY}→ %s${NC}\n" "$label" "$(readlink "$dest")"
-            ok=$(( ok + 1 ))
+            ok=$((ok + 1))
         else
             printf "  ${RED}BROKEN${NC}  %s  ${GREY}→ %s${NC}\n" "$label" "$(readlink "$dest")"
-            broken=$(( broken + 1 ))
+            broken=$((broken + 1))
         fi
     elif [[ -e "$dest" ]]; then
         printf "  ${YELLOW}FILE${NC}    %s  ${GREY}(exists but not a symlink)${NC}\n" "$label"
-        file_exists=$(( file_exists + 1 ))
+        file_exists=$((file_exists + 1))
     else
         printf "  ${YELLOW}ABSENT${NC}  %s\n" "$label"
-        absent=$(( absent + 1 ))
+        absent=$((absent + 1))
     fi
 }
 
@@ -315,10 +318,22 @@ _check_link() {
 cmd_aliases() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            -h|--help) _help_aliases; return 0 ;;
-            --)        shift; break ;;
-            -*)        unknown_flag aliases "$1"; return $? ;;
-            *)         unknown_flag aliases "$1"; return $? ;;
+            -h | --help)
+                _help_aliases
+                return 0
+                ;;
+            --)
+                shift
+                break
+                ;;
+            -*)
+                unknown_flag aliases "$1"
+                return $?
+                ;;
+            *)
+                unknown_flag aliases "$1"
+                return $?
+                ;;
         esac
         shift
     done
@@ -332,7 +347,8 @@ cmd_aliases() {
     local BOLD='\033[1m'
 
     printf "${BOLD}SHELL REFERENCE${NC}\n"
-    printf '%0.s─' {1..80}; printf '\n'
+    printf '%0.s─' {1..80}
+    printf '\n'
 
     # Parser emits tab-separated records:
     #   SECTION<tab><name>            — start a new section (flush pending pair first)
@@ -353,7 +369,8 @@ cmd_aliases() {
     _aliases_render_zshrc
 
     printf '\n'
-    printf '%0.s─' {1..80}; printf '\n'
+    printf '%0.s─' {1..80}
+    printf '\n'
     printf "${GREEN}Tip:${NC} run ${YELLOW}dotfiles help${NC} for CLI usage, ${YELLOW}dotfiles health${NC} to verify your install.\n\n"
 }
 
@@ -474,19 +491,19 @@ _aliases_render_zshrc() {
     [[ -f "$zshrc" ]] || return 0
 
     local dev_root projects_root
-    dev_root=$(grep -E '^\s*export\s+DEV_ROOT=' "$zshrc" 2>/dev/null \
-        | head -1 | sed 's/.*=//; s/^"//; s/"$//' || true)
-    projects_root=$(grep -E '^\s*export\s+PROJECTS_ROOT=' "$zshrc" 2>/dev/null \
-        | head -1 | sed 's/.*=//; s/^"//; s/"$//' || true)
+    dev_root=$(grep -E '^\s*export\s+DEV_ROOT=' "$zshrc" 2>/dev/null |
+        head -1 | sed 's/.*=//; s/^"//; s/"$//' || true)
+    projects_root=$(grep -E '^\s*export\s+PROJECTS_ROOT=' "$zshrc" 2>/dev/null |
+        head -1 | sed 's/.*=//; s/^"//; s/"$//' || true)
     if [[ -n "$dev_root" || -n "$projects_root" ]]; then
         printf "\n${CYAN}DOTFILES DIRECTORIES${NC}  ${GREY}(set via dotfiles set)${NC}\n"
-        [[ -n "$dev_root" ]]      && printf "  ${YELLOW}%-14s${NC} ${GREY}%s${NC}\n" "DEV_ROOT" "$dev_root"
+        [[ -n "$dev_root" ]] && printf "  ${YELLOW}%-14s${NC} ${GREY}%s${NC}\n" "DEV_ROOT" "$dev_root"
         [[ -n "$projects_root" ]] && printf "  ${YELLOW}%-14s${NC} ${GREY}%s${NC}\n" "PROJECTS_ROOT" "$projects_root"
     fi
 
     local user_aliases
-    user_aliases=$(grep -E '^\s*alias\s+' "$zshrc" 2>/dev/null \
-        | sed 's/^[[:space:]]*alias[[:space:]]*//' || true)
+    user_aliases=$(grep -E '^\s*alias\s+' "$zshrc" 2>/dev/null |
+        sed 's/^[[:space:]]*alias[[:space:]]*//' || true)
     if [[ -n "$user_aliases" ]]; then
         printf "\n${CYAN}USER ALIASES${NC}  ${GREY}(~/.zshrc)${NC}\n"
         while IFS= read -r line; do
@@ -498,17 +515,29 @@ _aliases_render_zshrc() {
             value="${value#[\"\']}"
             value="${value%[\"\']}"
             printf "  ${YELLOW}%-14s${NC} ${GREY}%s${NC}\n" "$name" "$value"
-        done <<< "$user_aliases"
+        done <<<"$user_aliases"
     fi
 }
 
 cmd_cd() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            -h|--help) _help_cd; return 0 ;;
-            --)        shift; break ;;
-            -*)        unknown_flag cd "$1"; return $? ;;
-            *)         unknown_flag cd "$1"; return $? ;;
+            -h | --help)
+                _help_cd
+                return 0
+                ;;
+            --)
+                shift
+                break
+                ;;
+            -*)
+                unknown_flag cd "$1"
+                return $?
+                ;;
+            *)
+                unknown_flag cd "$1"
+                return $?
+                ;;
         esac
         shift
     done
@@ -518,10 +547,22 @@ cmd_cd() {
 cmd_diff() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            -h|--help) _help_diff; return 0 ;;
-            --)        shift; break ;;
-            -*)        unknown_flag diff "$1"; return $? ;;
-            *)         unknown_flag diff "$1"; return $? ;;
+            -h | --help)
+                _help_diff
+                return 0
+                ;;
+            --)
+                shift
+                break
+                ;;
+            -*)
+                unknown_flag diff "$1"
+                return $?
+                ;;
+            *)
+                unknown_flag diff "$1"
+                return $?
+                ;;
         esac
         shift
     done
@@ -550,10 +591,22 @@ cmd_diff() {
 cmd_edit() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            -h|--help) _help_edit; return 0 ;;
-            --)        shift; break ;;
-            -*)        unknown_flag edit "$1"; return $? ;;
-            *)         unknown_flag edit "$1"; return $? ;;
+            -h | --help)
+                _help_edit
+                return 0
+                ;;
+            --)
+                shift
+                break
+                ;;
+            -*)
+                unknown_flag edit "$1"
+                return $?
+                ;;
+            *)
+                unknown_flag edit "$1"
+                return $?
+                ;;
         esac
         shift
     done
@@ -566,11 +619,20 @@ cmd_export() {
     local -a selectors=()
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            -h|--help)  _help_export; return 0 ;;
-            -p|--push)  push=1 ;;
-            --)         shift; break ;;
-            -*)         unknown_flag export "$1"; return $? ;;
-            *)          selectors+=("$1") ;;
+            -h | --help)
+                _help_export
+                return 0
+                ;;
+            -p | --push) push=1 ;;
+            --)
+                shift
+                break
+                ;;
+            -*)
+                unknown_flag export "$1"
+                return $?
+                ;;
+            *) selectors+=("$1") ;;
         esac
         shift
     done
@@ -644,10 +706,22 @@ cmd_export() {
 cmd_health() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            -h|--help) _help_health; return 0 ;;
-            --)        shift; break ;;
-            -*)        unknown_flag health "$1"; return $? ;;
-            *)         unknown_flag health "$1"; return $? ;;
+            -h | --help)
+                _help_health
+                return 0
+                ;;
+            --)
+                shift
+                break
+                ;;
+            -*)
+                unknown_flag health "$1"
+                return $?
+                ;;
+            *)
+                unknown_flag health "$1"
+                return $?
+                ;;
         esac
         shift
     done
@@ -737,12 +811,21 @@ cmd_import() {
     local -a selectors=()
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            -h|--help)  _help_import; return 0 ;;
-            -f|--force) force=1 ;;
-            -p|--prune) prune=1 ;;
-            --)         shift; break ;;
-            -*)         unknown_flag import "$1"; return $? ;;
-            *)          selectors+=("$1") ;;
+            -h | --help)
+                _help_import
+                return 0
+                ;;
+            -f | --force) force=1 ;;
+            -p | --prune) prune=1 ;;
+            --)
+                shift
+                break
+                ;;
+            -*)
+                unknown_flag import "$1"
+                return $?
+                ;;
+            *) selectors+=("$1") ;;
         esac
         shift
     done
@@ -752,8 +835,8 @@ cmd_import() {
     dir=$(_local_dir_required) || return $?
 
     if git -C "$dir" remote get-url origin &>/dev/null; then
-        git -C "$dir" pull --ff-only -q 2>/dev/null \
-            || warn "Pull failed (offline or diverged), importing from local copy"
+        git -C "$dir" pull --ff-only -q 2>/dev/null ||
+            warn "Pull failed (offline or diverged), importing from local copy"
     fi
 
     _local_pairs
@@ -816,10 +899,22 @@ cmd_import() {
 cmd_links() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            -h|--help) _help_links; return 0 ;;
-            --)        shift; break ;;
-            -*)        unknown_flag links "$1"; return $? ;;
-            *)         unknown_flag links "$1"; return $? ;;
+            -h | --help)
+                _help_links
+                return 0
+                ;;
+            --)
+                shift
+                break
+                ;;
+            -*)
+                unknown_flag links "$1"
+                return $?
+                ;;
+            *)
+                unknown_flag links "$1"
+                return $?
+                ;;
         esac
         shift
     done
@@ -882,7 +977,7 @@ cmd_links() {
     fi
 
     # Summary
-    local total=$(( ok + broken + absent + file_exists ))
+    local total=$((ok + broken + absent + file_exists))
     echo ""
     printf "${GREEN}%d OK${NC}  ${RED}%d broken${NC}  ${YELLOW}%d absent${NC}  ${YELLOW}%d file${NC}  (%d total)\n" \
         "$ok" "$broken" "$absent" "$file_exists" "$total"
@@ -899,11 +994,11 @@ cmd_local() {
     shift || true
 
     case "$sub" in
-        init)   cmd_local_init   "$@" ;;
-        clone)  cmd_local_clone  "$@" ;;
+        init) cmd_local_init "$@" ;;
+        clone) cmd_local_clone "$@" ;;
         status) cmd_local_status "$@" ;;
-        diff)   cmd_local_diff   "$@" ;;
-        edit)   cmd_local_edit   "$@" ;;
+        diff) cmd_local_diff "$@" ;;
+        edit) cmd_local_edit "$@" ;;
         *)
             error "Unknown local subcommand: $sub"
             printf "  Run: ${CYAN}dotfiles help local${NC}\n" >&2
@@ -916,7 +1011,10 @@ cmd_local_init() {
     local url="" dir_flag=""
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            -h|--help) _help_local; return 0 ;;
+            -h | --help)
+                _help_local
+                return 0
+                ;;
             --dir)
                 if [[ -z "${2:-}" ]]; then
                     missing_arg local --dir
@@ -925,9 +1023,15 @@ cmd_local_init() {
                 dir_flag="$2"
                 shift
                 ;;
-            --) shift; break ;;
-            -*) unknown_flag local "$1"; return $? ;;
-            *)  url="$1" ;;
+            --)
+                shift
+                break
+                ;;
+            -*)
+                unknown_flag local "$1"
+                return $?
+                ;;
+            *) url="$1" ;;
         esac
         shift
     done
@@ -938,8 +1042,8 @@ cmd_local_init() {
     dir="${dir/#\~/$HOME}"
 
     local already=0
-    if git -C "$dir" rev-parse --git-dir &>/dev/null \
-        && [[ -f "$LOCAL_REPO_FILE" || -n "${DOTFILES_LOCAL_DIR:-}" ]]; then
+    if git -C "$dir" rev-parse --git-dir &>/dev/null &&
+        [[ -f "$LOCAL_REPO_FILE" || -n "${DOTFILES_LOCAL_DIR:-}" ]]; then
         already=1
     fi
 
@@ -950,8 +1054,8 @@ cmd_local_init() {
     _local_seed_gitignore "$dir"
     if [[ -n "$url" ]]; then
         url=$(_local_expand_url "$url")
-        git -C "$dir" remote add origin "$url" 2>/dev/null \
-            || git -C "$dir" remote set-url origin "$url"
+        git -C "$dir" remote add origin "$url" 2>/dev/null ||
+            git -C "$dir" remote set-url origin "$url"
     fi
     _local_write_pointer "$dir"
 
@@ -967,7 +1071,10 @@ cmd_local_clone() {
     local url="" dir_flag=""
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            -h|--help) _help_local; return 0 ;;
+            -h | --help)
+                _help_local
+                return 0
+                ;;
             --dir)
                 if [[ -z "${2:-}" ]]; then
                     missing_arg local --dir
@@ -976,9 +1083,15 @@ cmd_local_clone() {
                 dir_flag="$2"
                 shift
                 ;;
-            --) shift; break ;;
-            -*) unknown_flag local "$1"; return $? ;;
-            *)  url="$1" ;;
+            --)
+                shift
+                break
+                ;;
+            -*)
+                unknown_flag local "$1"
+                return $?
+                ;;
+            *) url="$1" ;;
         esac
         shift
     done
@@ -1018,9 +1131,18 @@ cmd_local_clone() {
 cmd_local_status() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            -h|--help) _help_local; return 0 ;;
-            --)        shift; break ;;
-            *)         unknown_flag local "$1"; return $? ;;
+            -h | --help)
+                _help_local
+                return 0
+                ;;
+            --)
+                shift
+                break
+                ;;
+            *)
+                unknown_flag local "$1"
+                return $?
+                ;;
         esac
         shift
     done
@@ -1056,7 +1178,7 @@ cmd_local_status() {
             printf "  ${GREEN}✓${NC} Up-to-date with origin\n"
         else
             [[ $behind -gt 0 ]] && printf "  ${YELLOW}↓${NC} %d commit(s) behind origin\n" "$behind"
-            [[ $ahead -gt 0 ]]  && printf "  ${YELLOW}↑${NC} %d commit(s) ahead of origin\n" "$ahead"
+            [[ $ahead -gt 0 ]] && printf "  ${YELLOW}↑${NC} %d commit(s) ahead of origin\n" "$ahead"
         fi
     fi
 
@@ -1107,9 +1229,18 @@ cmd_local_status() {
 cmd_local_diff() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            -h|--help) _help_local; return 0 ;;
-            --)        shift; break ;;
-            *)         unknown_flag local "$1"; return $? ;;
+            -h | --help)
+                _help_local
+                return 0
+                ;;
+            --)
+                shift
+                break
+                ;;
+            *)
+                unknown_flag local "$1"
+                return $?
+                ;;
         esac
         shift
     done
@@ -1196,10 +1327,22 @@ cmd_local_diff() {
 cmd_local_edit() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            -h|--help) _help_local; return 0 ;;
-            --)        shift; break ;;
-            -*)        unknown_flag local "$1"; return $? ;;
-            *)         unknown_flag local "$1"; return $? ;;
+            -h | --help)
+                _help_local
+                return 0
+                ;;
+            --)
+                shift
+                break
+                ;;
+            -*)
+                unknown_flag local "$1"
+                return $?
+                ;;
+            *)
+                unknown_flag local "$1"
+                return $?
+                ;;
         esac
         shift
     done
@@ -1213,10 +1356,22 @@ cmd_local_edit() {
 cmd_notes() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            -h|--help) _help_notes; return 0 ;;
-            --)        shift; break ;;
-            -*)        unknown_flag notes "$1"; return $? ;;
-            *)         unknown_flag notes "$1"; return $? ;;
+            -h | --help)
+                _help_notes
+                return 0
+                ;;
+            --)
+                shift
+                break
+                ;;
+            -*)
+                unknown_flag notes "$1"
+                return $?
+                ;;
+            *)
+                unknown_flag notes "$1"
+                return $?
+                ;;
         esac
         shift
     done
@@ -1254,10 +1409,19 @@ cmd_notes() {
 cmd_set() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            -h|--help) _help_set; return 0 ;;
-            --)        shift; break ;;
-            -*)        unknown_flag set "$1"; return $? ;;
-            *)         break ;;
+            -h | --help)
+                _help_set
+                return 0
+                ;;
+            --)
+                shift
+                break
+                ;;
+            -*)
+                unknown_flag set "$1"
+                return $?
+                ;;
+            *) break ;;
         esac
     done
 
@@ -1272,7 +1436,7 @@ cmd_set() {
 
     local var_name
     case "$target" in
-        dev)      var_name="DEV_ROOT" ;;
+        dev) var_name="DEV_ROOT" ;;
         projects) var_name="PROJECTS_ROOT" ;;
         *)
             error "Unknown target: $target (use 'dev' or 'projects')"
@@ -1295,8 +1459,11 @@ cmd_set() {
         dir=$(cd "$(dirname "$dir")" && pwd)/$(basename "$dir")
     fi
 
-    # Store with $HOME for portability
-    local stored_value="\$HOME${dir#"$HOME"}"
+    # store $HOME-relative for portability; paths outside $HOME stay literal
+    local stored_value="$dir"
+    if [[ "$dir" == "$HOME" || "$dir" == "$HOME"/* ]]; then
+        stored_value="\$HOME${dir#"$HOME"}"
+    fi
 
     update_zshrc_export "$var_name" "$stored_value"
 
@@ -1309,10 +1476,22 @@ cmd_set() {
 cmd_status() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            -h|--help) _help_status; return 0 ;;
-            --)        shift; break ;;
-            -*)        unknown_flag status "$1"; return $? ;;
-            *)         unknown_flag status "$1"; return $? ;;
+            -h | --help)
+                _help_status
+                return 0
+                ;;
+            --)
+                shift
+                break
+                ;;
+            -*)
+                unknown_flag status "$1"
+                return $?
+                ;;
+            *)
+                unknown_flag status "$1"
+                return $?
+                ;;
         esac
         shift
     done
@@ -1332,7 +1511,7 @@ cmd_status() {
     released=$(_release_datetime "$version") || true
     updated=$(_last_update_datetime) || true
     [[ -n "$released" ]] && printf "${CYAN}Released:${NC}  %s\n" "$released"
-    [[ -n "$updated" ]]  && printf "${CYAN}Updated:${NC}   %s\n" "$updated"
+    [[ -n "$updated" ]] && printf "${CYAN}Updated:${NC}   %s\n" "$updated"
 
     printf "${CYAN}Preset:${NC}    %s\n" "$preset"
     local theme_file="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/current-theme"
@@ -1382,11 +1561,23 @@ cmd_sync() {
     local force=0
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            -h|--help)    _help_sync; return 0 ;;
-            -f|--force)   force=1 ;;
-            --)           shift; break ;;
-            -*)           unknown_flag sync "$1"; return $? ;;
-            *)            unknown_flag sync "$1"; return $? ;;
+            -h | --help)
+                _help_sync
+                return 0
+                ;;
+            -f | --force) force=1 ;;
+            --)
+                shift
+                break
+                ;;
+            -*)
+                unknown_flag sync "$1"
+                return $?
+                ;;
+            *)
+                unknown_flag sync "$1"
+                return $?
+                ;;
         esac
         shift
     done
@@ -1501,12 +1692,24 @@ cmd_update() {
     local force=0 dry_run=0
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            -h|--help)    _help_update; return 0 ;;
-            -f|--force)   force=1 ;;
-            -p|--preview) dry_run=1 ;;
-            --)           shift; break ;;
-            -*)           unknown_flag update "$1"; return $? ;;
-            *)            unknown_flag update "$1"; return $? ;;
+            -h | --help)
+                _help_update
+                return 0
+                ;;
+            -f | --force) force=1 ;;
+            -p | --preview) dry_run=1 ;;
+            --)
+                shift
+                break
+                ;;
+            -*)
+                unknown_flag update "$1"
+                return $?
+                ;;
+            *)
+                unknown_flag update "$1"
+                return $?
+                ;;
         esac
         shift
     done
@@ -1634,10 +1837,22 @@ cmd_update() {
 cmd_version() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            -h|--help) _help_version; return 0 ;;
-            --)        shift; break ;;
-            -*)        unknown_flag version "$1"; return $? ;;
-            *)         unknown_flag version "$1"; return $? ;;
+            -h | --help)
+                _help_version
+                return 0
+                ;;
+            --)
+                shift
+                break
+                ;;
+            -*)
+                unknown_flag version "$1"
+                return $?
+                ;;
+            *)
+                unknown_flag version "$1"
+                return $?
+                ;;
         esac
         shift
     done
@@ -1658,7 +1873,7 @@ cmd_version() {
     released=$(_release_datetime "$version") || true
     updated=$(_last_update_datetime) || true
     [[ -n "$released" ]] && printf "${CYAN}Released:${NC} %s\n" "$released"
-    [[ -n "$updated" ]]  && printf "${CYAN}Updated:${NC}  %s\n" "$updated"
+    [[ -n "$updated" ]] && printf "${CYAN}Updated:${NC}  %s\n" "$updated"
 
     printf "${CYAN}Preset:${NC}   %s\n" "$(get_preset)"
 
@@ -1675,7 +1890,7 @@ cmd_version() {
 # ─── Per-command help (_help_*) ───────────────────────────────────────
 
 _help_aliases() {
-    cat << 'EOF'
+    cat <<'EOF'
 dotfiles aliases — show all shell aliases, functions, and shortcuts
 
 USAGE
@@ -1692,7 +1907,7 @@ EOF
 }
 
 _help_cd() {
-    cat << 'EOF'
+    cat <<'EOF'
 dotfiles cd — print the dotfiles installation path
 
 USAGE
@@ -1707,7 +1922,7 @@ EOF
 }
 
 _help_diff() {
-    cat << 'EOF'
+    cat <<'EOF'
 dotfiles diff — show changes in copy-on-install files vs repo
 
 USAGE
@@ -1723,7 +1938,7 @@ EOF
 }
 
 _help_edit() {
-    cat << 'EOF'
+    cat <<'EOF'
 dotfiles edit — open the dotfiles directory in $EDITOR
 
 USAGE
@@ -1740,7 +1955,7 @@ EOF
 }
 
 _help_export() {
-    cat << 'EOF'
+    cat <<'EOF'
 dotfiles export: export the local layer to the private repo
 
 Copies your user-owned local files (local.conf overrides, ~/.zshrc, personal
@@ -1769,7 +1984,7 @@ EOF
 }
 
 _help_health() {
-    cat << 'EOF'
+    cat <<'EOF'
 dotfiles health — run a full installation health check
 
 USAGE
@@ -1784,7 +1999,7 @@ EOF
 }
 
 _help_import() {
-    cat << 'EOF'
+    cat <<'EOF'
 dotfiles import: import the local layer from the private repo
 
 Pulls the configured private repo (when a remote is set) and applies its
@@ -1815,7 +2030,7 @@ EOF
 }
 
 _help_links() {
-    cat << 'EOF'
+    cat <<'EOF'
 dotfiles links — show all managed symlinks and their status
 
 USAGE
@@ -1831,7 +2046,7 @@ EOF
 }
 
 _help_local() {
-    cat << 'EOF'
+    cat <<'EOF'
 dotfiles local: manage the private local-layer repo
 
 The local layer (local.* overrides, ~/.zshrc, personal launchers,
@@ -1867,7 +2082,7 @@ EOF
 }
 
 _help_notes() {
-    cat << 'EOF'
+    cat <<'EOF'
 dotfiles notes — browse the full changelog in a pager
 
 USAGE
@@ -1883,7 +2098,7 @@ EOF
 }
 
 _help_set() {
-    cat << 'EOF'
+    cat <<'EOF'
 dotfiles set — configure project directories in ~/.zshrc
 
 USAGE
@@ -1899,7 +2114,7 @@ EOF
 }
 
 _help_status() {
-    cat << 'EOF'
+    cat <<'EOF'
 dotfiles status — show version, sync status, and local changes
 
 USAGE
@@ -1915,7 +2130,7 @@ EOF
 }
 
 _help_sync() {
-    cat << 'EOF'
+    cat <<'EOF'
 dotfiles sync — sync copy-on-install files from repo to system
 
 USAGE
@@ -1932,7 +2147,7 @@ EOF
 }
 
 _help_theme() {
-    cat << 'EOF'
+    cat <<'EOF'
 dotfiles theme — manage colour themes
 
 USAGE
@@ -1959,7 +2174,7 @@ EOF
 }
 
 _help_update() {
-    cat << 'EOF'
+    cat <<'EOF'
 dotfiles update — pull latest changes and apply incrementally
 
 USAGE
@@ -1979,7 +2194,7 @@ EOF
 }
 
 _help_version() {
-    cat << 'EOF'
+    cat <<'EOF'
 dotfiles version — show the current version, release/update dates, preset, and theme
 
 USAGE
@@ -1997,7 +2212,7 @@ EOF
 
 _help_main() {
     print_logo
-    cat << 'EOF'
+    cat <<'EOF'
 dotfiles — manage your dots
 
 USAGE
@@ -2036,8 +2251,8 @@ main() {
 
     # Top-level shorthands
     case "$cmd" in
-        --help|-h)    cmd=help ;;
-        --version|-V) cmd=version ;;
+        --help | -h) cmd=help ;;
+        --version | -V) cmd=version ;;
     esac
 
     # Treat `dotfiles <cmd> help` as an alias for `dotfiles <cmd> --help`,
@@ -2049,23 +2264,23 @@ main() {
     fi
 
     case "$cmd" in
-        update|-u)              cmd_update    "$@" ;;
-        status|-s)              cmd_status    "$@" ;;
-        health)                 cmd_health    "$@" ;;
-        set)                    cmd_set       "$@" ;;
-        theme|-t)               cmd_theme     "$@" ;;
-        links|-l)               cmd_links     "$@" ;;
-        diff|-d)                cmd_diff      "$@" ;;
-        sync)                   cmd_sync      "$@" ;;
-        export)                 cmd_export    "$@" ;;
-        import)                 cmd_import    "$@" ;;
-        local)                  cmd_local     "$@" ;;
-        aliases|alias|cheat|-a) cmd_aliases   "$@" ;;
-        notes|-n)               cmd_notes     "$@" ;;
-        version|-v)             cmd_version   "$@" ;;
-        edit|-e)                cmd_edit      "$@" ;;
-        cd)                     cmd_cd        "$@" ;;
-        help)                   cmd_help      "$@" ;;
+        update | -u) cmd_update "$@" ;;
+        status | -s) cmd_status "$@" ;;
+        health) cmd_health "$@" ;;
+        set) cmd_set "$@" ;;
+        theme | -t) cmd_theme "$@" ;;
+        links | -l) cmd_links "$@" ;;
+        diff | -d) cmd_diff "$@" ;;
+        sync) cmd_sync "$@" ;;
+        export) cmd_export "$@" ;;
+        import) cmd_import "$@" ;;
+        local) cmd_local "$@" ;;
+        aliases | alias | cheat | -a) cmd_aliases "$@" ;;
+        notes | -n) cmd_notes "$@" ;;
+        version | -v) cmd_version "$@" ;;
+        edit | -e) cmd_edit "$@" ;;
+        cd) cmd_cd "$@" ;;
+        help) cmd_help "$@" ;;
         *)
             error "Unknown command: $cmd"
             echo ""

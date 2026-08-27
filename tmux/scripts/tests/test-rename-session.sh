@@ -44,7 +44,7 @@ setup_test_server "rename-no-alerts"
 tmux new-session -d -s test-rename-1 -n window1
 
 # create alerts file with entry for this session
-echo "test-rename-1:window1:claude" > "$ALERTS_FILE"
+echo "test-rename-1:window1:claude" >"$ALERTS_FILE"
 
 # clear session alerts (should not fail even with no @*_alert options)
 if clear_session_alerts "test-rename-1"; then
@@ -69,7 +69,7 @@ tmux new-session -d -s test-rename-2 -n window1
 tmux set-option -wt test-rename-2:window1 "@claude_alert" 1
 
 # create alerts file entry
-echo "test-rename-2:window1:claude" > "$ALERTS_FILE"
+echo "test-rename-2:window1:claude" >"$ALERTS_FILE"
 
 # clear session alerts
 if clear_session_alerts "test-rename-2"; then
@@ -219,7 +219,7 @@ tmux new-session -d -s alert-session -n window1
 tmux set-option -wt alert-session:window1 "@claude_alert" 1
 
 # create alerts file entry
-echo "alert-session:window1:claude" > "$ALERTS_FILE"
+echo "alert-session:window1:claude" >"$ALERTS_FILE"
 
 # simulate the rename script: update alerts file BEFORE renaming
 current_session="alert-session"
@@ -324,7 +324,7 @@ section "Regression: session rename preserves alerts through cleanup"
 setup_test_server "rename-regression-sess"
 
 tmux new-session -d -s reg-sess -n work
-echo "reg-sess:work:claude" > "$ALERTS_FILE"
+echo "reg-sess:work:claude" >"$ALERTS_FILE"
 
 # simulate the correct order: update file, then rename, then cleanup
 # (cleanup.sh is what the session-renamed hook runs asynchronously)
@@ -348,7 +348,7 @@ section "Regression: window rename preserves alerts through cleanup"
 setup_test_server "rename-regression-win"
 
 tmux new-session -d -s reg-wsess -n oldwin
-echo "reg-wsess:oldwin:opencode" > "$ALERTS_FILE"
+echo "reg-wsess:oldwin:opencode" >"$ALERTS_FILE"
 
 # correct order: update file, then rename, then cleanup
 update_window_name_in_alerts "reg-wsess" "oldwin" "newwin"
@@ -370,7 +370,7 @@ section "Regression: wrong order loses alerts (documents the bug)"
 setup_test_server "rename-regression-wrong"
 
 tmux new-session -d -s wrong-sess -n work
-echo "wrong-sess:work:claude" > "$ALERTS_FILE"
+echo "wrong-sess:work:claude" >"$ALERTS_FILE"
 
 # WRONG order: rename first, THEN cleanup runs before update
 # this simulates what happens if update_session_name_in_alerts is called
@@ -396,7 +396,7 @@ tmux new-session -d -s exit-sess -n build
 # exit alerts are keyed on window_id (field 4); cleanup validates by id, so the
 # seed carries the real id of the build window. it survives the session move
 EXIT_WID=$(tmux display-message -t "exit-sess:build" -p '#{window_id}' 2>/dev/null)
-echo "exit-sess:build:exit:${EXIT_WID}:1:make test" > "$ALERTS_FILE"
+echo "exit-sess:build:exit:${EXIT_WID}:1:make test" >"$ALERTS_FILE"
 
 update_session_name_in_alerts "exit-sess" "exit-new"
 tmux rename-session -t "exit-sess" "exit-new" 2>/dev/null
@@ -422,7 +422,7 @@ AUTO_WID=$(tmux display-message -t "auto-sess:nowname" -p '#{window_id}' 2>/dev/
 {
     echo "auto-sess:make:exit:${AUTO_WID}:0:make test"
     echo "auto-sess:gone:exit:@99999:1:dead window"
-} > "$ALERTS_FILE"
+} >"$ALERTS_FILE"
 
 cleanup_stale_alerts
 
@@ -444,7 +444,7 @@ section "Regression: multiple alerts preserved through window rename"
 setup_test_server "rename-regression-multi"
 
 tmux new-session -d -s multi-sess -n codew
-cat > "$ALERTS_FILE" <<'ALERTS'
+cat >"$ALERTS_FILE" <<'ALERTS'
 multi-sess:codew:claude
 multi-sess:codew:opencode
 multi-sess:other:copilot

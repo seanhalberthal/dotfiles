@@ -41,7 +41,7 @@ GHDASH_CONFIG="$GHDASH_DIR/config.yml"
 GHDASH_LOCAL="$GHDASH_DIR/local.yml"
 
 # test 1: merge with both base and local present
-cat > "$GHDASH_BASE" <<'EOF'
+cat >"$GHDASH_BASE" <<'EOF'
 prSections:
   - title: My PRs
     filters: author:@me
@@ -50,7 +50,7 @@ theme:
     text: "#d4d4d4"
 EOF
 
-cat > "$GHDASH_LOCAL" <<'EOF'
+cat >"$GHDASH_LOCAL" <<'EOF'
 prSections:
   - title: Team PRs
     filters: org:myorg
@@ -75,7 +75,7 @@ fi
 section "ghdash merge — missing local.yml"
 
 # test 2: no local.yml, base should be promoted to config
-cat > "$GHDASH_BASE" <<'EOF'
+cat >"$GHDASH_BASE" <<'EOF'
 prSections:
   - title: My PRs
 EOF
@@ -92,7 +92,7 @@ fi
 section "ghdash merge — empty local.yml"
 
 # test 3: empty local.yml, base should be preserved
-cat > "$GHDASH_BASE" <<'EOF'
+cat >"$GHDASH_BASE" <<'EOF'
 prSections:
   - title: My PRs
 EOF

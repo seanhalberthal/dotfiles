@@ -27,8 +27,8 @@ while [[ $# -gt 0 ]]; do
             REMOVE_BREW=1
             shift
             ;;
-        -h|--help)
-            cat << 'EOF'
+        -h | --help)
+            cat <<'EOF'
 uninstall.sh - Remove dotfiles installation
 
 USAGE:
@@ -87,9 +87,18 @@ SYMLINKS=(
     "$HOME/.config/yazi/keymap.toml"
     "$HOME/.config/zed/keymap.json"
     "$HOME/.config/zed/tasks.json"
+    "$HOME/.config/lazydocker/format-logs.awk"
+    "${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/statusline-theme.sh"
     # full
     "$HOME/.hammerspoon/init.lua"
 )
+
+# macOS-only links: lazydocker lives under Application Support there, and the
+# ImageMagick font map is not installed on linux
+if [[ "$(uname)" == "Darwin" ]]; then
+    SYMLINKS+=("$HOME/Library/Application Support/lazydocker/format-logs.awk")
+    SYMLINKS+=("${XDG_CONFIG_HOME:-$HOME/.config}/ImageMagick/type.xml")
+fi
 
 # legacy macOS ghostty symlink (no longer created, Ghostty reads XDG natively)
 if [[ "$(uname)" == "Darwin" ]] && [[ -L "$HOME/Library/Application Support/com.mitchellh.ghostty/config" ]]; then

@@ -27,7 +27,7 @@ trap 'HOME="$ORIGINAL_HOME"; rm -rf "$TEST_DIR"' EXIT INT TERM
 
 # source the libraries under test
 # shellcheck source=scripts/_lib/common.sh
-source "$DOTFILES_DIR/../../dotfiles/scripts/_lib/common.sh" 2>/dev/null || \
+source "$DOTFILES_DIR/../../dotfiles/scripts/_lib/common.sh" 2>/dev/null ||
     source "$(cd "$SCRIPT_DIR/.." && pwd)/_lib/common.sh"
 # shellcheck source=scripts/_lib/rollback.sh
 source "$(cd "$SCRIPT_DIR/.." && pwd)/_lib/rollback.sh"
@@ -86,7 +86,7 @@ record_step "prerequisites"
 record_step "packages"
 record_step "symlinks"
 
-step_count=$(wc -l < "$ROLLBACK_STATE_FILE" | tr -d ' ')
+step_count=$(wc -l <"$ROLLBACK_STATE_FILE" | tr -d ' ')
 assert_equals "Records three steps" "3" "$step_count"
 
 last_step=$(get_last_step)
@@ -101,7 +101,7 @@ section "record_symlink"
 record_symlink "$TEST_HOME/.zshrc" "$DOTFILES_DIR/zsh/zshrc"
 record_symlink "$TEST_HOME/.tmux.conf" "$DOTFILES_DIR/tmux/tmux.conf"
 
-symlink_count=$(wc -l < "$SYMLINKS_CREATED_FILE" | tr -d ' ')
+symlink_count=$(wc -l <"$SYMLINKS_CREATED_FILE" | tr -d ' ')
 assert_equals "Records two symlinks" "2" "$symlink_count"
 
 # verify pipe-delimited format
@@ -131,8 +131,8 @@ section "perform_rollback - Symlink Removal"
 
 # create actual symlinks that rollback should remove
 mkdir -p "$DOTFILES_DIR/zsh" "$DOTFILES_DIR/tmux"
-echo "zshrc content" > "$DOTFILES_DIR/zsh/zshrc"
-echo "tmux content" > "$DOTFILES_DIR/tmux/tmux.conf"
+echo "zshrc content" >"$DOTFILES_DIR/zsh/zshrc"
+echo "tmux content" >"$DOTFILES_DIR/tmux/tmux.conf"
 
 ln -sf "$DOTFILES_DIR/zsh/zshrc" "$TEST_HOME/.zshrc"
 ln -sf "$DOTFILES_DIR/tmux/tmux.conf" "$TEST_HOME/.tmux.conf"
@@ -150,7 +150,7 @@ record_symlink "$TEST_HOME/.tmux.conf" "$DOTFILES_DIR/tmux/tmux.conf"
 
 # create a backup to restore from
 mkdir -p "$TEST_BACKUP/.config"
-echo "original zshrc" > "$TEST_BACKUP/.zshrc"
+echo "original zshrc" >"$TEST_BACKUP/.zshrc"
 record_backup_location "$TEST_BACKUP"
 
 # run rollback
@@ -220,27 +220,51 @@ pass "record_backup_location is no-op without state directory"
 # path traversal protection tests
 # ═══════════════════════════════════════════════════════════════
 
-section "Path Traversal Protection"
+section "restore_from_backup"
 
-# create a backup with a traversal path and verify it's skipped
-mkdir -p "$TEST_BACKUP"
-init_rollback_state
-record_backup_location "$TEST_BACKUP"
+restore_src="$TEST_DIR/restore-backup"
+rm -rf "$restore_src"
+mkdir -p "$restore_src/.config/nested"
+echo "top level" >"$restore_src/.testrc"
+echo "nested content" >"$restore_src/.config/nested/conf.yml"
 
-# create a file with a traversal path in the backup
-# the restore_from_backup function should skip files matching ../ patterns
-# this is a structural check; the function uses pattern matching
-rollback_content=$(cat "$(cd "$SCRIPT_DIR/.." && pwd)/_lib/rollback.sh")
-if [[ "$rollback_content" == *'../*'* ]]; then
-    pass "Rollback library checks for path traversal patterns"
+restore_from_backup "$restore_src" >/dev/null 2>&1
+
+if [[ -f "$HOME/.testrc" ]] && [[ "$(cat "$HOME/.testrc")" == "top level" ]]; then
+    pass "restore_from_backup restores a top-level file"
 else
-    fail "Rollback library should check for ../ patterns"
+    fail "restore_from_backup did not restore a top-level file"
 fi
 
-if [[ "$rollback_content" == *'/../'* ]]; then
-    pass "Rollback library checks for embedded traversal patterns"
+if [[ -f "$HOME/.config/nested/conf.yml" ]] &&
+    [[ "$(cat "$HOME/.config/nested/conf.yml")" == "nested content" ]]; then
+    pass "restore_from_backup recreates nested directories"
 else
-    fail "Rollback library should check for /../ patterns"
+    fail "restore_from_backup did not restore a nested file"
+fi
+
+# a symlink at the destination is removed so the real file lands in its place.
+# the link points at a regular file, not /dev/null: cp -p through a device
+# node fails on macOS and would abort the run instead of failing the assertion
+echo "link target" >"$TEST_DIR/link-target"
+ln -sfn "$TEST_DIR/link-target" "$HOME/.linktarget"
+echo "restored over link" >"$restore_src/.linktarget"
+restore_from_backup "$restore_src" >/dev/null 2>&1
+if [[ -f "$HOME/.linktarget" && ! -L "$HOME/.linktarget" ]]; then
+    pass "restore_from_backup replaces a symlink with the backed-up file"
+else
+    fail "restore_from_backup left a symlink at the destination"
+fi
+
+# the traversal guard is defensive rather than reachable: relative_path comes
+# from find output with the backup_dir prefix stripped, which never yields a
+# ../ or /./ component. assert it is still present so a refactor cannot drop
+# it silently, but do not claim this exercises it
+rollback_content=$(cat "$(cd "$SCRIPT_DIR/.." && pwd)/_lib/rollback.sh")
+if [[ "$rollback_content" == *'../*'* && "$rollback_content" == *'/../'* ]]; then
+    pass "traversal guard still present in restore_from_backup (source check)"
+else
+    fail "traversal guard removed from restore_from_backup"
 fi
 
 cleanup_rollback_state
