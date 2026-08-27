@@ -611,14 +611,17 @@ section "manifest drift guard"
 
 # every install_local/copy_config destination in create-symlinks.sh must be
 # represented in _local_pairs (full preset) or explicitly excluded here.
-# a new local override added to the installer without a manifest entry
-# fails this test: add it to _local_pairs in scripts/_lib/local-layer.sh
-# or record the exclusion below with a reason
+# destinations are compared resolved and whole, not by substring, so a repo
+# path that merely looks similar does not satisfy the check. the reverse
+# direction is not checked: a manifest entry with no installer counterpart
+# (a purely personal file) is fine. add new ones to _local_pairs in
+# scripts/_lib/local-layer.sh, or record an exclusion below with a reason
 drift_exclusions=(
     # none currently
 )
 
-manifest=$(bash -c '
+# the manifest's own destinations, already resolved by running _local_pairs
+manifest_dests=$(bash -c '
     export DOTFILES_DIR="'"$DOTFILES_DIR"'"
     source "$DOTFILES_DIR/scripts/_lib/common.sh"
     source "$DOTFILES_DIR/scripts/_lib/cli.sh"
@@ -626,27 +629,39 @@ manifest=$(bash -c '
     PRESET=full
     _local_pairs
     printf "%s\n" "${LOCAL_PAIRS[@]}" "${LOCAL_DIR_PAIRS[@]}"
-')
+' | sed 's/^[^|]*|//')
 
-installer_sources=$(grep -E '^[[:space:]]*(install_local|copy_config) ' \
+# resolve an installer destination expression with the variables
+# create-symlinks.sh has in scope at that point
+if [[ "$(uname)" == "Darwin" ]]; then
+    drift_lazydocker="$HOME/Library/Application Support/lazydocker"
+else
+    drift_lazydocker="${XDG_CONFIG_HOME:-$HOME/.config}/lazydocker"
+fi
+resolve_local_dest() {
+    lazygit_dir="${XDG_CONFIG_HOME:-$HOME/.config}/lazygit" \
+        lazydocker_dir="$drift_lazydocker" \
+        bash -c "printf '%s' \"$1\""
+}
+
+installer_dests=$(grep -E '^[[:space:]]*(install_local|copy_config) ' \
     "$DOTFILES_DIR/scripts/install/create-symlinks.sh" |
-    sed -E 's/^[[:space:]]*(install_local|copy_config) "\$DOTFILES_DIR\/([^"]+)".*/\2/' |
-    sed 's/\.template$//')
+    sed -E 's/^[[:space:]]*(install_local|copy_config) "[^"]+" "([^"]+)".*/\2/')
 
 drift_ok=1
-while IFS= read -r src_rel; do
-    [[ -z "$src_rel" ]] && continue
+while IFS= read -r dest_expr; do
+    [[ -z "$dest_expr" ]] && continue
     excluded=0
     for ex in "${drift_exclusions[@]:-}"; do
-        [[ "$src_rel" == "$ex" ]] && excluded=1
+        [[ "$dest_expr" == "$ex" ]] && excluded=1
     done
     [[ $excluded -eq 1 ]] && continue
-    # installer path tool/file must appear in some manifest repo path
-    if ! printf '%s\n' "$manifest" | grep -qF "$src_rel"; then
-        fail "manifest drift: '$src_rel' installed by create-symlinks.sh but missing from _local_pairs"
+    resolved=$(resolve_local_dest "$dest_expr")
+    if ! printf '%s\n' "$manifest_dests" | grep -qxF "$resolved"; then
+        fail "manifest drift: '$dest_expr' installed by create-symlinks.sh but missing from _local_pairs"
         drift_ok=0
     fi
-done <<<"$installer_sources"
+done <<<"$installer_dests"
 
 if [[ $drift_ok -eq 1 ]]; then
     pass "all installer local files are covered by _local_pairs"
