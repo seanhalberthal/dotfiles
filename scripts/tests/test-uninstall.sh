@@ -66,10 +66,14 @@ section "Symlink removal logic (sandboxed)"
 setup_sandbox
 trap cleanup_sandbox EXIT
 
-# test 7: create and remove mock symlinks
+# test 7/8: run uninstall.sh's removal loop over a mixed set. this mirrors the
+# `[[ -L "$link" ]]` guard at uninstall.sh:159 rather than executing the script,
+# which prompts for confirmation; the real file is in the list so the guard is
+# what keeps it, not its absence from the loop
 mkdir -p "$TEST_HOME/.config/zsh"
 ln -sf "$DOTFILES_DIR/zsh/dotfiles.zsh" "$TEST_HOME/.config/zsh/dotfiles.zsh"
 ln -sf "$DOTFILES_DIR/zsh/zprofile" "$TEST_HOME/.zprofile"
+echo "real config" >"$TEST_HOME/.test-real-file"
 
 if [[ -L "$TEST_HOME/.config/zsh/dotfiles.zsh" && -L "$TEST_HOME/.zprofile" ]]; then
     pass "test symlinks created successfully"
@@ -77,24 +81,21 @@ else
     fail "could not create test symlinks"
 fi
 
-# simulate uninstall symlink removal
-for link in "$TEST_HOME/.config/zsh/dotfiles.zsh" "$TEST_HOME/.zprofile"; do
+for link in "$TEST_HOME/.config/zsh/dotfiles.zsh" "$TEST_HOME/.zprofile" \
+    "$TEST_HOME/.test-real-file"; do
     if [[ -L "$link" ]]; then
-        rm "$link"
+        rm -f "$link"
     fi
 done
 
-if [[ ! -L "$TEST_HOME/.config/zsh/dotfiles.zsh" && ! -L "$TEST_HOME/.zprofile" ]]; then
+if [[ ! -e "$TEST_HOME/.config/zsh/dotfiles.zsh" && ! -e "$TEST_HOME/.zprofile" ]]; then
     pass "symlink removal works correctly"
 else
     fail "symlinks were not removed"
 fi
 
-# test 8: removal skips non-symlink files
-echo "real config" >"$TEST_HOME/.test-real-file"
-# uninstall should skip this since it's not a symlink
 if [[ -f "$TEST_HOME/.test-real-file" && ! -L "$TEST_HOME/.test-real-file" ]]; then
-    pass "non-symlink file preserved during removal"
+    pass "non-symlink file in the removal list is preserved"
 else
     fail "non-symlink file was incorrectly removed"
 fi

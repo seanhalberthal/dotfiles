@@ -22,6 +22,8 @@ mkdir -p "$TEST_HOME/.config"
 
 # source common.sh for should_install and colour variables
 source "$DOTFILES_DIR/scripts/_lib/common.sh"
+# symlink.sh provides the real create_link/copy_config/install_local
+source "$DOTFILES_DIR/scripts/_lib/symlink.sh"
 
 # ===========================================================================
 # tests
@@ -71,21 +73,28 @@ else
     skip "btop.conf not found — skipping copy test"
 fi
 
-# test 4: install_local preserves existing file
+# test 4: install_local, both branches, calling the real function
 test_template="$DOTFILES_DIR/ghostty/local.template"
 test_local_dest="$TEST_HOME/.config/ghostty/local"
 mkdir -p "$(dirname "$test_local_dest")"
 if [[ -f "$test_template" ]]; then
+    # existing file must survive
     echo "my custom overrides" >"$test_local_dest"
-    # simulate install_local, should NOT overwrite existing
-    if [[ -f "$test_local_dest" ]]; then
-        # install_local only copies if dest doesn't exist
-        content=$(cat "$test_local_dest")
-        if [[ "$content" == "my custom overrides" ]]; then
-            pass "install_local preserves existing local override file"
-        else
-            fail "install_local overwrote existing local override file"
-        fi
+    install_local "$test_template" "$test_local_dest" >/dev/null 2>&1
+    content=$(cat "$test_local_dest")
+    if [[ "$content" == "my custom overrides" ]]; then
+        pass "install_local preserves existing local override file"
+    else
+        fail "install_local overwrote existing local override file"
+    fi
+
+    # missing file must be seeded from the template
+    rm -f "$test_local_dest"
+    install_local "$test_template" "$test_local_dest" >/dev/null 2>&1
+    if [[ -f "$test_local_dest" ]] && diff -q "$test_template" "$test_local_dest" >/dev/null; then
+        pass "install_local seeds a missing local override from the template"
+    else
+        fail "install_local did not seed the local override from the template"
     fi
 else
     skip "ghostty local.template not found"
