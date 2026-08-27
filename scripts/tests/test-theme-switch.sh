@@ -645,12 +645,6 @@ else
     fail "theme-switch should reference reload-ghostty.sh for reloading"
 fi
 
-# check that script calls reload-ghostty.sh (which handles detection internally)
-if grep -q 'reload-ghostty.sh' "$THEME_SWITCH"; then
-    pass "theme-switch calls reload-ghostty.sh"
-else
-    fail "theme-switch should call reload-ghostty.sh"
-fi
 
 # check that reload-ghostty.sh handles platform detection internally
 GHOSTTY_RELOAD_SCRIPT="$DOTFILES_ROOT/tmux/scripts/themes/reload-ghostty.sh"

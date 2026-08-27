@@ -219,11 +219,11 @@ main() {
         fail "tmux theme picker does not call reload-fzf.sh"
     fi
 
-    # test: pick-theme.sh loads fzf theme before displaying (directly or via common.sh)
+    # test: pick.sh loads fzf theme before displaying (directly or via common.sh)
     if grep -q "fzf-theme.sh\|load_fzf_theme" "$DOTFILES_ROOT/tmux/scripts/themes/pick.sh"; then
-        pass "pick-theme.sh loads FZF theme"
+        pass "themes/pick.sh loads FZF theme"
     else
-        fail "pick-theme.sh does not load FZF theme"
+        fail "themes/pick.sh does not load FZF theme"
     fi
 
     # ══════════════════════════════════════════════════════════════
